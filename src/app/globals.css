@@ -98,3 +98,30 @@ body {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* Glyph Portal: piezas de marca sobre el componente de ui/ */
+.solvit-portal [data-gp-caption] {
+  inset: calc(var(--gp-word-bottom, 60%) + 84px) 16px auto;
+  justify-content: center;
+}
+.solvit-portal [data-gp-hint] {
+  display: none;
+}
+.solvit-portal [data-gp-enter] {
+  gap: 12px;
+  padding: 0 20px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  transition:
+    border-color 150ms ease,
+    transform 150ms var(--ease-out);
+}
+.solvit-portal [data-gp-enter]:hover {
+  border-color: rgb(79 147 255 / 0.6);
+}
+.solvit-portal [data-gp-enter]:active {
+  transform: scale(0.97);
+}

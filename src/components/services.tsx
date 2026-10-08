@@ -82,8 +82,8 @@ export function Services() {
         <div className="mt-14 grid grid-cols-1 gap-4 md:grid-cols-12 md:gap-5">
           <Shell className="md:col-span-7 md:row-span-2">
             <Photo
-              src={img("photo-1551288049-bebda4e38f71", 1400)}
-              alt="Tablero de control con métricas de negocio en tiempo real"
+              src={img("photo-1555066931-4365d14bab8c", 1400)}
+              alt="Código fuente de una aplicación en un editor"
               sizes="(min-width: 768px) 700px, 100vw"
               className="aspect-[16/10] w-full md:aspect-auto md:min-h-[300px] md:flex-1"
             />
