@@ -27,6 +27,12 @@ npm run lint
 - `src/components/ui/`: componentes base reutilizables, al estilo shadcn
   - `glyph-portal.tsx`: cámara que entra por una letra al hacer scroll (MIT, Christian Katzmann)
   - `container-scroll-animation.tsx`: tarjeta 3D que se endereza con el scroll (Aceternity UI, adaptada)
+  - `hero-1.tsx`: hero centrado con horizonte de luz
+  - `area-chart-1.tsx`: tarjeta con gráfico de áreas (reaviz) y métricas, por props
+  - `domino-gallery.tsx`: cartas que caen como dominó al hacer scroll (sectores, en escritorio)
+  - `testimonials-columns-1.tsx`: columnas de testimonios en loop, pausables
+  - `button.tsx`: botón de shadcn/ui con la forma del sitio
+- `src/content/testimonials.tsx`: textos de los testimonios
 - `src/app/api/contacto/route.ts`: endpoint del formulario (valida y registra la consulta)
 - `src/app/globals.css`: tokens de marca (azul marino + azul eléctrico)
 
@@ -41,3 +47,7 @@ componentes base (sin contenido de Solvit) de las secciones que arman la página
 - Reemplazar la recreación SVG del logo (`src/components/logo.tsx`) por el archivo original.
 - Reemplazar las fotos de referencia de Unsplash (`src/lib/images.ts`) por fotografía propia.
 - Conectar el formulario de contacto con el destino real (email, CRM o WhatsApp).
+- **Testimonios:** los actuales son marcadores de posición ("Nombre Apellido"). Reemplazarlos
+  en `src/content/testimonials.tsx` por testimonios reales, con permiso de cada cliente.
+- El tablero de la vitrina usa datos de ejemplo (rotulados en pantalla); se pueden cambiar en
+  `src/components/dashboard-chart.tsx`.
