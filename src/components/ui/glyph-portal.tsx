@@ -5,9 +5,9 @@
  * Origin: UsefulPortal.astro on https://ktzm.dk → UsefulPortal.tsx → ClarityPortal.tsx.
  * A scroll-driven camera through live type. Keep this notice with copies.
  *
- * Solvit edits: splitCharacters() (React Compiler lint), and the "content has focus"
- * overrides react to :focus-visible instead of :focus-within, so a mouse or touch
- * user who followed the enter link and scrolls back up still sees the clipped word.
+ * Solvit edits: splitCharacters() (React Compiler lint); the "content has focus"
+ * overrides only apply once the content is entered, so a visitor who followed the
+ * enter link and scrolls back up still sees the clipped word; optional enterIcon.
  */
 import { useId, useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
@@ -35,6 +35,8 @@ export type GlyphPortalProps = {
   fontWeight?: number;
   annotations?: boolean;
   enterLabel?: string;
+  /** Icon after the enter label. Defaults to the original "↘" glyph. */
+  enterIcon?: ReactNode;
   className?: string;
   style?: GlyphPortalStyle;
   /** Called once per rendered scroll frame, never through React state. */
@@ -104,7 +106,7 @@ function scrollParent(element: HTMLElement): HTMLElement | null {
 export default function GlyphPortal({
   word = "SUBLIME", focusChar, interactive = true, background, front, children, scrollLength = 2.4,
   fontFamily = DEFAULT_FONT, fontWeight = 900, annotations = false,
-  enterLabel = "Enter section", className, style, onProgress,
+  enterLabel = "Enter section", enterIcon = "↘", className, style, onProgress,
 }: GlyphPortalProps) {
   const uid = `gp-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   const clipId = `${uid}-clip`;
@@ -390,9 +392,9 @@ export default function GlyphPortal({
         ${q}[data-gp-motion=off] [data-gp-hint]{display:none;}
         ${q}[data-gp-motion=on] [data-gp-content]{margin-top:calc((var(--gp-length) - 1) * var(--gp-height));background:transparent;opacity:var(--gp-reveal,0);pointer-events:none;}
         ${q}[data-gp-motion=on][data-gp-entered=true] [data-gp-content]{pointer-events:auto;}
-        ${q}[data-gp-motion=on]:has([data-gp-content]:focus-visible,[data-gp-content] :focus-visible) [data-gp-field]{clip-path:none!important;}
-        ${q}[data-gp-motion=on] [data-gp-content]:is(:focus-visible,:has(:focus-visible)){opacity:1;pointer-events:auto;}
-        ${q}:has([data-gp-content]:focus-visible,[data-gp-content] :focus-visible) [data-gp-caption],${q}:has([data-gp-content]:focus-visible,[data-gp-content] :focus-visible) [data-gp-marks]{opacity:0;}
+        ${q}[data-gp-motion=on][data-gp-entered=true]:has([data-gp-content]:focus-within) [data-gp-field]{clip-path:none!important;}
+        ${q}[data-gp-motion=on][data-gp-entered=true] [data-gp-content]:focus-within{opacity:1;pointer-events:auto;}
+        ${q}[data-gp-entered=true]:has([data-gp-content]:focus-within) [data-gp-caption],${q}[data-gp-entered=true]:has([data-gp-content]:focus-within) [data-gp-marks]{opacity:0;}
         ${q} [data-gp-default-title]{color:inherit;font:400 clamp(32px,5vw,72px)/1.05 Georgia,serif;letter-spacing:-.035em;max-width:13ch;margin:0 0 24px;text-wrap:balance;}
         ${q} [data-gp-default-copy]{color:inherit;font:16px/1.6 Arial,sans-serif;max-width:36ch;margin:0;}
         @media(prefers-reduced-motion:reduce){${q} [data-gp-pin]{position:relative!important;} ${q} [data-gp-content]{margin-top:0!important;opacity:1!important;background:var(--gp-field)!important;min-height:0;padding-block:64px;} ${q} [data-gp-caption]{opacity:1!important;}}
@@ -424,7 +426,7 @@ export default function GlyphPortal({
         <span data-gp-fallback aria-hidden="true" style={{ fontFamily, fontWeight: weight }}>{text}</span>
         <div data-gp-caption>
           <span data-gp-hint aria-hidden="true">{interactive ? "Scroll to enter." : annotations ? "A passage through type" : ""}</span>
-          <a data-gp-enter href={`#${uid}-content`}>{enterLabel}<span aria-hidden="true">↘</span></a>
+          <a data-gp-enter href={`#${uid}-content`}>{enterLabel}<span aria-hidden="true">{enterIcon}</span></a>
         </div>
       </div>
       <div data-gp-content id={`${uid}-content`} tabIndex={-1}>

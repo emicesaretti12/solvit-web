@@ -8,7 +8,7 @@ export function PlatformShowcase() {
         titleComponent={
           <div className="px-2">
             <h2 className="mx-auto max-w-[18ch] text-4xl font-semibold leading-[1.05] tracking-[-0.03em] text-balance text-ink md:text-6xl">
-              Todo tu negocio, <span className="text-blue-400">en un solo tablero.</span>
+              Tu operación, <span className="text-blue-400">medida en tiempo real.</span>
             </h2>
             <p className="mx-auto mt-5 max-w-[52ch] text-lg leading-relaxed text-ink-muted">
               CRM, ventas, stock y sensores en una plataforma propia, con

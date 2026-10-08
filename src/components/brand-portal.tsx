@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties, type FocusEvent } from "react";
+import { ArrowDown } from "@phosphor-icons/react";
 import GlyphPortal, { type GlyphPortalStyle } from "@/components/ui/glyph-portal";
 
 const WORD = "SOLVIT";
 const WEIGHT = 800;
-const SCROLL_LENGTH = 2.2;
+// 1.6 pantallas: con 2.2 quedaban ~500px de scroll sobre el campo azul vacío
+const SCROLL_LENGTH = 1.6;
 // Solo la familia real: "Geist Fallback" de next/font nunca se carga cuando Geist
 // está disponible, y el portal lo tomaría como fuente pendiente (modo estático).
 const FONT = "Geist, sans-serif";
@@ -63,38 +65,29 @@ function Field() {
   );
 }
 
-function Front() {
-  return (
-    <p
-      className="absolute inset-x-4 m-0 text-center text-base text-ink-muted md:text-lg"
-      style={{ top: "calc(var(--gp-word-bottom, 60%) + 28px)" }}
-    >
-      Un socio tecnológico de punta a punta.
-    </p>
-  );
-}
-
 export function BrandPortal() {
   const frameRef = useRef<HTMLDivElement>(null);
   const fontReady = useFontReady(frameRef);
 
-  // Con teclado, el enlace de la portada se muestra en el cuadro inicial (sin capas encima)
+  // Con teclado, el enlace de la portada se muestra en su cuadro inicial (sin capas encima).
+  // Se espera un frame para no pelear con el scroll que hace el navegador al enfocar.
   const onFocusCapture = (e: FocusEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
-    if (!target.matches("[data-gp-enter]")) return;
-    const frame = frameRef.current;
-    if (frame && frame.getBoundingClientRect().top < 0) {
-      frame.scrollIntoView({ block: "start", behavior: "instant" });
-    }
+    if (!target.matches("[data-gp-enter]:focus-visible")) return;
+    requestAnimationFrame(() => {
+      if (document.activeElement === target) {
+        frameRef.current?.scrollIntoView({ block: "start", behavior: "instant" });
+      }
+    });
   };
 
   return (
-    // Reserva la altura final, (recorrido + 1) pantallas, para que montar o activar
-    // la animación no mueva lo que viene después (anclas, CLS).
+    // Reserva la altura final, (SCROLL_LENGTH + 1) pantallas = 260svh, para que montar
+    // o activar la animación no mueva lo que viene después (anclas, CLS).
     <div
       ref={frameRef}
       onFocusCapture={onFocusCapture}
-      className="solvit-portal-frame min-h-[320svh] motion-reduce:min-h-0"
+      className="solvit-portal-frame min-h-[260svh] motion-reduce:min-h-0"
     >
       <noscript>
         <style>{".solvit-portal-frame{min-height:0!important}"}</style>
@@ -107,8 +100,8 @@ export function BrandPortal() {
         interactive={false}
         scrollLength={SCROLL_LENGTH}
         enterLabel="Conocé nuestro enfoque"
+        enterIcon={<ArrowDown size={16} weight="bold" />}
         background={<Field />}
-        front={<Front />}
         style={portalStyle}
         className="solvit-portal"
       >

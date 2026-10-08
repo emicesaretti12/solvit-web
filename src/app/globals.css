@@ -181,7 +181,7 @@ body {
 
 /* Glyph Portal: piezas de marca sobre el componente de ui/ */
 .solvit-portal [data-gp-caption] {
-  inset: calc(var(--gp-word-bottom, 60%) + 84px) 16px auto;
+  inset: calc(var(--gp-word-bottom, 60%) + 48px) 16px auto;
   justify-content: center;
 }
 .solvit-portal [data-gp-hint] {
@@ -189,7 +189,7 @@ body {
 }
 .solvit-portal [data-gp-enter] {
   gap: 12px;
-  padding: 0 20px;
+  padding: 6px 6px 6px 20px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
   color: var(--ink);
@@ -234,7 +234,7 @@ body {
 /* Portal: foco visible del enlace con el estilo del sitio (el componente lo achica y apaga) */
 .solvit-portal [data-gp-caption] [data-gp-enter]:focus-visible {
   margin: 0;
-  padding: 0 20px;
+  padding: 6px 6px 6px 20px;
   background: transparent;
   color: var(--ink);
   outline: 2px solid var(--blue-400);
@@ -242,5 +242,20 @@ body {
 }
 /* Portal: el enlace no puede quedar fuera del cuadro en pantallas bajas */
 .solvit-portal [data-gp-caption] {
-  top: min(calc(var(--gp-word-bottom, 60%) + 84px), calc(100% - 56px));
+  top: min(calc(var(--gp-word-bottom, 60%) + 48px), calc(100% - 48px));
+}
+/* Flecha del enlace en un círculo, como el resto de los botones del sitio */
+.solvit-portal [data-gp-enter] > span {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.05);
+}
+/* Una vez adentro, el enlace de la portada no puede quedar debajo del manifiesto */
+.solvit-portal[data-gp-entered="true"] [data-gp-caption] {
+  opacity: 0;
+  pointer-events: none;
 }

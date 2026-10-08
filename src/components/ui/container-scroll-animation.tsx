@@ -6,7 +6,7 @@
   - respeta prefers-reduced-motion
   - detecta mobile con matchMedia (breakpoint md de Tailwind) en lugar de escuchar resize
   - offset de scroll propio para que la animación dure lo mismo en cualquier pantalla
-  - colores del dispositivo con tokens de marca
+  - tarjeta con el doble bisel del sitio (2rem afuera, 2rem - 6px adentro)
 */
 import React, { useRef } from "react";
 import {
@@ -121,9 +121,9 @@ export const Card = ({
         boxShadow:
           "0 0 #0306124d, 0 9px 20px #0306124a, 0 37px 37px #03061242, 0 84px 50px #03061226, 0 149px 60px #0306120a, 0 233px 65px #03061203",
       }}
-      className="mx-auto -mt-12 h-[30rem] w-full max-w-5xl rounded-[30px] border-4 border-navy-700 bg-navy-950 p-2 shadow-2xl md:h-[40rem] md:p-6"
+      className="mx-auto -mt-12 h-[30rem] w-full max-w-5xl rounded-[2rem] border border-line bg-white/[0.025] p-1.5 md:h-[40rem]"
     >
-      <div className="h-full w-full overflow-hidden rounded-2xl bg-navy-850 md:rounded-2xl md:p-4">
+      <div className="h-full w-full overflow-hidden rounded-[calc(2rem-6px)] bg-navy-850 shadow-[inset_0_1px_1px_rgb(255_255_255/0.06)]">
         {children}
       </div>
     </motion.div>
