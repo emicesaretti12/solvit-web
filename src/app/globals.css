@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+/*
+  Solvit · tokens de marca
+  Tema único oscuro (azul marino de marca). El acento es el azul eléctrico del isotipo.
+  Radios: tarjetas 2rem (doble bisel, núcleo interno 2rem - 6px), botones pill, inputs 0.75rem.
+*/
+:root {
+  --navy-950: #070c18;
+  --navy-900: #0b1222;
+  --navy-850: #0f182c;
+  --navy-800: #142037;
+  --navy-700: #1c2a45;
+  --line: rgb(148 170 210 / 0.12);
+  --line-strong: rgb(148 170 210 / 0.22);
+  --ink: #eef2f8;
+  --ink-muted: #9aa8c1;
+  --ink-faint: #8391ab;
+  --blue-600: #1a56f0;
+  --blue-500: #2f74ff;
+  --blue-400: #4f93ff;
+  --blue-300: #8ab8ff;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+@theme inline {
+  --color-navy-950: var(--navy-950);
+  --color-navy-900: var(--navy-900);
+  --color-navy-850: var(--navy-850);
+  --color-navy-800: var(--navy-800);
+  --color-navy-700: var(--navy-700);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-blue-600: var(--blue-600);
+  --color-blue-500: var(--blue-500);
+  --color-blue-400: var(--blue-400);
+  --color-blue-300: var(--blue-300);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-brand: var(--font-michroma);
+  --ease-out-strong: var(--ease-out);
+  --ease-in-out-strong: var(--ease-in-out);
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
+}
+
+body {
+  background: var(--navy-900);
+  color: var(--ink);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: rgb(47 116 255 / 0.4);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--blue-400);
+  outline-offset: 3px;
+}
+
+/* Grano sutil, fijo y sin eventos para no repintar al hacer scroll */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hover-lift:hover {
+    transform: translateY(-1px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
