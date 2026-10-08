@@ -4,7 +4,8 @@
   Container Scroll Animation (Aceternity UI), adaptado a Solvit:
   - importa de "motion/react" (framer-motion es el mismo motor, ya instalado como dependencia de motion)
   - respeta prefers-reduced-motion
-  - detecta mobile con matchMedia en lugar de escuchar resize
+  - detecta mobile con matchMedia (breakpoint md de Tailwind) en lugar de escuchar resize
+  - offset de scroll propio para que la animación dure lo mismo en cualquier pantalla
   - colores del dispositivo con tokens de marca
 */
 import React, { useRef } from "react";
@@ -17,7 +18,8 @@ import {
 } from "motion/react";
 import { cn } from "@/lib/utils";
 
-const MOBILE_QUERY = "(max-width: 768px)";
+// Igual que el breakpoint md de Tailwind (768px ya es escritorio)
+const MOBILE_QUERY = "(max-width: 767.98px)";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState(false);
@@ -41,8 +43,11 @@ export const ContainerScroll = ({
   className?: string;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  // De "el contenedor llega a la mitad de la pantalla" a "queda centrado": el recorrido
+  // no depende de (alto del contenedor - alto de pantalla), que en celulares es de ~100px.
   const { scrollYProgress } = useScroll({
     target: containerRef,
+    offset: ["start center", "center center"],
   });
   const isMobile = useIsMobile();
   const reduce = useReducedMotion();

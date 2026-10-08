@@ -1,7 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
+import { DominoGallery, type DominoItem } from "@/components/ui/domino-gallery";
 import { Photo } from "./photo";
 import { img } from "@/lib/images";
 
@@ -48,11 +49,27 @@ const sectors = [
   },
 ];
 
+// Cartas verticales para la galería dominó (solo escritorio)
+const dominoItems: DominoItem[] = sectors.map((sec) => ({
+  src: `${img(sec.photo, 440)}&h=1180`,
+  alt: sec.alt,
+  title: sec.name,
+}));
+
 export function Sectors() {
   const [active, setActive] = useState(0);
   const reduce = useReducedMotion();
   const id = useId();
+  const panelRef = useRef<HTMLDivElement>(null);
   const s = sectors[active];
+
+  const selectFromCard = (index: number) => {
+    setActive(index);
+    panelRef.current?.scrollIntoView({
+      behavior: reduce ? "auto" : "smooth",
+      block: "nearest",
+    });
+  };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
@@ -66,16 +83,31 @@ export function Sectors() {
 
   return (
     <section id="sectores" className="border-t border-line">
-      <div className="mx-auto max-w-[1200px] px-4 py-24 md:px-6 md:py-32">
+      <div className="mx-auto max-w-[1200px] px-4 pt-24 md:px-6 md:pt-32">
         <h2 className="max-w-[20ch] text-4xl font-semibold leading-[1.05] tracking-[-0.03em] text-ink md:text-5xl">
           Ingeniería aplicada a tu industria.
         </h2>
+        <p className="mt-5 hidden max-w-[56ch] text-lg leading-relaxed text-ink-muted md:block">
+          Cinco industrias donde conectamos software, IA y hardware. Elegí una
+          para ver qué resolvemos.
+        </p>
+      </div>
+
+      <DominoGallery
+        items={dominoItems}
+        selectedIndex={active}
+        onSelect={selectFromCard}
+        scrollLength={1100}
+        className="hidden md:block"
+      />
+
+      <div className="mx-auto max-w-[1200px] px-4 pb-24 md:px-6 md:pb-32">
 
         <div
           role="tablist"
           aria-label="Sectores"
           onKeyDown={onKeyDown}
-          className="-mx-4 mt-10 flex snap-x gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:flex-wrap md:px-0"
+          className="-mx-4 mt-10 flex snap-x gap-2 md:mt-0 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:flex-wrap md:px-0"
         >
           {sectors.map((sec, i) => (
             <button
@@ -106,6 +138,7 @@ export function Sectors() {
         </div>
 
         <div
+          ref={panelRef}
           id={`${id}-panel`}
           role="tabpanel"
           aria-labelledby={`${id}-tab-${active}`}
@@ -119,19 +152,19 @@ export function Sectors() {
                 animate={{ opacity: 1, filter: "blur(0px)" }}
                 exit={{ opacity: 0, filter: "blur(4px)" }}
                 transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
-                className="grid w-full bg-navy-850 md:grid-cols-[1.15fr_1fr]"
+                className="grid w-full bg-navy-850"
               >
                 <Photo
                   src={img(s.photo, 1200)}
                   alt={s.alt}
                   sizes="(min-width: 768px) 620px, 100vw"
-                  className="aspect-[16/10] md:aspect-auto md:min-h-[420px]"
+                  className="aspect-[16/10] md:hidden"
                 />
-                <div className="flex flex-col justify-end p-7 md:p-10">
-                  <h3 className="max-w-[22ch] text-2xl font-semibold leading-tight tracking-tight text-ink md:text-3xl">
+                <div className="flex flex-col justify-end p-7 md:min-h-[220px] md:p-12">
+                  <h3 className="max-w-[26ch] text-2xl font-semibold leading-tight tracking-tight text-ink md:text-4xl">
                     {s.title}
                   </h3>
-                  <p className="mt-4 max-w-[46ch] leading-relaxed text-ink-muted">
+                  <p className="mt-4 max-w-[56ch] leading-relaxed text-ink-muted md:text-lg">
                     {s.text}
                   </p>
                 </div>

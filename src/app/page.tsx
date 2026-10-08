@@ -6,6 +6,7 @@ import { PlatformShowcase } from "@/components/platform-showcase";
 import { Method } from "@/components/method";
 import { Sectors } from "@/components/sectors";
 import { About } from "@/components/about";
+import { Testimonials } from "@/components/testimonials";
 import { Contact } from "@/components/contact";
 import { SiteFooter } from "@/components/site-footer";
 
@@ -21,6 +22,7 @@ export default function Home() {
         <Method />
         <Sectors />
         <About />
+        <Testimonials />
         <Contact />
       </main>
       <SiteFooter />

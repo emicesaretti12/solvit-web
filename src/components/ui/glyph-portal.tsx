@@ -4,6 +4,10 @@
  * Glyph Portal © 2026 Christian Katzmann. MIT.
  * Origin: UsefulPortal.astro on https://ktzm.dk → UsefulPortal.tsx → ClarityPortal.tsx.
  * A scroll-driven camera through live type. Keep this notice with copies.
+ *
+ * Solvit edits: splitCharacters() (React Compiler lint), and the "content has focus"
+ * overrides react to :focus-visible instead of :focus-within, so a mouse or touch
+ * user who followed the enter link and scrolls back up still sees the clipped word.
  */
 import { useId, useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
@@ -386,9 +390,9 @@ export default function GlyphPortal({
         ${q}[data-gp-motion=off] [data-gp-hint]{display:none;}
         ${q}[data-gp-motion=on] [data-gp-content]{margin-top:calc((var(--gp-length) - 1) * var(--gp-height));background:transparent;opacity:var(--gp-reveal,0);pointer-events:none;}
         ${q}[data-gp-motion=on][data-gp-entered=true] [data-gp-content]{pointer-events:auto;}
-        ${q}[data-gp-motion=on]:has([data-gp-content]:focus-within) [data-gp-field]{clip-path:none!important;}
-        ${q}[data-gp-motion=on] [data-gp-content]:focus-within{opacity:1;pointer-events:auto;}
-        ${q}:has([data-gp-content]:focus-within) [data-gp-caption],${q}:has([data-gp-content]:focus-within) [data-gp-marks]{opacity:0;}
+        ${q}[data-gp-motion=on]:has([data-gp-content]:focus-visible,[data-gp-content] :focus-visible) [data-gp-field]{clip-path:none!important;}
+        ${q}[data-gp-motion=on] [data-gp-content]:is(:focus-visible,:has(:focus-visible)){opacity:1;pointer-events:auto;}
+        ${q}:has([data-gp-content]:focus-visible,[data-gp-content] :focus-visible) [data-gp-caption],${q}:has([data-gp-content]:focus-visible,[data-gp-content] :focus-visible) [data-gp-marks]{opacity:0;}
         ${q} [data-gp-default-title]{color:inherit;font:400 clamp(32px,5vw,72px)/1.05 Georgia,serif;letter-spacing:-.035em;max-width:13ch;margin:0 0 24px;text-wrap:balance;}
         ${q} [data-gp-default-copy]{color:inherit;font:16px/1.6 Arial,sans-serif;max-width:36ch;margin:0;}
         @media(prefers-reduced-motion:reduce){${q} [data-gp-pin]{position:relative!important;} ${q} [data-gp-content]{margin-top:0!important;opacity:1!important;background:var(--gp-field)!important;min-height:0;padding-block:64px;} ${q} [data-gp-caption]{opacity:1!important;}}

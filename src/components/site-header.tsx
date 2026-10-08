@@ -33,7 +33,7 @@ export function SiteHeader() {
         aria-label="Principal"
         className="mx-auto flex h-14 max-w-[1200px] items-center justify-between rounded-full border border-line bg-navy-900/70 pl-5 pr-2 shadow-[inset_0_1px_0_rgb(255_255_255/0.05)] backdrop-blur-xl"
       >
-        <a href="#inicio" aria-label="Solvit, inicio" onClick={() => setOpen(false)}>
+        <a href="#hero" aria-label="Solvit, inicio" onClick={() => setOpen(false)}>
           <Logo />
         </a>
 

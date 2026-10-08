@@ -1,6 +1,5 @@
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
-import { Photo } from "./photo";
-import { img } from "@/lib/images";
+import { DashboardPreview } from "./dashboard-preview";
 
 export function PlatformShowcase() {
   return (
@@ -19,12 +18,7 @@ export function PlatformShowcase() {
           </div>
         }
       >
-        <Photo
-          src={img("photo-1551288049-bebda4e38f71", 2000)}
-          alt="Tablero de control con métricas de ventas y operación en tiempo real"
-          sizes="(min-width: 1024px) 1000px, 100vw"
-          className="h-full w-full rounded-xl"
-        />
+        <DashboardPreview />
       </ContainerScroll>
     </section>
   );

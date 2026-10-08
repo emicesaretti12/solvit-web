@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 /*
   Solvit · tokens de marca
@@ -23,6 +24,28 @@
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* Tokens semánticos de shadcn/ui, mapeados a la paleta de marca */
+  --background: var(--navy-900);
+  --foreground: var(--ink);
+  --card: var(--navy-850);
+  --card-foreground: var(--ink);
+  --popover: var(--navy-850);
+  --popover-foreground: var(--ink);
+  --primary: var(--blue-500);
+  --primary-foreground: #ffffff;
+  --secondary: var(--navy-800);
+  --secondary-foreground: var(--ink);
+  --muted: var(--navy-800);
+  --muted-foreground: var(--ink-muted);
+  --accent: var(--navy-700);
+  --accent-foreground: var(--ink);
+  --destructive: #e5484d;
+  --destructive-foreground: #ffffff;
+  --border: var(--line-strong);
+  --input: var(--line-strong);
+  --ring: var(--blue-400);
+  --radius: 1rem;
 }
 
 @theme inline {
@@ -45,6 +68,62 @@
   --font-brand: var(--font-michroma);
   --ease-out-strong: var(--ease-out);
   --ease-in-out-strong: var(--ease-in-out);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@theme {
+  --animate-fade-in: fade-in 1s var(--ease-out) forwards;
+  --animate-fade-up: fade-up 1.2s var(--ease-out) forwards;
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-up {
+    0% {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer base {
+  /* Como shadcn: un borde sin color explícito usa el token de borde, no currentColor */
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-border);
+  }
 }
 
 html {
@@ -96,6 +175,7 @@ body {
   *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
 
@@ -124,4 +204,43 @@ body {
 }
 .solvit-portal [data-gp-enter]:active {
   transform: scale(0.97);
+}
+
+/* Testimonios: columnas que se desplazan en loop; se pausan con hover, foco o el botón */
+@keyframes testimonials-scroll {
+  to {
+    transform: translateY(-50%);
+  }
+}
+.testimonials-track {
+  animation: testimonials-scroll var(--testimonials-duration, 15s) linear infinite;
+}
+.group\/column:hover .testimonials-track,
+.group\/column:focus-within .testimonials-track,
+[data-paused] .testimonials-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .testimonials-track {
+    animation: none !important;
+  }
+}
+
+/* Galería dominó: si una foto no carga, que no aparezca el texto alternativo sobre la carta */
+[data-slot="domino-gallery"] img {
+  color: transparent;
+}
+
+/* Portal: foco visible del enlace con el estilo del sitio (el componente lo achica y apaga) */
+.solvit-portal [data-gp-caption] [data-gp-enter]:focus-visible {
+  margin: 0;
+  padding: 0 20px;
+  background: transparent;
+  color: var(--ink);
+  outline: 2px solid var(--blue-400);
+  outline-offset: 3px;
+}
+/* Portal: el enlace no puede quedar fuera del cuadro en pantallas bajas */
+.solvit-portal [data-gp-caption] {
+  top: min(calc(var(--gp-word-bottom, 60%) + 84px), calc(100% - 56px));
 }
