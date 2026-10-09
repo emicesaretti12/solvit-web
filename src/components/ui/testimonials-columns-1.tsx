@@ -1,7 +1,7 @@
 "use client";
 
 /*
-  Testimonials Columns 1 (21st.dev), adaptado a Solvit:
+  Testimonials Columns 1 (21st.dev), adaptado a SEN:
   - el tipo `Testimonial` se exporta (el original usaba `typeof testimonials`, que no existe en este archivo)
   - la imagen es opcional: sin foto se muestra un ícono o las iniciales
   - el desplazamiento es una animación CSS: corre fuera del hilo principal y se puede pausar

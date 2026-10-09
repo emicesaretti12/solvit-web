@@ -1,34 +1,58 @@
 import { useId } from "react";
 
 /*
-  Recreación vectorial del logo de Solvit a partir del brand board.
-  Reemplazar por el SVG original cuando esté disponible.
+  Isotipo de SEN: la S en tres cintas plegadas (dos caras al frente y el pliegue en sombra),
+  redibujado en vectores a partir del isotipo original. Degradé azul eléctrico a cian, solo en
+  el logo. Reemplazar por el SVG original cuando esté disponible.
 */
 export function LogoMark({ className = "" }: { className?: string }) {
   const id = useId();
   return (
-    <svg
-      viewBox="0 0 174 230"
-      className={className}
-      aria-hidden="true"
-      focusable="false"
-    >
+    <svg viewBox="0 0 515 787" className={className} aria-hidden="true" focusable="false">
       <defs>
-        <linearGradient id={`${id}-a`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#1a56f0" />
-          <stop offset="1" stopColor="#3f8cff" />
+        <linearGradient id={`${id}-face`} x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0" stopColor="#0052ff" />
+          <stop offset="0.55" stopColor="#0a8bff" />
+          <stop offset="1" stopColor="#1fdcff" />
         </linearGradient>
-        <linearGradient id={`${id}-b`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#123fb8" />
-          <stop offset="1" stopColor="#1a56f0" />
+        <linearGradient id={`${id}-fold`} x1="0.3" y1="0" x2="0.7" y2="1">
+          <stop offset="0" stopColor="#002a9e" />
+          <stop offset="1" stopColor="#0064ff" />
         </linearGradient>
       </defs>
-      <polygon points="2,57 172,117 172,172 2,117" fill={`url(#${id}-b)`} />
-      <polygon points="139,0 139,57 2,117 2,57" fill={`url(#${id}-a)`} />
-      <polygon points="172,117 172,172 32,230 32,173" fill={`url(#${id}-a)`} />
+      <polygon points="0,399 280,273 515,391 232,515" fill={`url(#${id}-fold)`} />
+      <polygon points="0,217 468,0 468,189 0,399" fill={`url(#${id}-face)`} />
+      <polygon points="52,594 515,391 515,584 52,787" fill={`url(#${id}-face)`} />
     </svg>
   );
 }
+
+/*
+  Wordmark SEN: contornos de Krona One (la tipografía del brand board) con el corte azul en
+  la punta de la N, que reemplaza el remate del palo derecho (no se superpone: así también
+  funciona con transparencias). En vectores para que se vea igual antes de que cargue la fuente.
+*/
+const LETTERS =
+  "M126-208L295-465Q380-417 468-379Q555-340 649-314Q743-287 847-273Q950-259 1067-259L1067-259Q1208-259 1307-278Q1406-296 1469-329Q1531-361 1560-406Q1588-451 1588-504L1588-504Q1588-589 1517-639Q1446-688 1298-688L1298-688Q1233-688 1161-680Q1089-671 1016-661Q942-651 871-643Q799-634 736-634L736-634Q631-634 535-661Q438-688 364-742Q289-796 245-877Q201-958 201-1066L201-1066Q201-1130 219-1193Q236-1256 275-1314Q313-1371 374-1421Q435-1470 522-1506Q608-1542 722-1563Q835-1583 980-1583L980-1583Q1085-1583 1191-1572Q1297-1560 1398-1539Q1498-1518 1591-1489Q1684-1459 1764-1423L1764-1423L1625-1167Q1559-1196 1483-1221Q1407-1245 1324-1263Q1241-1281 1153-1292Q1064-1302 972-1302L972-1302Q841-1302 757-1283Q672-1264 622-1235Q572-1205 553-1169Q533-1132 533-1096L533-1096Q533-1026 596-982Q659-937 788-937L788-937Q840-937 908-945Q975-952 1050-961Q1124-970 1202-978Q1279-985 1352-985L1352-985Q1490-985 1597-954Q1703-923 1775-866Q1847-808 1884-727Q1921-645 1921-544L1921-544Q1921-409 1859-304Q1796-198 1681-126Q1565-53 1402-16Q1239 22 1039 22L1039 22Q907 22 781 6Q655-11 540-42Q424-72 320-115Q215-157 126-208L126-208ZM2270 0L2270-1563L3601-1563L3601-1285L2587-1285L2587-973L3485-973L3485-712L2587-712L2587-277L3622-277L3622 0L2270 0ZM3972 0L3972-1563L4289-1563L5263-1053L5263-1155L5580-1155L5580 0L5263 0L5263-717L4289-1224L4289 0L3972 0Z";
+const ACCENT = "5263,-1563 5740,-1563 5580,-1155 5263,-1155";
+
+export function Wordmark({
+  className = "",
+  accentClassName = "",
+}: {
+  className?: string;
+  accentClassName?: string;
+}) {
+  return (
+    <svg viewBox="126 -1583 5614 1605" className={className} aria-hidden="true" focusable="false">
+      <path d={LETTERS} fill="currentColor" />
+      <polygon points={ACCENT} fill="var(--blue-500)" className={accentClassName} />
+    </svg>
+  );
+}
+
+export const BRAND_NAME = "SEN Software";
+export const BRAND_FULL = "SEN Software · Ing. & Soluciones";
 
 export function Logo({
   className = "",
@@ -41,23 +65,14 @@ export function Logo({
     <span className={`inline-flex items-center gap-2.5 ${className}`}>
       <LogoMark className="h-7 w-auto shrink-0" />
       <span className="flex flex-col">
-        <span className="font-brand text-[1.05rem] leading-none tracking-[0.04em] text-ink">
-          SOLVI
-          <span className="relative inline-block">
-            T
-            <span
-              aria-hidden="true"
-              className="absolute left-[-0.06em] right-[-0.1em] top-[0.1em] h-[0.17em] -skew-x-[28deg] bg-blue-500"
-            />
-          </span>
-        </span>
+        <Wordmark className="h-[0.95rem] w-auto self-start text-ink" />
         {withTagline && (
-          <span className="mt-1.5 text-[0.55rem] uppercase tracking-[0.28em] text-ink-muted">
-            Ingeniería y Desarrollo de Software
+          <span className="mt-2 text-[0.55rem] uppercase tracking-[0.28em] text-ink-muted">
+            Software · Ing. &amp; Soluciones
           </span>
         )}
       </span>
-      <span className="sr-only">Solvit</span>
+      <span className="sr-only">{BRAND_NAME}</span>
     </span>
   );
 }

@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { CheckCircle, CircleNotch, WarningCircle } from "@phosphor-icons/react";
 import { useState, type FormEvent } from "react";
+import { toast } from "sonner";
 import { CONTACT_LABEL } from "./cta";
 
 type Status = "idle" | "sending" | "sent" | "error";
@@ -77,13 +78,21 @@ export function ContactForm() {
       return;
     }
     setStatus("sending");
+    const request = fetch("/api/contacto", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(Object.fromEntries(data)),
+    }).then((res) => {
+      if (!res.ok) throw new Error(String(res.status));
+    });
+    // Aviso que acompaña el envío: cargando, y después éxito o error
+    toast.promise(request, {
+      loading: "Enviando tu consulta",
+      success: "Consulta recibida. Te escribimos dentro de las 48 horas hábiles.",
+      error: "No pudimos enviar la consulta. Probá de nuevo en unos minutos.",
+    });
     try {
-      const res = await fetch("/api/contacto", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(Object.fromEntries(data)),
-      });
-      if (!res.ok) throw new Error();
+      await request;
       setStatus("sent");
       form.reset();
     } catch {

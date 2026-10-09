@@ -3,7 +3,7 @@
 /*
   Domino Gallery (21st.dev / CCgather). Único cambio respecto del original:
   `selectedIndex` opcional para controlar la selección desde afuera
-  (Solvit la sincroniza con las pestañas de sectores).
+  (SEN la sincroniza con las pestañas de sectores).
 */
 import * as React from "react";
 

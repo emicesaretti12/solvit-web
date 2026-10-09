@@ -14,14 +14,17 @@ export function Testimonials() {
   const [paused, setPaused] = useState(false);
 
   return (
-    <section id="testimonios" className="relative border-t border-line">
+    <section id="casos" aria-labelledby="casos-titulo" className="relative border-t border-line">
       <div className="mx-auto max-w-[1200px] px-4 py-24 md:px-6 md:py-32">
         <Reveal>
-          <h2 className="max-w-[20ch] text-4xl font-semibold leading-[1.05] tracking-[-0.03em] text-ink md:text-5xl">
+          <h2
+            id="casos-titulo"
+            className="font-display max-w-[20ch] text-[2.1rem] font-semibold leading-[1.04] tracking-[-0.035em] text-ink text-balance sm:text-5xl lg:text-[3.4rem]"
+          >
             Lo que cambia cuando todo está conectado.
           </h2>
           <p className="mt-5 max-w-[56ch] text-lg leading-relaxed text-ink-muted">
-            Equipos que dejaron las planillas y las respuestas tardías.
+            Situaciones típicas de cada industria y cómo se ven resueltas con un sistema integrado.
           </p>
           <button
             type="button"

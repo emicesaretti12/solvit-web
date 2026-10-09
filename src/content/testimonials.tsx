@@ -12,66 +12,65 @@ import {
 import type { Testimonial } from "@/components/ui/testimonials-columns-1";
 
 /*
-  MARCADORES DE POSICIÓN. Reemplazar por testimonios reales de clientes
-  (con su permiso) antes de publicar. Los nombres quedan como "Nombre Apellido"
-  a propósito, para que nadie los confunda con casos reales.
-  Si hay foto del cliente, agregar `image`; si no, se muestra el ícono del sector.
+  Situaciones típicas por industria y cómo se ven resueltas (no son citas de clientes).
+  Cuando haya testimonios reales, con permiso de cada cliente, reemplazar `name` por la
+  persona, `role` por "Cargo · Empresa" y sumar `image` si hay foto.
 */
 const icon = (Icon: typeof Car) => <Icon size={18} weight="light" />;
 
 export const TESTIMONIALS: Testimonial[] = [
   {
-    text: "Las consultas de WhatsApp llegan calificadas y asignadas. Los asesores ya no pierden tiempo filtrando.",
-    name: "Nombre Apellido",
-    role: "Cargo · Concesionaria",
+    text: "Las consultas de WhatsApp llegan calificadas y asignadas. Los asesores dejan de filtrar a mano.",
+    name: "Concesionaria",
+    role: "Agente de IA · CRM",
     avatar: icon(Car),
   },
   {
-    text: "La telemetría de las canillas nos muestra cada litro servido. Se acabaron las mermas sin registrar.",
-    name: "Nombre Apellido",
-    role: "Cargo · Gastronomía",
+    text: "La telemetría de las canillas registra cada litro servido. Las mermas sin registrar desaparecen.",
+    name: "Gastronomía",
+    role: "Telemetría · Pedidos",
     avatar: icon(ForkKnife),
   },
   {
-    text: "Los sensores avisan antes de que la línea se detenga. Pasamos de reparar a prevenir.",
-    name: "Nombre Apellido",
-    role: "Cargo · Industria",
+    text: "Los sensores avisan antes de que la línea se detenga. El mantenimiento pasa de reparar a prevenir.",
+    name: "Industria",
+    role: "Sensores · Tableros",
     avatar: icon(Factory),
   },
   {
-    text: "Cada despacho queda registrado con su lectura RFID. Encontrar un pedido ya no lleva una mañana.",
-    name: "Nombre Apellido",
-    role: "Cargo · Logística",
+    text: "Cada despacho queda registrado con su lectura RFID. Encontrar un pedido deja de llevar una mañana.",
+    name: "Logística",
+    role: "RFID · Nube",
     avatar: icon(Truck),
   },
   {
     text: "El agente separa inversores de curiosos. Los ejecutivos solo hablan con quien puede comprar.",
-    name: "Nombre Apellido",
-    role: "Cargo · Desarrollo inmobiliario",
+    name: "Desarrollo inmobiliario",
+    role: "Agente de IA · CRM",
     avatar: icon(Buildings),
   },
   {
-    text: "Las campañas y el CRM hablan el mismo idioma. Sabemos qué anuncio trae cada venta.",
-    name: "Nombre Apellido",
-    role: "Cargo · Comercio",
+    text: "Campañas y CRM comparten los mismos datos. Cada venta queda atribuida al anuncio que la trajo.",
+    name: "Comercio",
+    role: "Performance · CRM",
     avatar: icon(Storefront),
   },
   {
-    text: "Reemplazamos cinco planillas por una plataforma con permisos para cada área.",
-    name: "Nombre Apellido",
-    role: "Cargo · Servicios",
+    text: "Cinco planillas se reemplazan por una plataforma con permisos para cada área.",
+    name: "Servicios",
+    role: "Software a medida",
     avatar: icon(Briefcase),
   },
   {
-    text: "El agente responde de noche y los fines de semana. A la mañana encontramos los leads ordenados.",
-    name: "Nombre Apellido",
-    role: "Cargo · Concesionaria",
+    text: "El agente responde de noche y los fines de semana. A la mañana, los leads esperan ordenados por prioridad.",
+    name: "Concesionaria",
+    role: "Agente de IA",
     avatar: icon(ChatCircleDots),
   },
   {
-    text: "El control de acceso registra cada ingreso en la misma base que usamos para todo lo demás.",
-    name: "Nombre Apellido",
-    role: "Cargo · Industria",
+    text: "Cada ingreso queda registrado en la misma base de datos que usa el resto de la empresa.",
+    name: "Industria",
+    role: "Control de acceso",
     avatar: icon(Fingerprint),
   },
 ];

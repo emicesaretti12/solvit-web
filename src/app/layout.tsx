@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Michroma } from "next/font/google";
+import { Archivo, Geist, Geist_Mono, Krona_One } from "next/font/google";
+import type { CSSProperties } from "react";
+import { Toaster } from "sonner";
+import { SmoothScroll } from "@/components/smooth-scroll";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,38 +15,67 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Solo para el logotipo
-const michroma = Michroma({
-  variable: "--font-michroma",
+// Titulares: Archivo con eje de ancho para usarla semi-expandida (eco del wordmark)
+const archivo = Archivo({
+  variable: "--font-archivo",
+  subsets: ["latin"],
+  axes: ["wdth"],
+});
+
+// Logotipo y palabra del portal: extendida y pesada como el wordmark del brand board
+const krona = Krona_One({
+  variable: "--font-krona",
   weight: "400",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Solvit · Ingeniería y Desarrollo de Software",
+  title: "SEN Software · Ing. & Soluciones",
   description:
     "Software a medida, inteligencia artificial, integración de hardware y marketing de performance para empresas que quieren escalar.",
   openGraph: {
-    title: "Solvit · Ingeniería y Desarrollo de Software",
+    title: "SEN Software · Ing. & Soluciones",
     description:
       "Software a medida, IA, hardware y marketing de performance integrados por un mismo equipo técnico.",
+    siteName: "SEN Software",
     locale: "es_AR",
     type: "website",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b1222",
+  themeColor: "#0a0f1b",
   colorScheme: "dark",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
 };
+
+// Toasts con los colores de marca (variables propias de Sonner)
+const toasterStyle = {
+  "--normal-bg": "var(--navy-850)",
+  "--normal-border": "var(--line-strong)",
+  "--normal-text": "var(--ink)",
+} as CSSProperties;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} ${michroma.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable} ${krona.variable} h-full antialiased`}
     >
-      <body className="grain min-h-full flex flex-col">{children}</body>
+      <body className="grain flex min-h-full flex-col">
+        <a
+          href="#main"
+          className="sr-only z-50 rounded-full bg-blue-500 px-4 py-2 text-sm font-medium text-white focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+        >
+          Saltar al contenido
+        </a>
+        <SmoothScroll />
+        {children}
+        <Toaster theme="dark" position="bottom-right" style={toasterStyle} />
+      </body>
     </html>
   );
 }

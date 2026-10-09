@@ -1,12 +1,12 @@
 'use client';
 
 /*
-  Area Chart 1 (21st.dev, "Incident Report"), adaptado a Solvit:
+  Area Chart 1 (21st.dev, "Incident Report"), adaptado a SEN:
   - datos, leyenda y métricas por props (antes estaban fijos en el archivo)
   - íconos de Phosphor en lugar de SVG dibujados a mano
   - variables de reaviz en el contenedor (styled-jsx global no se renderiza en el servidor con App Router)
   - motion/react en lugar de framer-motion (mismo motor, ya instalado)
-  - colores de tendencia del set de estado de la skill dataviz, siempre con ícono + texto
+  - tendencia en colores de marca (azul si mejora, gris si empeora), siempre con ícono + texto
   - tabla accesible con los mismos datos para lectores de pantalla
 */
 import React from 'react';
@@ -61,9 +61,9 @@ export interface AreaChartCardProps {
   className?: string;
 }
 
-// Paleta de estado de la skill dataviz (nunca se reutiliza como color de serie)
-const STATUS_GOOD = '#0ca30c';
-const STATUS_CRITICAL = '#d03b3b';
+// Paleta del brand board: el azul es la única señal de color; empeorar se lee en gris + texto
+const STATUS_GOOD = '#3d8bff';
+const STATUS_CRITICAL = '#a7b0c0';
 
 const validateChartData = (data: ChartSeries[]): ChartNestedDataShape[] =>
   data.map((series) => ({
@@ -140,7 +140,7 @@ const AreaChartCard: React.FC<AreaChartCardProps> = ({
           </ul>
           <div className="h-[150px] min-h-0 md:h-auto md:flex-1" aria-hidden="true">
             <AreaChart
-              id="solvit-area-chart"
+              id="sen-area-chart"
               data={data}
               xAxis={
                 <LinearXAxis

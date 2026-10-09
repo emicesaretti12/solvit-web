@@ -1,7 +1,7 @@
 "use client";
 
 /*
-  Container Scroll Animation (Aceternity UI), adaptado a Solvit:
+  Container Scroll Animation (Aceternity UI), adaptado a SEN:
   - importa de "motion/react" (framer-motion es el mismo motor, ya instalado como dependencia de motion)
   - respeta prefers-reduced-motion
   - detecta mobile con matchMedia (breakpoint md de Tailwind) en lugar de escuchar resize
