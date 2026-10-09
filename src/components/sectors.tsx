@@ -186,7 +186,7 @@ export function Sectors() {
           id={`${id}-panel`}
           role="tabpanel"
           aria-labelledby={`${id}-tab-${active}`}
-          className="mt-8 rounded-[2rem] border border-line bg-white/[0.025] p-1.5"
+          className="mt-8 rounded-[2rem] border border-line bg-navy-800 p-1.5"
         >
           <div className="relative overflow-hidden rounded-[calc(2rem-6px)] bg-navy-850">
             <AnimatePresence mode="popLayout" initial={false}>

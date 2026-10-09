@@ -4,16 +4,17 @@ const COLUMNS = [
   {
     title: "Servicios",
     links: [
-      { href: "#servicios", label: "Software a medida" },
-      { href: "#servicios", label: "Inteligencia artificial" },
-      { href: "#servicios", label: "Hardware e IoT" },
-      { href: "#servicios", label: "Marketing de performance" },
+      { href: "#servicios", label: "Desarrollo web y software a medida" },
+      { href: "#servicios", label: "Agentes de IA" },
+      { href: "#servicios", label: "Marketing digital" },
+      { href: "#servicios", label: "Hardware e IoT (módulo aparte)" },
     ],
   },
   {
     title: "SEN",
     links: [
-      { href: "#flujo", label: "Flujo de valor" },
+      { href: "#proyectos", label: "Proyectos" },
+      { href: "#flujo", label: "Cómo trabajamos" },
       { href: "#plataforma", label: "Plataforma" },
       { href: "#sectores", label: "Sectores" },
       { href: "#nosotros", label: "Nosotros" },
@@ -29,8 +30,8 @@ export function SiteFooter() {
         <div>
           <Logo withTagline />
           <p className="mt-6 max-w-[40ch] text-sm leading-relaxed text-ink-muted">
-            Firma de tecnología integral y consultoría estratégica. Software, inteligencia
-            artificial, hardware y marketing sobre una misma infraestructura técnica.
+            Especialistas en solucionar tus ventas: desarrollo web y software a medida,
+            agentes de IA y marketing digital. Hardware e IoT como módulo aparte.
           </p>
         </div>
         {COLUMNS.map((col) => (
@@ -55,7 +56,7 @@ export function SiteFooter() {
       {/* Wordmark de cierre, como en el brand board: blanco apagado con el corte de la N en azul */}
       <div aria-hidden="true" className="pointer-events-none select-none overflow-hidden px-4 pt-6 md:px-6">
         <Wordmark
-          className="mx-auto block h-auto w-full max-w-[1200px] translate-y-[18%] text-white/[0.05]"
+          className="mx-auto block h-auto w-full max-w-[1200px] translate-y-[18%] text-fg/[0.05]"
           accentClassName="opacity-30"
         />
       </div>

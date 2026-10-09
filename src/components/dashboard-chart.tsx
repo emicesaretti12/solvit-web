@@ -2,14 +2,16 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import {
+  ArrowsClockwise,
   CalendarCheck,
+  Pause,
+  Play,
   ClockCountdown,
-  Drop,
+  FileText,
   Funnel,
-  IdentificationCard,
+  Globe,
   InstagramLogo,
   Megaphone,
-  Scan,
   Timer,
   UserSwitch,
   WhatsappLogo,
@@ -17,8 +19,9 @@ import {
 } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import AreaChartCard, { type ChartMetric, type ChartSeries } from "@/components/ui/area-chart-1";
-import { LiveBadge, useLive } from "./previews/preview-shell";
+import { LiveBadge, usePreviewLoop } from "./previews/preview-shell";
 import { LogoMark } from "./logo";
+import { useTheme } from "@/lib/theme";
 
 /*
   Datos de ejemplo del tablero (se muestran rotulados como tales).
@@ -32,11 +35,19 @@ const day = (offset: number) => {
 };
 const week = (values: number[]) => values.map((data, i) => ({ key: day(values.length - 1 - i), data }));
 
-// Paleta del brand board: azul eléctrico y blanco frío, nada más
-const SERIES: ChartSeries[] = [
-  { key: "Leads recibidos", color: "#3d8bff", data: week([72, 88, 87, 107, 113, 126, 123]) },
-  { key: "Calificados por IA", color: "#dbe4f3", data: week([41, 53, 49, 66, 68, 78, 75]) },
-];
+// Paleta del brand board: azul eléctrico y blanco frío en oscuro; azul y navy en claro
+const RECIBIDOS = week([72, 88, 87, 107, 113, 126, 123]);
+const CALIFICADOS = week([41, 53, 49, 66, 68, 78, 75]);
+const SERIES: Record<"dark" | "light", ChartSeries[]> = {
+  dark: [
+    { key: "Leads recibidos", color: "#3d8bff", data: RECIBIDOS },
+    { key: "Calificados por IA", color: "#dbe4f3", data: CALIFICADOS },
+  ],
+  light: [
+    { key: "Leads recibidos", color: "#1f6bff", data: RECIBIDOS },
+    { key: "Calificados por IA", color: "#23345c", data: CALIFICADOS },
+  ],
+};
 
 const METRICS: ChartMetric[] = [
   { id: "respuesta", Icon: Timer, label: "Primera respuesta", value: "38 s", trend: "down", trendIsGood: true },
@@ -46,16 +57,16 @@ const METRICS: ChartMetric[] = [
 
 const weekday = (d: Date) => d.toLocaleDateString("es-AR", { weekday: "short" }).replace(".", "");
 
-// Lo que pasa en una operación conectada: ventas, IA, hardware y marketing en el mismo registro
+// Un solo sistema: el CRM comercial (leads, agente de IA, asesores y campañas)
 const EVENTS: { icon: Icon; text: string; source: string }[] = [
   { icon: WhatsappLogo, text: "Lead calificado: SUV 0km", source: "Agente IA" },
   { icon: UserSwitch, text: "Asignado a Asesor 2", source: "CRM" },
-  { icon: Drop, text: "Barril 3 al 18 % de stock", source: "Telemetría" },
-  { icon: IdentificationCard, text: "Acceso permitido: depósito", source: "RFID" },
-  { icon: Megaphone, text: "CPA de Meta Ads −4,2 %", source: "Performance" },
-  { icon: InstagramLogo, text: "Consulta: 2 ambientes", source: "Instagram" },
-  { icon: Scan, text: "Conteo de pallets: 148", source: "Visión" },
-  { icon: CalendarCheck, text: "Turno reservado 16:30", source: "Reservas" },
+  { icon: InstagramLogo, text: "Consulta: unidad 2 ambientes", source: "Instagram" },
+  { icon: Megaphone, text: "CPA de Meta Ads −4,2 %", source: "Campañas" },
+  { icon: CalendarCheck, text: "Visita agendada 16:30", source: "Agenda" },
+  { icon: FileText, text: "Propuesta enviada a Pedido mayorista", source: "CRM" },
+  { icon: Globe, text: "Formulario web: financiación", source: "Web" },
+  { icon: ArrowsClockwise, text: "Seguimiento vencido, reasignado", source: "CRM" },
 ];
 
 type FeedItem = { id: number; event: number; time: string };
@@ -63,7 +74,7 @@ const clock = () => new Date().toLocaleTimeString("es-AR", { hour: "2-digit", mi
 
 function LiveFeed() {
   const ref = useRef<HTMLDivElement>(null);
-  const live = useLive(ref);
+  const { running, paused, setPaused } = usePreviewLoop(ref);
   // Contador que sobrevive a las pausas (fuera de pantalla), para que las keys no se repitan
   const counter = useRef(4);
   const [items, setItems] = useState<FeedItem[]>(() => {
@@ -72,19 +83,29 @@ function LiveFeed() {
   });
 
   useEffect(() => {
-    if (!live) return;
+    if (!running) return;
     const id = window.setInterval(() => {
       const n = counter.current++;
       setItems((list) => [{ id: n, event: n % EVENTS.length, time: clock() }, ...list].slice(0, 5));
     }, 2400);
     return () => window.clearInterval(id);
-  }, [live]);
+  }, [running]);
 
   return (
     <div ref={ref} className="flex h-full min-h-0 flex-col rounded-3xl bg-card p-5">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-2">
         <h3 className="text-sm font-semibold text-ink">Actividad</h3>
-        <LiveBadge />
+        <div className="flex items-center gap-1">
+          <LiveBadge paused={paused} />
+          <button
+            type="button"
+            onClick={() => setPaused((p) => !p)}
+            aria-label={paused ? "Reanudar la actividad de ejemplo" : "Pausar la actividad de ejemplo"}
+            className="-mr-2 flex size-11 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:text-ink motion-reduce:hidden"
+          >
+            {paused ? <Play size={12} weight="fill" aria-hidden="true" /> : <Pause size={12} weight="fill" aria-hidden="true" />}
+          </button>
+        </div>
       </div>
       <ul className="mt-4 flex min-h-0 flex-1 flex-col gap-2 overflow-hidden" aria-live="off">
         <AnimatePresence initial={false} mode="popLayout">
@@ -100,7 +121,7 @@ function LiveFeed() {
                 transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
                 className="flex items-start gap-3 rounded-xl border border-line bg-navy-900/70 p-2.5"
               >
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.05] text-blue-400">
+                <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-fg/[0.05] text-blue-400">
                   <e.icon size={15} aria-hidden="true" />
                 </span>
                 <span className="min-w-0 flex-1">
@@ -124,11 +145,11 @@ export function AppBar() {
     <div className="flex items-center justify-between gap-4 border-b border-line px-4 py-3 md:px-6">
       <div className="flex min-w-0 items-center gap-3">
         <LogoMark className="h-5 w-auto shrink-0" />
-        <span className="truncate text-[13px] font-medium text-ink">Panel de operación</span>
+        <span className="truncate text-[13px] font-medium text-ink">CRM comercial</span>
         <span className="hidden items-center gap-1 rounded-full border border-line p-0.5 text-[12px] sm:flex">
-          <span className="rounded-full bg-white/[0.07] px-2.5 py-0.5 text-ink">Ventas</span>
-          <span className="px-2.5 py-0.5 text-ink-faint">Operación</span>
-          <span className="px-2.5 py-0.5 text-ink-faint">Stock</span>
+          <span className="rounded-full bg-fg/[0.07] px-2.5 py-0.5 text-ink">Leads</span>
+          <span className="px-2.5 py-0.5 text-ink-faint">Pipeline</span>
+          <span className="px-2.5 py-0.5 text-ink-faint">Campañas</span>
         </span>
       </div>
       <span className="shrink-0 rounded-full border border-line px-2.5 py-1 text-[11px] text-ink-faint">
@@ -139,13 +160,14 @@ export function AppBar() {
 }
 
 export default function DashboardChart() {
+  const theme = useTheme();
   return (
     <div className="flex h-full w-full flex-col">
       <AppBar />
       <div className="grid min-h-0 flex-1 gap-2 p-2 md:grid-cols-[1fr_280px]">
         <AreaChartCard
           title="Leads de la semana"
-          series={SERIES}
+          series={SERIES[theme]}
           metrics={METRICS}
           formatTick={weekday}
           className="bg-navy-900/50"

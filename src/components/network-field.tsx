@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTheme, type Theme } from "@/lib/theme";
 
 /*
   Campo del portal SEN: pistas de circuito impreso con pulsos de datos que viajan de nodo
@@ -15,9 +16,29 @@ import { useEffect, useRef } from "react";
 type Node = { x: number; y: number; links: number[] };
 type Pulse = { from: number; to: number; t: number; speed: number; prev: number };
 
-const TRACE = "rgba(61, 139, 255, 0.14)";
-const PAD = "rgba(141, 184, 255, 0.32)";
-const CHIP = "rgba(141, 184, 255, 0.22)";
+// Colores por tema: en claro, pistas navy sobre papel y pulsos sin composición aditiva
+const PALETTE: Record<Theme, { trace: string; pad: string; chip: string; chipFill: string; tail0: string; tail1: string; head: string; blend: GlobalCompositeOperation }> = {
+  dark: {
+    trace: "rgba(61, 139, 255, 0.14)",
+    pad: "rgba(141, 184, 255, 0.32)",
+    chip: "rgba(141, 184, 255, 0.22)",
+    chipFill: "rgba(3, 16, 36, 0.9)",
+    tail0: "rgba(31, 107, 255, 0)",
+    tail1: "rgba(61, 139, 255, 0.9)",
+    head: "rgba(220, 234, 255, 0.95)",
+    blend: "lighter",
+  },
+  light: {
+    trace: "rgba(20, 52, 120, 0.13)",
+    pad: "rgba(20, 52, 120, 0.3)",
+    chip: "rgba(20, 52, 120, 0.22)",
+    chipFill: "rgba(246, 248, 251, 0.95)",
+    tail0: "rgba(31, 107, 255, 0)",
+    tail1: "rgba(31, 107, 255, 0.85)",
+    head: "rgba(16, 64, 190, 1)",
+    blend: "source-over",
+  },
+};
 
 function mulberry32(seed: number) {
   return () => {
@@ -64,6 +85,7 @@ function buildNetwork(w: number, h: number) {
 }
 
 export function NetworkField({ className = "" }: { className?: string }) {
+  const theme = useTheme();
   const wrapRef = useRef<HTMLDivElement>(null);
   const staticRef = useRef<HTMLCanvasElement>(null);
   const liveRef = useRef<HTMLCanvasElement>(null);
@@ -75,6 +97,7 @@ export function NetworkField({ className = "" }: { className?: string }) {
     const sctx = staticCanvas.getContext("2d")!;
     const lctx = live.getContext("2d")!;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const colors = PALETTE[theme];
 
     let w = 0;
     let h = 0;
@@ -101,7 +124,7 @@ export function NetworkField({ className = "" }: { className?: string }) {
       sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       sctx.clearRect(0, 0, w, h);
       const { nodes, chips } = net;
-      sctx.strokeStyle = TRACE;
+      sctx.strokeStyle = colors.trace;
       sctx.lineWidth = 1;
       sctx.beginPath();
       for (let i = 0; i < nodes.length; i++) {
@@ -113,13 +136,13 @@ export function NetworkField({ className = "" }: { className?: string }) {
         }
       }
       sctx.stroke();
-      sctx.fillStyle = PAD;
+      sctx.fillStyle = colors.pad;
       for (const n of nodes) {
         if (n.links.length) sctx.fillRect(n.x - 1.5, n.y - 1.5, 3, 3);
       }
-      sctx.strokeStyle = CHIP;
+      sctx.strokeStyle = colors.chip;
       for (const c of chips) {
-        sctx.fillStyle = "rgba(10, 15, 27, 0.9)";
+        sctx.fillStyle = colors.chipFill;
         sctx.fillRect(c.x - c.w / 2, c.y - c.h / 2, c.w, c.h);
         sctx.strokeRect(c.x - c.w / 2 + 0.5, c.y - c.h / 2 + 0.5, c.w - 1, c.h - 1);
       }
@@ -128,7 +151,7 @@ export function NetworkField({ className = "" }: { className?: string }) {
     const drawPulses = (dt: number) => {
       lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       lctx.clearRect(0, 0, w, h);
-      lctx.globalCompositeOperation = "lighter";
+      lctx.globalCompositeOperation = colors.blend;
       const { nodes, rand } = net;
       for (const p of pulses) {
         const a = nodes[p.from];
@@ -151,15 +174,15 @@ export function NetworkField({ className = "" }: { className?: string }) {
         const ux = (b.x - a.x) / len;
         const uy = (b.y - a.y) / len;
         const g = lctx.createLinearGradient(x - ux * tail, y - uy * tail, x, y);
-        g.addColorStop(0, "rgba(31, 107, 255, 0)");
-        g.addColorStop(1, "rgba(61, 139, 255, 0.9)");
+        g.addColorStop(0, colors.tail0);
+        g.addColorStop(1, colors.tail1);
         lctx.strokeStyle = g;
         lctx.lineWidth = 1.6;
         lctx.beginPath();
         lctx.moveTo(x - ux * tail, y - uy * tail);
         lctx.lineTo(x, y);
         lctx.stroke();
-        lctx.fillStyle = "rgba(220, 234, 255, 0.95)";
+        lctx.fillStyle = colors.head;
         lctx.beginPath();
         lctx.arc(x, y, 1.7, 0, Math.PI * 2);
         lctx.fill();
@@ -218,15 +241,16 @@ export function NetworkField({ className = "" }: { className?: string }) {
       io.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, []);
+    // Al cambiar de tema se rearma todo (pistas y pulsos) con la paleta nueva
+  }, [theme]);
 
   return (
     <div
       ref={wrapRef}
       aria-hidden="true"
-      className={`absolute inset-0 bg-[radial-gradient(ellipse_80%_70%_at_50%_45%,#111a2e_0%,#0a0f1b_62%,#060a12_100%)] ${className}`}
+      className={`absolute inset-0 bg-[radial-gradient(ellipse_80%_70%_at_50%_45%,#0b1f45_0%,#031024_62%,#010a18_100%)] light:bg-[radial-gradient(ellipse_80%_70%_at_50%_45%,#ffffff_0%,#eef2f8_62%,#dfe6f1_100%)] ${className}`}
     >
-      <div className="absolute left-1/2 top-[42%] size-[70vmax] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(31_107_255/0.14),transparent)]" />
+      <div className="absolute left-1/2 top-[42%] size-[70vmax] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(31_107_255/0.14),transparent)] light:bg-[radial-gradient(closest-side,rgb(31_107_255/0.1),transparent)]" />
       <canvas ref={staticRef} className="absolute inset-0 size-full" />
       <canvas ref={liveRef} className="absolute inset-0 size-full" />
     </div>

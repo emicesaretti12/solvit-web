@@ -1,32 +1,33 @@
-import { SiteHeader } from "@/components/site-header";
-import { Hero } from "@/components/hero";
-import { Integrations } from "@/components/integrations";
+import AgencyHeroSection from "@/components/ui/hero-01";
 import { BrandPortal } from "@/components/brand-portal";
 import { Services } from "@/components/services";
 import { ValueFlow } from "@/components/value-flow";
 import { PlatformShowcase } from "@/components/platform-showcase";
+import { Projects } from "@/components/projects";
 import { Sectors } from "@/components/sectors";
 import { Testimonials } from "@/components/testimonials";
 import { About } from "@/components/about";
 import { Contact } from "@/components/contact";
 import { SiteFooter } from "@/components/site-footer";
 
+/*
+  El home es el hero-01 (header, hero y slider de marcas). Como en el componente original,
+  el hero arma el <main> y el resto de las secciones van adentro, a continuación del slider.
+*/
 export default function Home() {
   return (
     <>
-      <SiteHeader />
-      <main id="main" className="w-full max-w-full flex-1 overflow-x-clip">
-        <Hero />
-        <Integrations />
+      <AgencyHeroSection>
         <BrandPortal />
         <Services />
         <ValueFlow />
         <PlatformShowcase />
+        <Projects />
         <Sectors />
         <Testimonials />
         <About />
         <Contact />
-      </main>
+      </AgencyHeroSection>
       <SiteFooter />
     </>
   );

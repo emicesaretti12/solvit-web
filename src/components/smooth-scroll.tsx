@@ -24,8 +24,9 @@ export function SmoothScroll() {
     const lenis = new Lenis({
       lerp: 0.1,
       smoothWheel: true,
-      // Las anclas (#servicios, #contacto) también se deslizan, compensando el header fijo
-      anchors: { offset: -96 },
+      // Las anclas (#servicios, #contacto) también se deslizan; Lenis ya descuenta el
+      // scroll-padding-top del html (el alto del header fijo), así que no lleva offset propio
+      anchors: true,
     });
     instance = lenis;
 

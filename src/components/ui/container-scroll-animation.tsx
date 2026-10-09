@@ -118,12 +118,13 @@ export const Card = ({
       style={{
         rotateX: rotate,
         scale,
+        // Sombra en capas teñida con el fondo del tema (navy en oscuro, gris azulado en claro)
         boxShadow:
-          "0 0 #0306124d, 0 9px 20px #0306124a, 0 37px 37px #03061242, 0 84px 50px #03061226, 0 149px 60px #0306120a, 0 233px 65px #03061203",
+          "0 0 rgb(var(--shade-rgb) / 0.3), 0 9px 20px rgb(var(--shade-rgb) / 0.29), 0 37px 37px rgb(var(--shade-rgb) / 0.26), 0 84px 50px rgb(var(--shade-rgb) / 0.15), 0 149px 60px rgb(var(--shade-rgb) / 0.04), 0 233px 65px rgb(var(--shade-rgb) / 0.01)",
       }}
-      className="mx-auto -mt-12 h-[30rem] w-full max-w-5xl rounded-[2rem] border border-line bg-white/[0.025] p-1.5 md:h-[40rem]"
+      className="mx-auto -mt-12 h-[30rem] w-full max-w-5xl rounded-[2rem] border border-line bg-navy-800 p-1.5 md:h-[40rem]"
     >
-      <div className="h-full w-full overflow-hidden rounded-[calc(2rem-6px)] bg-navy-850 shadow-[inset_0_1px_1px_rgb(255_255_255/0.06)]">
+      <div className="h-full w-full overflow-hidden rounded-[calc(2rem-6px)] bg-navy-850 shadow-[inset_0_1px_1px_rgb(var(--fg-rgb)/0.06)]">
         {children}
       </div>
     </motion.div>

@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { TrendDown } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
-import { PreviewShell, useLive } from "./preview-shell";
+import { PreviewShell, usePreviewLoop } from "./preview-shell";
 
 type Channel = "Meta Ads" | "Google Ads";
 const CHANNELS: Channel[] = ["Meta Ads", "Google Ads"];
@@ -39,26 +39,29 @@ const width = (v: number) => Math.max(0.08, Math.log10(v) / MAX_LOG);
 
 export function MarketingPreview() {
   const ref = useRef<HTMLDivElement>(null);
-  const live = useLive(ref);
+  const { running, paused, setPaused } = usePreviewLoop(ref);
   const [channel, setChannel] = useState<Channel>("Meta Ads");
-  const [manual, setManual] = useState(false);
 
-  // Alterna de canal sola hasta que la persona elige uno
+  // Alterna de canal sola; elegir uno a mano equivale a pausar
   useEffect(() => {
-    if (!live || manual) return;
+    if (!running) return;
     const id = window.setInterval(() => {
       setChannel((c) => (c === "Meta Ads" ? "Google Ads" : "Meta Ads"));
     }, 3600);
     return () => window.clearInterval(id);
-  }, [live, manual]);
+  }, [running]);
 
   const rows = FUNNEL[channel];
   const cpa = CPA[channel];
   const rate = ((rows[4].value / rows[2].value) * 100).toLocaleString("es-AR", { maximumFractionDigits: 1 });
 
   return (
-    <div ref={ref} className="h-full">
-      <PreviewShell title="Embudo de adquisición · últimos 30 días">
+    <div ref={ref} className="flex h-full min-h-0 flex-col">
+      <PreviewShell
+        title="Embudo de adquisición · últimos 30 días"
+        paused={paused}
+        onTogglePause={() => setPaused((p) => !p)}
+      >
         <div role="group" aria-label="Canal" className="inline-flex gap-1 rounded-xl border border-line bg-navy-900 p-1">
           {CHANNELS.map((c) => (
             <button
@@ -66,10 +69,10 @@ export function MarketingPreview() {
               type="button"
               aria-pressed={c === channel}
               onClick={() => {
-                setManual(true);
+                setPaused(true);
                 setChannel(c);
               }}
-              className={`relative rounded-lg px-3 py-1.5 text-[12px] font-medium transition-colors duration-150 active:scale-[0.97] ${
+              className={`relative rounded-lg px-3 py-1.5 text-[12px] font-medium transition-colors duration-150 active:scale-[0.97] pointer-coarse:min-h-11 ${
                 c === channel ? "text-white" : "text-ink-muted hover:text-ink"
               }`}
             >
@@ -90,10 +93,10 @@ export function MarketingPreview() {
             <li key={r.stage} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1">
               <span className="text-[12px] text-ink-muted">{r.stage}</span>
               <span className="text-right font-mono text-[12px] text-ink tabular">{fmt(r.value)}</span>
-              <span className="col-span-2 h-2 overflow-hidden rounded-full bg-white/[0.06]">
+              <span className="col-span-2 h-2 overflow-hidden rounded-full bg-fg/[0.06]">
                 <span
                   className={`block h-full origin-left rounded-full transition-transform duration-700 ease-[var(--ease-out)] ${
-                    i >= 3 ? "bg-blue-400" : "bg-white/25"
+                    i >= 3 ? "bg-blue-400" : "bg-fg/25"
                   }`}
                   style={{ transform: `scaleX(${width(r.value)})` }}
                 />

@@ -115,7 +115,7 @@ const AreaChartCard: React.FC<AreaChartCardProps> = ({
       style={
         {
           '--reaviz-tick-fill': 'var(--ink-muted)',
-          '--reaviz-gridline-stroke': 'rgb(148 170 210 / 0.14)',
+          '--reaviz-gridline-stroke': 'var(--line-strong)',
         } as React.CSSProperties
       }
     >
@@ -138,7 +138,8 @@ const AreaChartCard: React.FC<AreaChartCardProps> = ({
               </li>
             ))}
           </ul>
-          <div className="h-[150px] min-h-0 md:h-auto md:flex-1" aria-hidden="true">
+          {/* inert: el gráfico es decorativo para el teclado (la tabla sr-only expone los datos) */}
+          <div className="h-[150px] min-h-0 md:h-auto md:flex-1" aria-hidden="true" inert>
             <AreaChart
               id="sen-area-chart"
               data={data}

@@ -3,10 +3,12 @@
 import { AnimatePresence, motion } from "motion/react";
 import { Check, Globe, InstagramLogo, LockSimple, WhatsappLogo, type Icon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
-import { PreviewShell, useLive } from "./preview-shell";
+import { PreviewShell, usePreviewLoop } from "./preview-shell";
 
 type Role = "Administrador" | "Supervisor" | "Ventas" | "Soporte";
 const ROLES: Role[] = ["Administrador", "Supervisor", "Ventas", "Soporte"];
+// En pantallas angostas los cuatro roles entran en una sola fila con la etiqueta corta
+const SHORT: Record<Role, string> = { Administrador: "Admin", Supervisor: "Supervisor", Ventas: "Ventas", Soporte: "Soporte" };
 
 const PERMISSIONS: { label: string; roles: Role[] }[] = [
   { label: "Ver todo", roles: ["Administrador", "Supervisor"] },
@@ -34,41 +36,48 @@ const visibleRows = (role: Role) => {
 const STAGE_STYLE: Record<string, string> = {
   Nuevo: "border-line-strong text-ink-muted",
   Calificado: "border-blue-400/40 bg-blue-500/10 text-blue-300",
-  Propuesta: "border-line-strong bg-white/[0.04] text-ink",
+  Propuesta: "border-line-strong bg-fg/[0.04] text-ink",
   Postventa: "border-line-strong text-ink-muted",
 };
 
 export function CrmPreview() {
   const ref = useRef<HTMLDivElement>(null);
-  const live = useLive(ref);
+  const { running, paused, setPaused } = usePreviewLoop(ref);
   const [role, setRole] = useState<Role>("Administrador");
-  const [manual, setManual] = useState(false);
 
-  // Recorre los roles solo, hasta que la persona elige uno
+  // Recorre los roles solo; elegir uno a mano equivale a pausar
   useEffect(() => {
-    if (!live || manual) return;
+    if (!running) return;
     const id = window.setInterval(() => {
       setRole((r) => ROLES[(ROLES.indexOf(r) + 1) % ROLES.length]);
     }, 2600);
     return () => window.clearInterval(id);
-  }, [live, manual]);
+  }, [running]);
 
   const rows = visibleRows(role);
 
   return (
-    <div ref={ref} className="h-full">
-      <PreviewShell title="CRM a medida · niveles de acceso">
-        <div role="group" aria-label="Rol" className="grid grid-cols-2 gap-1 rounded-xl border border-line bg-navy-900 p-1 sm:grid-cols-4">
+    <div ref={ref} className="flex h-full min-h-0 flex-col">
+      <PreviewShell
+        title="CRM a medida · niveles de acceso"
+        paused={paused}
+        onTogglePause={() => setPaused((p) => !p)}
+      >
+        <div
+          role="group"
+          aria-label="Rol"
+          className="flex flex-wrap gap-1 rounded-xl border border-line bg-navy-900 p-1 sm:grid sm:grid-cols-4"
+        >
           {ROLES.map((r) => (
             <button
               key={r}
               type="button"
               aria-pressed={r === role}
               onClick={() => {
-                setManual(true);
+                setPaused(true);
                 setRole(r);
               }}
-              className={`relative rounded-lg px-2 py-1.5 text-[12px] font-medium transition-colors duration-150 active:scale-[0.97] ${
+              className={`relative flex-auto rounded-lg px-2 py-1.5 text-[12px] font-medium transition-colors duration-150 active:scale-[0.97] pointer-coarse:min-h-11 ${
                 r === role ? "text-white" : "text-ink-muted hover:text-ink"
               }`}
             >
@@ -79,12 +88,13 @@ export function CrmPreview() {
                   transition={{ type: "spring", duration: 0.4, bounce: 0.15 }}
                 />
               )}
-              <span className="relative">{r}</span>
+              <span className="relative sm:hidden">{SHORT[r]}</span>
+              <span className="relative hidden sm:inline">{r}</span>
             </button>
           ))}
         </div>
 
-        <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Permisos del rol">
+        <ul className="mt-3 flex flex-wrap gap-1.5 stack-sm:mt-2.5" aria-label="Permisos del rol">
           {PERMISSIONS.map((p) => {
             const on = p.roles.includes(role);
             return (
@@ -94,20 +104,26 @@ export function CrmPreview() {
                   on ? "border-blue-400/40 text-ink" : "border-line text-ink-faint"
                 }`}
               >
-                {on ? <Check size={11} weight="bold" className="text-blue-400" /> : <LockSimple size={11} />}
+                {on ? (
+                  <Check size={11} weight="bold" className="text-blue-400" aria-hidden="true" />
+                ) : (
+                  <LockSimple size={11} aria-hidden="true" />
+                )}
+                <span className="sr-only">{on ? "Permitido:" : "Bloqueado:"}</span>
                 {p.label}
               </li>
             );
           })}
         </ul>
 
-        <div className="mt-4 overflow-hidden rounded-xl border border-line">
+        <div className="mt-4 overflow-hidden rounded-xl border border-line stack-sm:mt-2.5">
           <div className="grid grid-cols-[1fr_auto] gap-3 border-b border-line bg-navy-900 px-3 py-2 text-[10px] uppercase tracking-[0.16em] text-ink-faint sm:grid-cols-[1fr_auto_auto]">
             <span>Prospecto</span>
             <span className="hidden sm:block">Asignado</span>
             <span>Etapa</span>
           </div>
-          <ul className="min-h-[188px]">
+          {/* En el apilado de celulares, tres filas fijas: la tarjeta no cambia de alto al cambiar de rol */}
+          <ul className="relative min-h-[188px] stack-sm:h-[6.9rem] stack-sm:min-h-0 stack-sm:overflow-hidden">
             <AnimatePresence mode="popLayout" initial={false}>
               {rows.map((r) => {
                 const ChannelIcon = CHANNEL[r.channel];
@@ -119,7 +135,7 @@ export function CrmPreview() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-                    className="grid grid-cols-[1fr_auto] items-center gap-3 border-b border-line px-3 py-2.5 last:border-b-0 sm:grid-cols-[1fr_auto_auto]"
+                    className="grid grid-cols-[1fr_auto] items-center gap-3 border-b border-line px-3 py-2.5 last:border-b-0 sm:grid-cols-[1fr_auto_auto] stack-sm:py-2"
                   >
                     <span className="flex min-w-0 items-center gap-2 text-[12.5px] text-ink">
                       <ChannelIcon size={15} className="shrink-0 text-ink-muted" aria-hidden="true" />

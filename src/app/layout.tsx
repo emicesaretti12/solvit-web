@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Geist, Geist_Mono, Krona_One } from "next/font/google";
 import type { CSSProperties } from "react";
-import { Toaster } from "sonner";
 import { SmoothScroll } from "@/components/smooth-scroll";
+import { Toaster } from "@/components/toaster";
+import { THEME_SCRIPT } from "@/lib/theme-config";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -44,8 +45,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0f1b",
-  colorScheme: "dark",
+  themeColor: "#031024",
+  colorScheme: "dark light",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -63,8 +64,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="es"
+      data-theme="dark"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable} ${krona.variable} h-full antialiased`}
     >
+      <head>
+        {/* Fija el tema guardado antes del primer pintado (sin parpadeo); ver src/lib/theme.ts */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="grain flex min-h-full flex-col">
         <a
           href="#main"
@@ -74,7 +81,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </a>
         <SmoothScroll />
         {children}
-        <Toaster theme="dark" position="bottom-right" style={toasterStyle} />
+        <Toaster position="bottom-right" containerAriaLabel="Notificaciones" style={toasterStyle} />
       </body>
     </html>
   );

@@ -8,6 +8,12 @@
 @custom-variant stack (@media (min-width: 1024px) and (min-height: 760px) and (prefers-reduced-motion: no-preference));
 
 /*
+  La misma idea en celulares y tablets (versiones compactas de cada sección): pantalla de al
+  menos 700px de alto y sin reduced motion. Misma consulta que STACK_SM_QUERY en lib/motion.ts.
+*/
+@custom-variant stack-sm (@media (max-width: 1023.98px) and (min-height: 700px) and (prefers-reduced-motion: no-preference));
+
+/*
   SEN Software · tokens de marca (brand board)
   Fondo medianoche casi negro, azul eléctrico del isotipo solo como acento (logo, CTA, líneas, luz),
   blanco para la tipografía y grises fríos para lo secundario. Nada de campos azules grandes.
@@ -15,11 +21,12 @@
   Ver DESIGN.md.
 */
 :root {
-  --navy-950: #060a12;
-  --navy-900: #0a0f1b;
-  --navy-850: #0e1422;
-  --navy-800: #131a2a;
-  --navy-700: #1b2336;
+  /* Navy medianoche del brand board (#021022): profundo y saturado, no gris */
+  --navy-950: #010a18;
+  --navy-900: #031024;
+  --navy-850: #07162d;
+  --navy-800: #0c1d38;
+  --navy-700: #142849;
   --line: rgb(160 178 210 / 0.1);
   --line-strong: rgb(160 178 210 / 0.18);
   --ink: #f4f6fa;
@@ -54,6 +61,44 @@
   --input: var(--line-strong);
   --ring: var(--blue-400);
   --radius: 1rem;
+
+  /* Capas translúcidas (rgb sin alfa): blanco sobre el oscuro, navy sobre el claro */
+  --fg-rgb: 255 255 255;
+  /* Sombras y velos teñidos con el fondo */
+  --shade-rgb: 1 8 20;
+  /* Relleno del wordmark del portal antes de entrar (blanco como el logo sobre navy) */
+  --portal-fill-from: #ffffff;
+  --portal-fill-via: #eef2fa;
+  --portal-fill-to: #bccdee;
+  color-scheme: dark;
+}
+
+/*
+  Tema claro (versión clara del brand board): fondo blanco frío, wordmark y texto navy,
+  el mismo azul eléctrico como único acento. Los nombres navy-* se mantienen como roles
+  (fondo, superficie, panel, borde) para que cada componente cambie solo con el tema.
+*/
+:root[data-theme="light"] {
+  --navy-950: #e9edf4;
+  --navy-900: #f6f8fb;
+  --navy-850: #ffffff;
+  --navy-800: #eef2f7;
+  --navy-700: #e1e7f0;
+  --line: rgb(11 18 34 / 0.09);
+  --line-strong: rgb(11 18 34 / 0.16);
+  --ink: #0b1222;
+  --ink-muted: #46526a;
+  --ink-faint: #616c80;
+  --blue-600: #1450e0;
+  --blue-500: #1f6bff;
+  --blue-400: #1a5fe6;
+  --blue-300: #1652c9;
+  --fg-rgb: 11 18 34;
+  --shade-rgb: 40 56 92;
+  --portal-fill-from: #0b1222;
+  --portal-fill-via: #16213a;
+  --portal-fill-to: #23345c;
+  color-scheme: light;
 }
 
 @theme inline {
@@ -71,6 +116,8 @@
   --color-blue-500: var(--blue-500);
   --color-blue-400: var(--blue-400);
   --color-blue-300: var(--blue-300);
+  --color-fg: rgb(var(--fg-rgb));
+  --color-shade: rgb(var(--shade-rgb));
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-archivo), var(--font-geist-sans), sans-serif;
@@ -102,6 +149,18 @@
 @theme {
   --animate-fade-in: fade-in 1s var(--ease-out) forwards;
   --animate-fade-up: fade-up 1.2s var(--ease-out) forwards;
+  /* Marquesinas horizontales (logos, galería en móvil): el contenido va duplicado */
+  --animate-marquee: marquee var(--duration, 40s) linear infinite;
+  --animate-marquee-reverse: marquee var(--duration, 40s) linear infinite reverse;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - var(--gap, 1rem)));
+    }
+  }
 
   @keyframes fade-in {
     0% {
@@ -135,8 +194,10 @@
   }
 }
 
+/* Selector de tema: claro u oscuro sin parpadeo (el script del layout fija data-theme) */
+@custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
+
 html {
-  color-scheme: dark;
   scroll-padding-top: 6rem;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
@@ -146,6 +207,9 @@ body {
   background: var(--navy-900);
   color: var(--ink);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+  transition:
+    background-color 300ms var(--ease-out),
+    color 300ms var(--ease-out);
 }
 
 /* Titulares: Archivo semi-expandida, eco del wordmark extendido del logo */
@@ -217,7 +281,31 @@ html.lenis body {
   pointer-events: none;
 }
 
-/* Flotación suave del tile de marca (se apaga con reduced motion) */
+/* Órbitas del fondo del hero: giro lento y constante (lineal), solo transform */
+@keyframes orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.hero-orbit {
+  animation: orbit var(--orbit-duration, 60s) linear infinite;
+}
+
+/* Luces del fondo del hero: derivan lento (18 s), solo transform */
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(6%, 4%, 0);
+  }
+}
+.hero-drift {
+  animation: drift 18s var(--ease-in-out) infinite;
+}
+
+/* Flotación suave del isotipo 3D (se apaga con reduced motion) */
 @keyframes float-y {
   0%,
   100% {
@@ -252,50 +340,6 @@ html.lenis body {
   animation: live-ping 1.8s var(--ease-out) infinite;
 }
 
-/* Lista de disciplinas del brand board: se ilumina en secuencia (7s, una por vez) */
-@keyframes discipline-glow {
-  0%,
-  24%,
-  100% {
-    color: var(--ink-faint);
-  }
-  5%,
-  17% {
-    color: var(--ink);
-  }
-}
-@keyframes discipline-tick {
-  0%,
-  24%,
-  100% {
-    transform: scaleX(0);
-  }
-  5%,
-  17% {
-    transform: scaleX(1);
-  }
-}
-.discipline-item {
-  position: relative;
-  color: var(--ink-faint);
-  animation: discipline-glow 7s var(--ease-in-out) infinite;
-}
-@media (min-width: 768px) {
-  .discipline-item::before {
-    content: "";
-    position: absolute;
-    left: -29px;
-    top: 50%;
-    width: 14px;
-    height: 1px;
-    background: var(--blue-400);
-    transform: scaleX(0);
-    transform-origin: left;
-    animation: discipline-tick 7s var(--ease-in-out) infinite;
-    animation-delay: inherit;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -305,13 +349,12 @@ html.lenis body {
     animation-iteration-count: 1 !important;
   }
   .animate-float,
-  .live-dot::after,
-  .discipline-item,
-  .discipline-item::before {
+  .hero-orbit,
+  .hero-drift,
+  .animate-marquee,
+  .animate-marquee-reverse,
+  .live-dot::after {
     animation: none !important;
-  }
-  .discipline-item {
-    color: var(--ink-muted);
   }
 }
 
@@ -328,7 +371,7 @@ html.lenis body {
   padding: 6px 6px 6px 20px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
-  background: rgb(10 15 27 / 0.6);
+  background: color-mix(in oklab, var(--navy-900) 60%, transparent);
   color: var(--ink);
   font-size: 14px;
   font-weight: 500;
@@ -348,7 +391,7 @@ html.lenis body {
 .sen-portal [data-gp-caption] [data-gp-enter]:focus-visible {
   margin: 0;
   padding: 6px 6px 6px 20px;
-  background: rgb(10 15 27 / 0.6);
+  background: color-mix(in oklab, var(--navy-900) 60%, transparent);
   color: var(--ink);
   outline: 2px solid var(--blue-400);
   outline-offset: 3px;
@@ -365,7 +408,7 @@ html.lenis body {
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: rgb(255 255 255 / 0.06);
+  background: rgb(var(--fg-rgb) / 0.06);
 }
 /* Una vez adentro, el enlace de la portada no puede quedar debajo del contenido */
 .sen-portal[data-gp-entered="true"] [data-gp-caption] {

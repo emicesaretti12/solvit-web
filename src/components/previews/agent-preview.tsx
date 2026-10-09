@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, Sparkle, WhatsappLogo } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
-import { PreviewShell, LiveBadge, useLive } from "./preview-shell";
+import { PreviewShell, LiveBadge, usePreviewLoop } from "./preview-shell";
 
 type Msg = { from: "cliente" | "agente"; text: string };
 
@@ -29,14 +29,14 @@ const LOOP = 10500;
 
 export function AgentPreview() {
   const ref = useRef<HTMLDivElement>(null);
-  const live = useLive(ref);
+  const { running, paused, setPaused } = usePreviewLoop(ref);
   // Sin animación (o fuera de pantalla al inicio) se muestra la conversación completa
   const [shown, setShown] = useState(MESSAGES.length);
   const [assigned, setAssigned] = useState(true);
   const [typing, setTyping] = useState(false);
 
   useEffect(() => {
-    if (!live) return;
+    if (!running) return;
     const timers: number[] = [];
     const run = () => {
       setShown(0);
@@ -61,15 +61,20 @@ export function AgentPreview() {
       timers.forEach(window.clearTimeout);
       window.clearInterval(loop);
     };
-  }, [live]);
+  }, [running]);
 
   const priorityKnown = shown >= 3;
 
   return (
-    <div ref={ref} className="h-full">
-      <PreviewShell title="Agente de IA · WhatsApp Business" status={<LiveBadge label="Atendiendo" />}>
-        <div className="grid h-full gap-3 sm:grid-cols-[1.25fr_1fr]">
-          <div className="flex min-h-[230px] flex-col justify-end gap-2 rounded-xl border border-line bg-navy-900/80 p-3" aria-live="polite">
+    <div ref={ref} className="flex h-full min-h-0 flex-col">
+      <PreviewShell
+        title="Agente de IA · WhatsApp Business"
+        status={<LiveBadge label="Atendiendo" paused={paused} />}
+        paused={paused}
+        onTogglePause={() => setPaused((p) => !p)}
+      >
+        <div className="grid h-full gap-3 sm:grid-cols-[1.25fr_1fr] stack-sm:flex stack-sm:min-h-0 stack-sm:flex-col">
+          <div className="flex min-h-[230px] flex-col justify-end gap-2 rounded-xl border border-line bg-navy-900/80 p-3 stack-sm:min-h-[200px]">
             <AnimatePresence initial={false}>
               {MESSAGES.slice(0, shown).map((m, i) => (
                 <motion.div
@@ -93,7 +98,6 @@ export function AgentPreview() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   className="flex gap-1 self-end rounded-2xl rounded-br-md bg-blue-500/20 px-3 py-2.5"
-                  aria-label="El agente está escribiendo"
                 >
                   {[0, 1, 2].map((d) => (
                     <span
@@ -107,7 +111,18 @@ export function AgentPreview() {
             </AnimatePresence>
           </div>
 
-          <div className="flex flex-col gap-2 rounded-xl border border-line bg-navy-900/80 p-3">
+          {/* En el apilado de celulares la ficha se resume en una línea (prioridad y asignación) */}
+          <div
+            className={`hidden items-center justify-between gap-2 rounded-xl border px-3 py-2 text-[12px] transition-[opacity,border-color] duration-300 stack-sm:flex ${
+              assigned ? "border-blue-400/40 bg-blue-500/10 text-ink" : "border-line text-ink-muted"
+            }`}
+          >
+            <span>Prioridad {priorityKnown ? "alta" : "en análisis"}</span>
+            <span className={`transition-opacity duration-300 ${assigned ? "opacity-100" : "opacity-0"}`}>
+              Asignado a Asesor 1
+            </span>
+          </div>
+          <div className="flex flex-col gap-2 rounded-xl border border-line bg-navy-900/80 p-3 stack-sm:hidden">
             <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-ink-faint">
               <Sparkle size={12} className="text-blue-400" /> Ficha del prospecto
             </p>

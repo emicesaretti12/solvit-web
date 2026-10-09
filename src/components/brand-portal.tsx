@@ -61,23 +61,23 @@ function useFontReady(frame: React.RefObject<HTMLDivElement | null>) {
 const STEPS: { icon: Icon; name: string; text: string }[] = [
   {
     icon: Code,
-    name: "Software a medida",
-    text: "Arquitecturas que centralizan operaciones complejas en un solo lugar.",
+    name: "Desarrollo web y software",
+    text: "Sitios que venden y sistemas a medida que centralizan la operación.",
   },
   {
     icon: Sparkle,
-    name: "Inteligencia artificial",
+    name: "Agentes de IA",
     text: "Agentes que conversan, califican y derivan prospectos las 24 horas.",
+  },
+  {
+    icon: ChartLineUp,
+    name: "Marketing digital",
+    text: "Pauta medida de punta a punta para que entren clientes todos los meses.",
   },
   {
     icon: Cpu,
     name: "Hardware e IoT",
-    text: "Sensores y controladores donde el software por sí solo no llega.",
-  },
-  {
-    icon: ChartLineUp,
-    name: "Marketing de performance",
-    text: "Demanda predecible para que la tecnología trabaje con volumen real.",
+    text: "Módulo aparte: placas y sensores donde el software solo no llega.",
   },
 ];
 
@@ -96,7 +96,7 @@ function Field() {
     <div className="absolute inset-0" style={{ transform: "scale(var(--gp-field-scale, 1))" }}>
       <NetworkField />
       <div
-        className="absolute inset-0 bg-[linear-gradient(180deg,#ffffff_0%,#eef2fa_48%,#bccdee_100%)]"
+        className="absolute inset-0 bg-[linear-gradient(180deg,var(--portal-fill-from)_0%,var(--portal-fill-via)_48%,var(--portal-fill-to)_100%)]"
         style={{ opacity: "calc(var(--portal-fill, 1) * 0.94)" }}
       />
     </div>
@@ -117,8 +117,8 @@ function Front() {
 
 function ProblemCard({ icon: IconCmp, title, items }: { icon: Icon; title: string; items: string[] }) {
   return (
-    <div className="rounded-[2rem] border border-line bg-white/[0.02] p-1.5">
-      <div className="h-full rounded-[calc(2rem-6px)] bg-navy-900/85 p-5 shadow-[inset_0_1px_1px_rgb(255_255_255/0.05)] md:p-6">
+    <div className="rounded-[2rem] border border-line bg-navy-800 p-1.5">
+      <div className="h-full rounded-[calc(2rem-6px)] bg-navy-900/85 p-5 shadow-[inset_0_1px_1px_rgb(var(--fg-rgb)/0.05)] md:p-6">
         <div className="flex items-center gap-3">
           <span className="flex size-9 items-center justify-center rounded-xl border border-line-strong bg-navy-800 text-blue-400">
             <IconCmp size={18} weight="light" aria-hidden="true" />
@@ -204,7 +204,7 @@ export function BrandPortal() {
         <div className="mx-auto w-full max-w-[1200px]">
           <p className="label-caps">Por qué SEN</p>
           <h2 className="font-display mt-4 max-w-[26ch] text-[1.7rem] font-semibold leading-[1.1] tracking-[-0.03em] text-balance text-ink sm:text-4xl lg:text-[2.9rem]">
-            No somos una agencia de publicidad ni una factoría de software aislada de tus
+            No somos una agencia de publicidad ni una fábrica de software aislada de tus
             objetivos.
           </h2>
           <p className="mt-5 max-w-[62ch] text-base leading-relaxed text-ink-muted md:text-lg">
@@ -245,7 +245,7 @@ export function BrandPortal() {
             <div className="rounded-[1.5rem] border border-line-strong bg-navy-900/70 p-5 shadow-[0_20px_60px_-30px_rgb(0_0_0/0.8)] backdrop-blur-md">
               <div className="flex gap-1.5">
                 {STEPS.map((s, i) => (
-                  <span key={s.name} className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/10">
+                  <span key={s.name} className="h-[3px] flex-1 overflow-hidden rounded-full bg-fg/10">
                     <span
                       data-seg={i}
                       className="block h-full origin-left bg-blue-400"

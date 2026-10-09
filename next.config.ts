@@ -12,8 +12,12 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
-    // Fotos de referencia. Reemplazar por fotografía propia de proyectos.
-    remotePatterns: [new URL("https://images.unsplash.com/**")],
+    /*
+      Fotos de referencia de Unsplash (reemplazar por fotografía propia). Con el patrón como objeto
+      y sin `search` se aceptan sus parámetros (?auto=format&w=...); `new URL(...)` deja search
+      vacío y el optimizador respondía 400 a cada foto.
+    */
+    remotePatterns: [{ protocol: "https", hostname: "images.unsplash.com", pathname: "/**" }],
   },
 };
 

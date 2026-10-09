@@ -10,11 +10,11 @@ type Status = "idle" | "sending" | "sent" | "error";
 type Errors = Partial<Record<"nombre" | "email" | "mensaje", string>>;
 
 const areas = [
-  "Software a medida",
-  "Inteligencia artificial",
+  "Más ventas: marketing, IA y CRM",
+  "Desarrollo web o software a medida",
+  "Agentes de IA",
+  "Marketing digital",
   "Hardware e IoT",
-  "Marketing de performance",
-  "Una solución integral",
 ];
 
 const field =
@@ -88,7 +88,7 @@ export function ContactForm() {
     // Aviso que acompaña el envío: cargando, y después éxito o error
     toast.promise(request, {
       loading: "Enviando tu consulta",
-      success: "Consulta recibida. Te escribimos dentro de las 48 horas hábiles.",
+      success: "Consulta recibida. Te vamos a escribir para coordinar el diagnóstico.",
       error: "No pudimos enviar la consulta. Probá de nuevo en unos minutos.",
     });
     try {
@@ -121,8 +121,8 @@ export function ContactForm() {
             Recibimos tu consulta.
           </h3>
           <p className="mt-3 max-w-[40ch] leading-relaxed text-ink-muted">
-            Un ingeniero del equipo te va a contactar dentro de las próximas 48
-            horas hábiles para coordinar el diagnóstico.
+            Un ingeniero del equipo te va a contactar para coordinar el
+            diagnóstico.
           </p>
           <button
             type="button"
@@ -157,7 +157,7 @@ export function ContactForm() {
           </Field>
           <div className="md:col-span-2">
             <Field id="area" label="¿Qué necesitás resolver?">
-              <select id="area" name="area" defaultValue={areas[4]} className={`${field} appearance-none`}>
+              <select id="area" name="area" defaultValue={areas[0]} className={`${field} appearance-none`}>
                 {areas.map((a) => (
                   <option key={a} value={a} className="bg-navy-900">
                     {a}

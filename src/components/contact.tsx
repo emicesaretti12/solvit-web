@@ -40,8 +40,8 @@ export function Contact() {
             </ol>
           </div>
         </Reveal>
-        <Reveal delay={0.1} className="self-start rounded-[2rem] border border-line bg-white/[0.025] p-1.5">
-          <div className="rounded-[calc(2rem-6px)] bg-navy-850 shadow-[inset_0_1px_1px_rgb(255_255_255/0.06)]">
+        <Reveal delay={0.1} className="self-start rounded-[2rem] border border-line bg-navy-800 p-1.5">
+          <div className="rounded-[calc(2rem-6px)] bg-navy-850 shadow-[inset_0_1px_1px_rgb(var(--fg-rgb)/0.06)]">
             <ContactForm />
           </div>
         </Reveal>

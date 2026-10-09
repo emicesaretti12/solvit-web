@@ -11,11 +11,11 @@ export function PlatformShowcase() {
               id="plataforma-titulo"
               className="font-display mx-auto max-w-[20ch] text-[2.1rem] font-semibold leading-[1.04] tracking-[-0.035em] text-balance text-ink sm:text-5xl lg:text-[3.6rem]"
             >
-              Tu operación, <span className="text-blue-400">medida en tiempo real.</span>
+              CRM y tableros a medida, <span className="text-blue-400">con datos en tiempo real.</span>
             </h2>
             <p className="mx-auto mt-5 max-w-[54ch] text-lg leading-relaxed text-ink-muted">
-              Leads, ventas, stock y sensores en una plataforma propia, con permisos para cada
-              equipo y cada evento registrado en el mismo lugar.
+              Así se ve un CRM comercial que construimos: leads por canal, calificación con IA y
+              seguimiento de cada asesor, con permisos para cada equipo.
             </p>
             <div className="h-16 md:h-20" />
           </div>

@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { Cpu, IdentificationCard, Drop } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
-import { LiveBadge, PreviewShell, useLive } from "./preview-shell";
+import { LiveBadge, PreviewShell, usePreviewLoop } from "./preview-shell";
 
 const POINTS = 32;
 const START = Array.from({ length: POINTS }, (_, i) => 4.2 + Math.sin(i / 3) * 0.6);
@@ -34,7 +34,7 @@ function sparkPath(values: number[], w: number, h: number) {
 
 export function HardwarePreview() {
   const ref = useRef<HTMLDivElement>(null);
-  const live = useLive(ref);
+  const { running, paused, setPaused } = usePreviewLoop(ref);
   const [flow, setFlow] = useState(START);
   const [valveOpen, setValveOpen] = useState(true);
   const [dispensed, setDispensed] = useState(18.4);
@@ -46,7 +46,7 @@ export function HardwarePreview() {
 
   // Telemetría: una lectura por segundo mientras la vista está en pantalla
   useEffect(() => {
-    if (!live) return;
+    if (!running) return;
     const id = window.setInterval(() => {
       const tick = ++tickRef.current;
       setNow(tick);
@@ -67,13 +67,20 @@ export function HardwarePreview() {
       }
     }, 1000);
     return () => window.clearInterval(id);
-  }, [live]);
+  }, [running]);
 
   const current = flow[flow.length - 1];
 
   return (
-    <div ref={ref} className="h-full">
-      <PreviewShell title="Nodo ESP32 · Barril 3" status={<LiveBadge label="En línea" />}>
+    <div ref={ref} className="flex h-full min-h-0 flex-col">
+      {/* Vista de un proyecto real (la cervecería automática), no del flujo comercial */}
+      <PreviewShell
+        title="Proyecto · Cervecería automática"
+        subtitle="Nodo ESP32 · Barril 3"
+        status={<LiveBadge label="En línea" paused={paused} />}
+        paused={paused}
+        onTogglePause={() => setPaused((p) => !p)}
+      >
         <div className="grid gap-3 sm:grid-cols-[1.3fr_1fr]">
           <div className="flex flex-col rounded-xl border border-line bg-navy-900/80 p-3">
             <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-ink-faint">
@@ -94,7 +101,7 @@ export function HardwarePreview() {
             </svg>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-1">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-1 stack-sm:grid-cols-3">
             <div className="rounded-xl border border-line bg-navy-900/80 p-3">
               <p className="text-[11px] text-ink-faint">Válvula solenoide</p>
               <p className="mt-1 flex items-center gap-2 text-[13px] font-medium text-ink">
@@ -108,12 +115,12 @@ export function HardwarePreview() {
               <p className="text-[11px] text-ink-faint">Dispensado hoy</p>
               <p className="mt-1 font-mono text-[15px] text-ink tabular">{fmt(dispensed)} L</p>
             </div>
-            <div className="col-span-2 rounded-xl border border-line bg-navy-900/80 p-3 sm:col-span-1">
+            <div className="col-span-2 rounded-xl border border-line bg-navy-900/80 p-3 sm:col-span-1 stack-sm:col-span-1">
               <div className="flex items-center justify-between text-[11px] text-ink-faint">
                 <span>Stock del barril</span>
-                <span className="font-mono text-ink tabular">{stock}%</span>
+                <span className="font-mono text-ink tabular">{stock}&nbsp;%</span>
               </div>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-fg/10">
                 <div
                   className="h-full origin-left rounded-full bg-blue-400 transition-transform duration-700 ease-out"
                   style={{ transform: `scaleX(${stock / 100})` }}
@@ -123,7 +130,7 @@ export function HardwarePreview() {
           </div>
         </div>
 
-        <div className="mt-3 rounded-xl border border-line bg-navy-900/80 p-3">
+        <div className="mt-3 rounded-xl border border-line bg-navy-900/80 p-3 stack-sm:hidden">
           <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-ink-faint">
             <IdentificationCard size={12} className="text-blue-400" /> Control de acceso RFID
           </p>
