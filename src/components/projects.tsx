@@ -19,7 +19,7 @@ import {
   useSpring,
   useTransform,
 } from "motion/react";
-import { ArrowUpRight, CheckCircle } from "@phosphor-icons/react";
+import { ArrowUpRight, CheckCircle, Pause, Play } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from "react";
 import { flushSync } from "react-dom";
@@ -42,18 +42,6 @@ const PREVIEW_GAP = 40;
 
 const anchorOf = (p: Project) => `proyecto-${p.slug}`;
 const altOf = (p: Project) => `Ilustración de ${p.name}: ${p.kind.toLowerCase()}`;
-
-// Datos que flotan sobre la portada de cada caso destacado
-const FLOATING: Record<string, [string, string][]> = {
-  "motobox-cordoba": [
-    ["CRM", "Usuarios por rol"],
-    ["Sitio", "Fotos desde el CRM"],
-  ],
-  "baterias-cordoba": [
-    ["Catálogo", "Marcas y vehículos"],
-    ["SEO local", "52 páginas de aterrizaje"],
-  ],
-};
 
 function Eyebrow({ children }: { children: ReactNode }) {
   return (
@@ -84,7 +72,7 @@ function SiteLink({ url, name, compact = false }: { url: string; name: string; c
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label={`Abrir el sitio de ${name} (${host}) en una pestaña nueva`}
+        aria-label={`Ver sitio de ${name} (${host}), se abre en una pestaña nueva`}
         className="group/link relative z-10 inline-flex size-11 items-center justify-center rounded-full border border-line-strong text-ink transition-[transform,border-color,background-color] duration-150 ease-out hover:border-blue-400/60 hover:bg-blue-500/10 active:scale-[0.95] md:size-auto md:gap-2 md:py-2 md:pl-4 md:pr-2"
       >
         <span className="hidden text-sm md:inline">Ver sitio</span>
@@ -113,16 +101,19 @@ function SiteLink({ url, name, compact = false }: { url: string; name: string; c
   );
 }
 
-/* Clientes satisfechos: nombres en una marquesina tipográfica */
+/* Clientes satisfechos: nombres en una marquesina tipográfica, con pausa */
 function Clients() {
   const clients = PROJECTS.flatMap((p) => (p.client ? [p.client] : []));
+  const [paused, setPaused] = useState(false);
   const row = (copy: number) => (
     <ul
       aria-hidden={copy > 0 || undefined}
       className={cn(
-        "flex shrink-0 animate-marquee items-center gap-[var(--gap)] pr-[var(--gap)] group-hover:[animation-play-state:paused]",
+        "flex shrink-0 animate-marquee items-center gap-[var(--gap)] pr-[var(--gap)] group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]",
+        paused && "[animation-play-state:paused]",
         copy > 0 && "motion-reduce:hidden",
-        "motion-reduce:flex-wrap motion-reduce:justify-center motion-reduce:gap-y-3 motion-reduce:pr-0",
+        // Con reduced motion la lista queda quieta y envuelve en varias líneas
+        "motion-reduce:w-full motion-reduce:shrink motion-reduce:flex-wrap motion-reduce:justify-center motion-reduce:gap-y-3 motion-reduce:pr-0",
       )}
     >
       {clients.map((client) => (
@@ -138,16 +129,23 @@ function Clients() {
 
   return (
     <div className="mt-16 md:mt-24">
-      <Reveal className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+      <Reveal className="flex items-center justify-between gap-4">
         <h3 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink md:text-2xl">
           Clientes satisfechos
         </h3>
-        <p className="max-w-[46ch] text-sm leading-relaxed text-ink-muted">
-          Negocios de motos, baterías, industria, salud, gastronomía, alquileres y más, que ya venden
-          con lo que construimos.
-        </p>
+        <button
+          type="button"
+          onClick={() => setPaused((p) => !p)}
+          aria-pressed={paused}
+          aria-label={paused ? "Reanudar la lista de clientes" : "Pausar la lista de clientes"}
+          className="flex size-11 shrink-0 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:text-ink motion-reduce:hidden"
+        >
+          <span className="flex size-8 items-center justify-center rounded-full border border-line-strong">
+            {paused ? <Play size={12} weight="fill" aria-hidden="true" /> : <Pause size={12} weight="fill" aria-hidden="true" />}
+          </span>
+        </button>
       </Reveal>
-      <div className="group mt-8 flex overflow-hidden border-y border-line py-6 [--duration:50s] [--gap:2rem] [mask-image:linear-gradient(to_right,transparent,#000_10%,#000_90%,transparent)] motion-reduce:[mask-image:none] md:py-8 md:[--gap:3rem]">
+      <div className="group mt-6 flex overflow-hidden border-y border-line py-6 [--duration:50s] [--gap:2rem] [mask-image:linear-gradient(to_right,transparent,#000_10%,#000_90%,transparent)] motion-reduce:[mask-image:none] md:py-8 md:[--gap:3rem]">
         {row(0)}
         {row(1)}
       </div>
@@ -158,12 +156,10 @@ function Clients() {
 /* Caso destacado: portada con relieve que se endereza al llegar al centro de la pantalla */
 function FeaturedCase({ project, flip }: { project: Project; flip: boolean }) {
   const ref = useRef<HTMLElement>(null);
-  const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "center 60%"] });
   const rotateX = useTransform(scrollYProgress, [0, 1], [22, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], [0.86, 1]);
   const lift = useTransform(scrollYProgress, [0, 1], [60, 0]);
-  const floating = FLOATING[project.slug] ?? [];
 
   return (
     <article
@@ -174,36 +170,15 @@ function FeaturedCase({ project, flip }: { project: Project; flip: boolean }) {
       className="grid items-center gap-10 outline-none lg:grid-cols-[1.12fr_0.88fr] lg:gap-16"
     >
       <div className={cn("relative [perspective:1600px]", flip && "lg:order-2")}>
+        {/* Mismo estilo en servidor y cliente; con reduced motion el CSS la deja derecha */}
         <motion.div
-          style={reduce ? undefined : { rotateX, scale, y: lift }}
-          className="relative origin-bottom overflow-hidden rounded-2xl border border-line-strong bg-navy-900 shadow-[0_50px_100px_-50px_rgb(var(--shade-rgb)/0.9)] light:shadow-[0_40px_80px_-50px_rgb(var(--shade-rgb)/0.4)]"
+          style={{ rotateX, scale, y: lift }}
+          className="relative origin-bottom overflow-hidden motion-reduce:!transform-none rounded-2xl border border-line-strong bg-navy-900 shadow-[0_50px_100px_-50px_rgb(var(--shade-rgb)/0.9)] light:shadow-[0_40px_80px_-50px_rgb(var(--shade-rgb)/0.4)]"
         >
           <div className="relative aspect-video">
             <Image src={coverOf(project)} alt={altOf(project)} fill sizes="(min-width: 1024px) 640px, 100vw" className="object-cover" />
           </div>
         </motion.div>
-        {/* Datos flotantes: capas por delante de la portada */}
-        {floating.map(([label, value], i) => (
-          <motion.div
-            key={label}
-            aria-hidden="true"
-            initial={reduce ? false : { opacity: 0, transform: "translateY(16px) scale(0.96)" }}
-            whileInView={{ opacity: 1, transform: "translateY(0px) scale(1)" }}
-            viewport={{ once: true, amount: 0.8 }}
-            transition={{ duration: 0.7, delay: 0.35 + i * 0.12, ease: EASE }}
-            className={cn(
-              "absolute hidden sm:block",
-              i === 0 ? (flip ? "-left-6 top-[14%]" : "-right-6 top-[14%]") : flip ? "-right-5 bottom-[12%]" : "-left-5 bottom-[12%]",
-            )}
-          >
-            <div className={cn("animate-float", i === 1 && "[animation-delay:-3s]")}>
-              <div className="rounded-2xl border border-line-strong bg-navy-850/90 px-4 py-3 shadow-[0_20px_50px_-20px_rgb(var(--shade-rgb)/0.8)] backdrop-blur-md light:shadow-[0_18px_40px_-22px_rgb(var(--shade-rgb)/0.35)]">
-                <p className="text-xs text-ink-faint">{label}</p>
-                <p className="mt-1 text-sm font-medium text-ink">{value}</p>
-              </div>
-            </div>
-          </motion.div>
-        ))}
       </div>
 
       <Reveal className={cn(flip && "lg:order-1")}>
@@ -261,7 +236,6 @@ function ProjectIndex({
 
   const visible = filter === "Todos" ? PROJECTS : PROJECTS.filter((p) => p.specialties.includes(filter));
   const countOf = (f: Filter) => (f === "Todos" ? PROJECTS.length : PROJECTS.filter((p) => p.specialties.includes(f)).length);
-  const more = DELIVERED - PROJECTS.length;
 
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
     if (e.pointerType !== "mouse" || !listRef.current) return;
@@ -278,11 +252,9 @@ function ProjectIndex({
       <Reveal className="grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
         <div>
           <h3 className="font-display text-[1.9rem] font-semibold leading-[1.05] tracking-[-0.035em] text-ink md:text-[2.6rem]">
-            Todos los proyectos
+            Proyectos por especialidad
           </h3>
-          <p className="mt-3 max-w-[52ch] text-base leading-relaxed text-ink-muted">
-            Una selección de lo que entregamos, por especialidad.
-          </p>
+
         </div>
         <div
           role="group"
@@ -434,26 +406,18 @@ function ProjectIndex({
         </motion.div>
       </div>
 
-      {/* Cierre: el total entregado y el siguiente paso */}
+      {/* Cierre: el siguiente paso */}
       <Reveal className="mt-14 md:mt-16">
-        <div className="relative flex flex-col gap-6 overflow-hidden rounded-2xl border border-line bg-navy-850 px-6 py-8 md:flex-row md:items-center md:justify-between md:px-10 md:py-10">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-20 -top-28 size-[360px] rounded-full bg-[radial-gradient(closest-side,rgb(31_107_255/0.18),transparent)]"
-          />
-          <div className="relative">
-            <p className="font-display text-[2.6rem] font-semibold leading-none tracking-[-0.04em] text-ink md:text-[3.4rem]">
-              +{more}
-              <span className="ml-3 align-middle text-lg font-medium tracking-[-0.01em] text-ink-muted md:text-xl">
-                proyectos más
-              </span>
+        <div className="flex flex-col gap-6 rounded-2xl border border-line bg-navy-850 px-6 py-8 md:flex-row md:items-center md:justify-between md:px-10 md:py-10">
+          <div>
+            <p className="font-display text-[1.7rem] font-semibold leading-[1.1] tracking-[-0.03em] text-ink md:text-[2.2rem]">
+              ¿Tenés un proyecto en mente?
             </p>
-            <p className="mt-3 max-w-[48ch] text-sm leading-relaxed text-ink-muted md:text-base">
-              Acá mostramos algunos: ya son más de {DELIVERED} proyectos entregados. El próximo
-              puede ser el tuyo.
+            <p className="mt-2 max-w-[48ch] text-sm leading-relaxed text-ink-muted md:text-base">
+              Estos son algunos de los que entregamos. Contanos el tuyo y vemos por dónde empezar.
             </p>
           </div>
-          <PrimaryCta label={CONTACT_LABEL} className="relative self-start md:self-center" />
+          <PrimaryCta label={CONTACT_LABEL} className="self-start md:self-center" />
         </div>
       </Reveal>
     </div>
@@ -497,7 +461,7 @@ export function Projects() {
           <PortfolioGallery
             title={`Más de ${DELIVERED} proyectos entregados.`}
             description="Webs que venden, CRM a medida, sistemas de reservas y catálogos para clientes de motos, baterías, industria, salud, gastronomía y más."
-            archiveButton={{ text: "Ver todos los proyectos", href: "#proyectos-lista" }}
+            archiveButton={{ text: "Ver la lista", href: "#proyectos-lista" }}
             images={images}
             onImageClick={goTo}
           />

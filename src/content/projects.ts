@@ -144,8 +144,9 @@ export const PROJECTS: Project[] = [
   },
 ];
 
-// CONFIRMAR: el cliente indicó que son "muchos más de 10" proyectos entregados
-export const DELIVERED = 20;
+// El cliente indicó que son "muchos más de 10" proyectos entregados: la página dice "Más de 10".
+// CONFIRMAR el número real para mostrarlo.
+export const DELIVERED = 10;
 
 /** Rubros distintos entre los proyectos publicados */
 export const SECTORS = new Set(PROJECTS.map((p) => p.sector)).size;

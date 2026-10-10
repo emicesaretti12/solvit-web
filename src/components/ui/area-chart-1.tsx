@@ -213,7 +213,7 @@ const AreaChartCard: React.FC<AreaChartCardProps> = ({
           </table>
         </div>
 
-        <ul className="flex flex-col divide-y divide-border font-mono">
+        <ul className="flex flex-col divide-y divide-border">
           {metrics.map((metric, i) => (
             <motion.li
               key={metric.id}

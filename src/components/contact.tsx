@@ -10,10 +10,6 @@ const NEXT_STEPS = [
 export function Contact() {
   return (
     <section id="contacto" aria-labelledby="contacto-titulo" className="relative overflow-hidden border-t border-line">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-[-30%] left-[-10%] h-[560px] w-[560px] rounded-full bg-blue-600/10 blur-[140px]"
-      />
       <div className="relative mx-auto grid max-w-[1200px] gap-12 px-4 py-24 md:px-6 md:py-36 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
         <Reveal>
           <h2
@@ -23,7 +19,7 @@ export function Contact() {
             Contanos dónde se te escapan las ventas.
           </h2>
           <p className="mt-6 max-w-[42ch] text-lg leading-relaxed text-ink-muted">
-            Diagnóstico sin compromiso, con el mismo equipo que después lo implementa.
+            Diagnóstico sin compromiso, con el mismo equipo que después implementa la solución.
           </p>
           <div className="relative mt-10 max-w-[44ch]">
             <span aria-hidden="true" className="absolute bottom-3 left-[13px] top-3 w-px bg-line-strong" />

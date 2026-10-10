@@ -13,7 +13,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, type MutableRefObject } from "react";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
-import type { DragState, IsoPose } from "./pose";
+import { FOV, fitDistance, stageSignal, type DragState, type IsoPose } from "./pose";
 
 
 // Polígonos del isotipo (viewBox 515 x 787), los mismos de logo.tsx
@@ -71,16 +71,19 @@ function Ribbon({
   index,
   pose,
   ribbon,
+  reduce,
 }: {
   index: number;
   pose: MutableRefObject<IsoPose>;
   ribbon: (typeof RIBBONS)[number];
+  reduce: boolean;
 }) {
   const { geometry, center } = useRibbonGeometry(ribbon.points, ribbon.from, ribbon.to, ribbon.depth);
   const ref = useRef<THREE.Group>(null);
   const material = useRef<THREE.MeshPhysicalMaterial>(null);
-  const spread = useRef(0);
-  const lit = useRef(1);
+  // Arranca en la pose que ya calculó el escenario (sin viaje inicial desde el centro)
+  const spread = useRef(pose.current.spread);
+  const lit = useRef(pose.current.focus < 0 || pose.current.focus === index ? 1 : 0.32);
 
   useEffect(() => () => geometry.dispose(), [geometry]);
 
@@ -88,7 +91,7 @@ function Ribbon({
     const g = ref.current;
     if (!g) return;
     const p = pose.current;
-    spread.current = THREE.MathUtils.damp(spread.current, p.spread, 6, dt);
+    spread.current = reduce ? p.spread : THREE.MathUtils.damp(spread.current, p.spread, 6, dt);
     const s = spread.current;
     const [offset, rz, ry] = SPREAD[index];
     g.position.set(center.x + offset.x * s, center.y + offset.y * s, ribbon.z + offset.z * s);
@@ -96,7 +99,7 @@ function Ribbon({
 
     // Con una cinta destacada, las otras bajan la luz
     const target = p.focus < 0 || p.focus === index ? 1 : 0.32;
-    lit.current = THREE.MathUtils.damp(lit.current, target, 8, dt);
+    lit.current = reduce ? target : THREE.MathUtils.damp(lit.current, target, 8, dt);
     if (material.current) {
       material.current.color.setScalar(lit.current);
       material.current.emissiveIntensity = p.focus === index ? 0.18 : 0;
@@ -125,14 +128,16 @@ function Ribbon({
 // Iluminación de estudio sin descargar HDR (RoomEnvironment es procedural)
 function StudioEnvironment() {
   const gl = useThree((state) => state.gl);
-  const env = useMemo(() => {
+  const target = useMemo(() => {
     const pmrem = new THREE.PMREMGenerator(gl);
-    const texture = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    const room = new RoomEnvironment();
+    const rt = pmrem.fromScene(room, 0.04);
+    room.dispose();
     pmrem.dispose();
-    return texture;
+    return rt;
   }, [gl]);
-  useEffect(() => () => env.dispose(), [env]);
-  return <primitive object={env} attach="environment" />;
+  useEffect(() => () => target.dispose(), [target]);
+  return <primitive object={target.texture} attach="environment" />;
 }
 
 function Rig({
@@ -150,9 +155,10 @@ function Rig({
   const yaw = useRef({ value: 0, vel: 0 });
   const pitch = useRef({ value: 0, vel: 0 });
   const look = useRef({ x: 0, y: 0 });
-  const damped = useRef({ turn: 0, tilt: 0, x: 0, y: 0, z: 0, scale: 1 });
+  const start = pose.current;
+  const damped = useRef({ turn: start.turn, tilt: start.tilt, x: start.x, y: start.y, z: start.z, scale: start.scale });
   const clock = useRef(0);
-  const lastZ = useRef(0);
+  const lastZ = useRef(start.z);
   const { camera, size } = useThree();
 
   useFrame((_, rawDt) => {
@@ -186,8 +192,9 @@ function Rig({
 
     const k = damped.current;
     // Corte de cámara: si el objetivo salta lejos de un cuadro al otro (la zambullida termina
-    // y las cintas reaparecen al fondo), se salta sin animar el regreso
-    if (Math.abs(p.z - lastZ.current) > 4) {
+    // y las cintas reaparecen al fondo), se salta sin animar el regreso. Con reduced motion,
+    // siempre: la pose se aplica directa, sin recorridos
+    if (reduce || Math.abs(p.z - lastZ.current) > 0.5) {
       k.turn = p.turn;
       k.tilt = p.tilt;
       k.x = p.x;
@@ -214,33 +221,28 @@ function Rig({
       -0.42 + k.turn + yaw.current.value + sway + look.current.x * 0.3,
       0,
     );
-    g.position.set(k.x * halfW, k.y * halfH + bob, k.z);
+    g.position.set(k.x * halfW, k.y * halfH + bob, k.z * cam.position.z);
     g.scale.setScalar(k.scale);
   });
 
   return (
     <group ref={root}>
       {RIBBONS.map((r, i) => (
-        <Ribbon key={r.key} index={i} pose={pose} ribbon={r} />
+        <Ribbon key={r.key} index={i} pose={pose} ribbon={r} reduce={reduce} />
       ))}
     </group>
   );
 }
 
 // Encaja la S (con margen para cuando se abre) según el aspecto del canvas
-function Fit({ margin = 1.35 }: { margin?: number }) {
-  const { camera, size } = useThree();
+function Fit() {
+  const { camera, size, invalidate } = useThree();
   useEffect(() => {
     const cam = camera as THREE.PerspectiveCamera;
-    const vfov = THREE.MathUtils.degToRad(cam.fov);
-    const aspect = size.width / Math.max(1, size.height);
-    const hfov = 2 * Math.atan(Math.tan(vfov / 2) * aspect);
-    const h = 3.2 * margin;
-    const w = 2.1 * margin * 1.25;
-    const dist = Math.max(h / 2 / Math.tan(vfov / 2), w / 2 / Math.tan(hfov / 2));
-    cam.position.set(0, 0, dist);
+    cam.position.set(0, 0, fitDistance(size.width / Math.max(1, size.height)));
     cam.updateProjectionMatrix();
-  }, [camera, size.width, size.height, margin]);
+    invalidate();
+  }, [camera, size.width, size.height, invalidate]);
   return null;
 }
 
@@ -263,10 +265,12 @@ export default function IsotypeScene({
   return (
     <Canvas
       dpr={[1, 1.75]}
-      frameloop={active ? "always" : "never"}
-      camera={{ fov: 28, position: [0, 0, 9.5], near: 0.1, far: 50 }}
+      frameloop={!active ? "never" : reduce ? "demand" : "always"}
+      camera={{ fov: FOV, position: [0, 0, 9.5], near: 0.1, far: 60 }}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-      onCreated={({ gl }) => {
+      onCreated={({ gl, invalidate }) => {
+        // Con reduced motion solo se dibuja cuando el scroll cambia la pose
+        stageSignal.invalidate = () => invalidate();
         gl.toneMapping = THREE.NeutralToneMapping;
         gl.toneMappingExposure = 0.92;
         onReady?.();

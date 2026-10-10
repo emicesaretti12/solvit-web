@@ -11,16 +11,16 @@ const CHANNELS: Channel[] = ["Meta Ads", "Google Ads"];
 // Embudo de ejemplo por canal: del anuncio a la venta cerrada
 const FUNNEL: Record<Channel, { stage: string; value: number }[]> = {
   "Meta Ads": [
-    { stage: "Impresiones", value: 48200 },
+    { stage: "Vieron el anuncio", value: 48200 },
     { stage: "Clics", value: 1930 },
-    { stage: "Leads", value: 412 },
+    { stage: "Consultas", value: 412 },
     { stage: "Calificados por IA", value: 168 },
     { stage: "Ventas", value: 37 },
   ],
   "Google Ads": [
-    { stage: "Impresiones", value: 31500 },
+    { stage: "Vieron el anuncio", value: 31500 },
     { stage: "Clics", value: 2210 },
-    { stage: "Leads", value: 356 },
+    { stage: "Consultas", value: 356 },
     { stage: "Calificados por IA", value: 151 },
     { stage: "Ventas", value: 41 },
   ],
@@ -58,7 +58,7 @@ export function MarketingPreview() {
   return (
     <div ref={ref} className="flex h-full min-h-0 flex-col">
       <PreviewShell
-        title="Embudo de adquisición · últimos 30 días"
+        title="Del anuncio a la venta"
         paused={paused}
         onTogglePause={() => setPaused((p) => !p)}
       >
@@ -107,14 +107,14 @@ export function MarketingPreview() {
 
         <div className="mt-4 grid grid-cols-2 gap-3">
           <div className="rounded-xl border border-line bg-navy-900/80 p-3">
-            <p className="text-[11px] text-ink-faint">Costo por adquisición</p>
+            <p className="text-[11px] text-ink-faint">Costo por venta</p>
             <p className="mt-1 font-mono text-[15px] text-ink tabular">{cpa.now}</p>
             <p className="mt-1 flex items-center gap-1 text-[11px] text-blue-300">
               <TrendDown size={12} weight="bold" aria-hidden="true" /> {cpa.delta} vs. {cpa.before}
             </p>
           </div>
           <div className="rounded-xl border border-line bg-navy-900/80 p-3">
-            <p className="text-[11px] text-ink-faint">Lead a venta</p>
+            <p className="text-[11px] text-ink-faint">Consulta a venta</p>
             <p className="mt-1 font-mono text-[15px] text-ink tabular">{rate} %</p>
             <p className="mt-1 text-[11px] text-ink-muted">Cada venta, atribuida a su anuncio</p>
           </div>

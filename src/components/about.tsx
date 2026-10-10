@@ -14,7 +14,7 @@ const MANIFESTO =
   "es un equipo de ingenieros y desarrolladores que se ocupa de todo el camino de la venta, del anuncio al cierre.";
 
 const PRINCIPLES = [
-  "Hablamos de ventas, no de tecnología.",
+  "Te hablamos en números de ventas.",
   "Un solo equipo: nadie se pasa la pelota.",
   "Trabajamos por etapas que podés medir.",
 ];
@@ -49,10 +49,6 @@ export function About() {
       aria-labelledby="nosotros-titulo"
       className="relative overflow-hidden border-t border-line"
     >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -left-40 top-24 size-[620px] rounded-full bg-[radial-gradient(closest-side,rgb(167_176_192/0.07),transparent)]"
-      />
       <div className="relative mx-auto max-w-[1200px] px-4 py-28 md:px-6 md:py-44">
         <h2 id="nosotros-titulo" className="sr-only">
           Quiénes somos

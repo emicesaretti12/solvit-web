@@ -40,18 +40,18 @@ const RECIBIDOS = week([72, 88, 87, 107, 113, 126, 123]);
 const CALIFICADOS = week([41, 53, 49, 66, 68, 78, 75]);
 const SERIES: Record<"dark" | "light", ChartSeries[]> = {
   dark: [
-    { key: "Leads recibidos", color: "#3d8bff", data: RECIBIDOS },
+    { key: "Consultas recibidas", color: "#3d8bff", data: RECIBIDOS },
     { key: "Calificados por IA", color: "#dbe4f3", data: CALIFICADOS },
   ],
   light: [
-    { key: "Leads recibidos", color: "#1f6bff", data: RECIBIDOS },
+    { key: "Consultas recibidas", color: "#1f6bff", data: RECIBIDOS },
     { key: "Calificados por IA", color: "#23345c", data: CALIFICADOS },
   ],
 };
 
 const METRICS: ChartMetric[] = [
   { id: "respuesta", Icon: Timer, label: "Primera respuesta", value: "38 s", trend: "down", trendIsGood: true },
-  { id: "calificados", Icon: Funnel, label: "Leads calificados", value: "61 %", trend: "up", trendIsGood: true },
+  { id: "calificados", Icon: Funnel, label: "Consultas calificadas", value: "61 %", trend: "up", trendIsGood: true },
   { id: "vencidos", Icon: ClockCountdown, label: "Seguimientos vencidos", value: "3", trend: "down", trendIsGood: true },
 ];
 
@@ -147,7 +147,7 @@ export function AppBar() {
         <LogoMark className="h-5 w-auto shrink-0" />
         <span className="truncate text-[13px] font-medium text-ink">CRM comercial</span>
         <span className="hidden items-center gap-1 rounded-full border border-line p-0.5 text-[12px] sm:flex">
-          <span className="rounded-full bg-fg/[0.07] px-2.5 py-0.5 text-ink">Leads</span>
+          <span className="rounded-full bg-fg/[0.07] px-2.5 py-0.5 text-ink">Consultas</span>
           <span className="px-2.5 py-0.5 text-ink-faint">Pipeline</span>
           <span className="px-2.5 py-0.5 text-ink-faint">Campañas</span>
         </span>
@@ -165,6 +165,7 @@ export function GrowthChart() {
   return (
     <AreaChartCard
       title="Consultas de la semana"
+      caption="Datos de ejemplo"
       series={SERIES[theme]}
       metrics={METRICS}
       formatTick={weekday}
@@ -180,7 +181,7 @@ export default function DashboardChart() {
       <AppBar />
       <div className="grid min-h-0 flex-1 gap-2 p-2 md:grid-cols-[1fr_280px]">
         <AreaChartCard
-          title="Leads de la semana"
+          title="Consultas de la semana"
           series={SERIES[theme]}
           metrics={METRICS}
           formatTick={weekday}

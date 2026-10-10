@@ -70,7 +70,6 @@ function CoverflowCard({
   onImageClick?: PortfolioGalleryProps["onImageClick"];
 }) {
   const ref = useRef<HTMLLIElement>(null);
-  const reduce = useReducedMotion();
   // 0 = entra por la derecha, 0,5 = centrada, 1 = sale por la izquierda
   const { scrollXProgress } = useScroll({ container, target: ref, axis: "x", offset: ["start end", "end start"] });
   const rotateY = useTransform(scrollXProgress, [0, 0.5, 1], [48, 0, -48]);
@@ -84,8 +83,11 @@ function CoverflowCard({
         href={image.href}
         aria-label={image.title ? `${image.title}: ${image.subtitle ?? image.alt}` : image.alt}
         onClick={(event) => onImageClick?.(index, event)}
-        style={reduce ? undefined : { rotateY, scale, opacity, x }}
-        className="relative block aspect-video overflow-hidden rounded-xl bg-navy-900 shadow-[0_24px_50px_-24px_rgb(var(--shade-rgb)/0.8)] ring-1 ring-fg/10"
+        // Con teclado, la portada enfocada pasa al centro (si no, queda tapada por el borde)
+        onFocus={() => ref.current?.scrollIntoView({ inline: "center", block: "nearest", behavior: "instant" })}
+        // Mismo estilo en servidor y cliente; con reduced motion el CSS deja el carrusel plano
+        style={{ rotateY, scale, opacity, x }}
+        className="relative block aspect-video overflow-hidden rounded-xl bg-navy-900 shadow-[0_24px_50px_-24px_rgb(var(--shade-rgb)/0.8)] ring-1 ring-fg/10 motion-reduce:!transform-none motion-reduce:!opacity-100"
       >
         <Cover image={image} sizes="300px" />
       </motion.a>
@@ -106,7 +108,7 @@ function Coverflow({ images, onImageClick }: { images: PortfolioImage[]; onImage
       <ul
         ref={container}
         aria-label="Portadas de los proyectos"
-        className="flex snap-x snap-mandatory gap-2 overflow-x-auto px-[calc(50%-min(36vw,150px))] py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="relative flex snap-x snap-mandatory gap-2 overflow-x-auto px-[calc(50%-min(36vw,150px))] py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {images.map((image, index) => (
           <CoverflowCard key={image.src} image={image} index={index} container={container} onImageClick={onImageClick} />
@@ -190,7 +192,7 @@ export function PortfolioGallery({
               const rest = -(maxHeight - distance * 20);
               const isHovered = hoveredIndex === index;
               const isOtherHovered = hoveredIndex !== null && !isHovered;
-              const y = !inView && !reduce ? 260 : isHovered ? -(maxHeight + 52) : isOtherHovered ? rest * 0.55 : rest;
+              const y = !inView ? 260 : isHovered ? -(maxHeight + 52) : isOtherHovered ? rest * 0.55 : rest;
 
               return (
                 <motion.li
@@ -200,7 +202,7 @@ export function PortfolioGallery({
                   initial={false}
                   animate={{
                     transform: `perspective(2400px) rotateY(-40deg) translateY(${y}px)`,
-                    opacity: inView || reduce ? 1 : 0,
+                    opacity: inView ? 1 : 0,
                   }}
                   transition={
                     reduce

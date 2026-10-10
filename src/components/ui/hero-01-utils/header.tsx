@@ -192,7 +192,6 @@ export default function Header({ navigationData }: { navigationData: NavigationS
                 <SheetClose asChild>
                   <PrimaryCta label={CONTACT_LABEL} onClick={followAnchor} className="justify-between" />
                 </SheetClose>
-                <p className="label-caps !text-[10px] !tracking-[0.24em]">Ingeniería y Desarrollo de Software</p>
               </div>
             </SheetContent>
           </Sheet>

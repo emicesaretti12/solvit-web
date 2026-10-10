@@ -124,7 +124,7 @@ export function AgentPreview() {
           </div>
           <div className="flex flex-col gap-2 rounded-xl border border-line bg-navy-900/80 p-3 stack-sm:hidden">
             <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-ink-faint">
-              <Sparkle size={12} className="text-blue-400" /> Ficha del prospecto
+              <Sparkle size={12} className="text-blue-400" /> Ficha del cliente
             </p>
             <dl className="mt-1 grid gap-1.5 text-[12px]">
               {FIELDS.map((f) => {

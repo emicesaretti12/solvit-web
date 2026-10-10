@@ -22,7 +22,7 @@ const CHANNEL: Record<string, Icon> = { whatsapp: WhatsappLogo, instagram: Insta
 const ROWS = [
   { id: 1, lead: "Moto 0km en cuotas", channel: "whatsapp", stage: "Calificado", owner: "Asesor 1" },
   { id: 2, lead: "Pedido mayorista de baterías", channel: "web", stage: "Propuesta", owner: "Asesor 2" },
-  { id: 3, lead: "Unidad 2 ambientes, inversor", channel: "instagram", stage: "Calificado", owner: "Asesor 3" },
+  { id: 3, lead: "Turno de service, moto 110 cc", channel: "instagram", stage: "Calificado", owner: "Asesor 3" },
   { id: 4, lead: "Mantenimiento de línea 2", channel: "web", stage: "Nuevo", owner: "Asesor 1" },
   { id: 5, lead: "Reclamo de entrega", channel: "whatsapp", stage: "Postventa", owner: "Soporte" },
 ];
@@ -118,7 +118,7 @@ export function CrmPreview() {
 
         <div className="mt-4 overflow-hidden rounded-xl border border-line stack-sm:mt-2.5">
           <div className="grid grid-cols-[1fr_auto] gap-3 border-b border-line bg-navy-900 px-3 py-2 text-[10px] uppercase tracking-[0.16em] text-ink-faint sm:grid-cols-[1fr_auto_auto]">
-            <span>Prospecto</span>
+            <span>Cliente</span>
             <span className="hidden sm:block">Asignado</span>
             <span>Etapa</span>
           </div>

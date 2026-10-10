@@ -13,7 +13,7 @@
     toma el arrastre horizontal, el vertical sigue siendo scroll.
 */
 import { ArrowDown } from "@phosphor-icons/react";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { CONTACT_LABEL, PrimaryCta } from "@/components/cta";
 import { StageMark, useStageDrag } from "@/components/three/stage";
@@ -22,7 +22,6 @@ const LINES = ["Especialistas en", "solucionar", "tus ventas."];
 
 export default function HeroSection() {
   const ref = useRef<HTMLElement>(null);
-  const reduce = useReducedMotion();
   const drag = useStageDrag();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   // El texto se aleja en profundidad mientras la cámara entra en la S
@@ -35,9 +34,10 @@ export default function HeroSection() {
       ref={ref}
       id="hero"
       aria-labelledby="hero-titulo"
-      className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden px-4 pb-14 pt-28 md:px-6 lg:justify-center lg:pb-20"
+      className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden pb-14 pt-28 lg:justify-center lg:pb-20"
     >
-      <StageMark pose="hero" className="absolute left-0 top-0" />
+      <StageMark pose="hero" slot="hero-slot" className="absolute left-0 top-0" />
+      <StageMark pose="plunge" className="absolute left-0 top-[55%]" />
       <StageMark pose="dive" className="absolute bottom-0 left-0" />
 
       {/* Arrastre del isotipo: mitad derecha en escritorio, la parte de arriba en celulares */}
@@ -47,14 +47,18 @@ export default function HeroSection() {
         className="absolute inset-x-0 top-0 h-[48%] cursor-grab touch-pan-y active:cursor-grabbing lg:inset-y-0 lg:left-auto lg:right-0 lg:h-auto lg:w-[46%] motion-reduce:hidden"
       />
 
+      {/* En celulares, el hueco de arriba es del isotipo (el escenario toma su centro y su alto) */}
+      <div id="hero-slot" aria-hidden="true" className="min-h-[30svh] flex-1 lg:hidden" />
+
+      {/* Mismo estilo en servidor y cliente; con reduced motion, el CSS anula el movimiento y queda el fundido */}
       <motion.div
-        style={reduce ? undefined : { opacity, scale, y }}
-        className="pointer-events-none relative mx-auto w-full max-w-[1200px] origin-top-left"
+        style={{ opacity, scale, y }}
+        className="pointer-events-none relative mx-auto w-full max-w-[1200px] origin-top-left px-4 md:px-6 motion-reduce:!transform-none"
       >
-        <div className="pointer-events-auto max-w-[620px] lg:max-w-[min(56%,720px)]">
+        <div className="pointer-events-auto max-w-[620px] lg:max-w-[min(54%,720px)]">
           <h1
             id="hero-titulo"
-            className="font-display text-[clamp(2.45rem,10.6vw,3.6rem)] font-bold leading-[0.95] tracking-[-0.045em] text-ink sm:text-[4.4rem] lg:text-[clamp(4rem,5.5vw,5.2rem)]"
+            className="font-display text-[clamp(2.45rem,10.6vw,3.6rem)] font-bold leading-[0.95] tracking-[-0.045em] text-ink sm:text-[4.4rem] lg:text-[clamp(3.6rem,5vw,4.7rem)]"
           >
             {LINES.map((line, i) => (
               <span key={line} className="block overflow-hidden pb-[0.06em]">

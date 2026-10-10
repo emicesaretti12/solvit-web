@@ -8,12 +8,14 @@
 
   - Sin GSAP pin: un contenedor alto con un panel sticky (convive con Lenis sin saltos)
   - El cambio de paso es un barrido en diagonal, con la inclinación de las cintas del isotipo
-    (24,5°); con reduced motion, un fundido
-  - Las vistas de los pasos que no se ven quedan en pausa (PreviewSuspendContext)
-  - La barra de pasos es navegación real: cada verbo lleva a su paso
+    (24,5°); con reduced motion, un fundido. Las variantes tienen las mismas claves en los dos
+    casos: el HTML del servidor y el del cliente coinciden y nada queda trabado al hidratar
+  - Las vistas se escalan para entrar en el espacio que queda (nunca se cortan) y solo se
+    montan al acercarse a su paso; las de los pasos que no se ven quedan en pausa
+  - Los textos de los cuatro pasos quedan en el árbol de accesibilidad; al cambiar de paso se
+    anuncia, y si el foco estaba en una vista que se oculta, pasa al botón del paso
 */
 import dynamic from "next/dynamic";
-import { ArrowDown } from "@phosphor-icons/react";
 import {
   motion,
   useMotionValueEvent,
@@ -22,7 +24,7 @@ import {
   useTransform,
   type MotionValue,
 } from "motion/react";
-import { useRef, useState, type ComponentType } from "react";
+import { memo, useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { AgentPreview } from "@/components/previews/agent-preview";
 import { CrmPreview } from "@/components/previews/crm-preview";
 import { MarketingPreview } from "@/components/previews/marketing-preview";
@@ -33,7 +35,7 @@ import type { PoseKey } from "@/components/three/choreography";
 
 const GrowthChart = dynamic(() => import("@/components/dashboard-chart").then((m) => m.GrowthChart), {
   ssr: false,
-  loading: () => <div className="h-full rounded-[1.25rem] border border-line bg-navy-900/50" />,
+  loading: () => <div className="h-[300px] rounded-[1.25rem] border border-line bg-navy-900/50" />,
 });
 
 type Step = {
@@ -50,8 +52,8 @@ const STEPS: Step[] = [
     pose: "atraer",
     verb: "Atraer",
     service: "Marketing digital",
-    title: "Anuncios que traen consultas, no solo likes.",
-    text: "Campañas en Meta y Google y una web pensada para que te escriban.",
+    title: "Anuncios pensados para que te escriban.",
+    text: "Campañas en Meta y Google y una web que convierte visitas en consultas.",
     Preview: MarketingPreview,
   },
   {
@@ -66,7 +68,7 @@ const STEPS: Step[] = [
     pose: "cerrar",
     verb: "Cerrar",
     service: "CRM y software a medida",
-    title: "Cada consulta llega al vendedor justo.",
+    title: "Cada consulta llega al vendedor indicado.",
     text: "Con toda la conversación y sin seguimientos olvidados, en un CRM hecho a tu medida.",
     Preview: CrmPreview,
   },
@@ -74,8 +76,8 @@ const STEPS: Step[] = [
     pose: "crecer",
     verb: "Crecer",
     service: "Tableros",
-    title: "Sabés qué anuncio vende y quién cierra.",
-    text: "Tus números de ventas en un tablero que se actualiza solo.",
+    title: "Ves en números cómo crecen tus ventas.",
+    text: "Consultas, tiempos de respuesta y seguimientos en un tablero que se actualiza solo.",
     Preview: GrowthChart,
   },
 ];
@@ -86,6 +88,7 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 const SHOWN = "polygon(-46% 0%, 100% 0%, 146% 100%, 0% 100%)";
 const BEFORE = "polygon(-46% 0%, -46% 0%, 0% 100%, 0% 100%)";
 const AFTER = "polygon(100% 0%, 100% 0%, 146% 100%, 146% 100%)";
+const STILL = "translateY(0px)";
 
 function RailSegment({ progress, index, total }: { progress: MotionValue<number>; index: number; total: number }) {
   const fill = useTransform(progress, [index / total, (index + 1) / total], [0, 1]);
@@ -96,16 +99,81 @@ function RailSegment({ progress, index, total }: { progress: MotionValue<number>
   );
 }
 
+/* Escala el contenido para que entre en el alto disponible (hasta 50 %), sin recortarlo */
+function FitBox({ children }: { children: ReactNode }) {
+  const outer = useRef<HTMLDivElement>(null);
+  const inner = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const o = outer.current;
+    const i = inner.current;
+    if (!o || !i) return;
+    const fit = () => {
+      i.style.transform = "";
+      i.style.width = "";
+      const avail = o.clientHeight;
+      const natural = i.offsetHeight;
+      const k = avail > 0 && natural > avail ? Math.max(0.5, avail / natural) : 1;
+      if (k < 1) {
+        i.style.width = `${100 / k}%`;
+        i.style.transform = `scale(${k})`;
+      }
+    };
+    // El panel cambia de alto (barra del navegador) y las vistas crecen (mensajes nuevos)
+    const ro = new ResizeObserver(fit);
+    ro.observe(o);
+    ro.observe(i);
+    fit();
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <div ref={outer} className="relative min-h-0 flex-1 overflow-hidden">
+      <div ref={inner} className="origin-top-left">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+const StepPreview = memo(function StepPreview({
+  Preview,
+  suspended,
+  mounted,
+}: {
+  Preview: ComponentType;
+  suspended: boolean;
+  mounted: boolean;
+}) {
+  return (
+    <div inert={suspended} className="mt-5 flex min-h-0 flex-1 flex-col lg:mt-7">
+      <FitBox>
+        <PreviewSuspendContext.Provider value={suspended}>{mounted ? <Preview /> : null}</PreviewSuspendContext.Provider>
+      </FitBox>
+    </div>
+  );
+});
+
 export function HowItWorks() {
   const reduce = useReducedMotion();
   const track = useRef<HTMLDivElement>(null);
+  const buttons = useRef<(HTMLButtonElement | null)[]>([]);
   const [active, setActive] = useState(0);
+  const [visited, setVisited] = useState(() => new Set([0, 1]));
   const { scrollYProgress } = useScroll({ target: track, offset: ["start start", "end end"] });
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
     const next = Math.min(STEPS.length - 1, Math.max(0, Math.floor(v * STEPS.length)));
     setActive((current) => (current === next ? current : next));
+    // Monta la vista del paso activo y la del siguiente (una vez montadas, quedan)
+    setVisited((seen) => (seen.has(next) && seen.has(next + 1) ? seen : new Set([...seen, next, next + 1])));
   });
+
+  useEffect(() => {
+    // Si el foco quedó dentro de una vista que se ocultó, pasa al botón del paso activo
+    const focused = document.activeElement;
+    if (focused instanceof HTMLElement && focused.closest("[data-step]")?.getAttribute("data-step") !== String(active)) {
+      if (focused.closest("[data-step]")) buttons.current[active]?.focus({ preventScroll: true });
+    }
+  }, [active]);
 
   // Lleva al centro del tramo de cada paso
   const goTo = (i: number) => {
@@ -119,17 +187,18 @@ export function HowItWorks() {
     else window.scrollTo({ top: target });
   };
 
-  const variants = reduce
-    ? { shown: { opacity: 1 }, before: { opacity: 0 }, after: { opacity: 0 } }
-    : {
-        shown: { clipPath: SHOWN, opacity: 1, transform: "translateY(0px)" },
-        before: { clipPath: BEFORE, opacity: 0.4, transform: "translateY(18px)" },
-        after: { clipPath: AFTER, opacity: 0.4, transform: "translateY(-18px)" },
-      };
+  // Las mismas variantes siempre (el servidor no conoce la preferencia y el HTML tiene que
+  // coincidir): con reduced motion, el CSS del artículo anula el barrido y el desplazamiento
+  // y queda solo el fundido
+  const variants = {
+    shown: { clipPath: SHOWN, opacity: 1, transform: STILL },
+    before: { clipPath: BEFORE, opacity: 0, transform: "translateY(18px)" },
+    after: { clipPath: AFTER, opacity: 0, transform: "translateY(-18px)" },
+  };
 
   return (
     <section id="como-funciona" aria-labelledby="como-titulo" className="relative">
-      <StageMark pose="arrive" className="absolute left-0 top-0" />
+      <StageMark pose="arrive" slot="steps-slot" className="absolute left-0 top-0" />
 
       <div className="mx-auto max-w-[1200px] px-4 pb-6 pt-24 md:px-6 md:pt-36">
         <h2
@@ -139,28 +208,38 @@ export function HowItWorks() {
           Así convertimos consultas en ventas.
         </h2>
         <p className="mt-5 max-w-[46ch] text-base leading-relaxed text-ink-muted md:text-lg">
-          Un solo equipo se encarga de los cuatro pasos y cada uno le pasa el cliente al siguiente.
+          Un solo equipo se encarga de los cuatro pasos, sin que ninguna consulta se pierda entre uno y otro.
         </p>
       </div>
 
       {/* Un tramo de scroll por paso; el panel queda fijo mientras tanto */}
       <div ref={track} className="relative" style={{ height: `${(STEPS.length + 1) * 100}svh` }}>
         {STEPS.map((s, i) => (
-          <StageMark key={s.pose} pose={s.pose} className="absolute left-0" style={{ top: `${i * 100 + 50}svh` }} />
+          <StageMark
+            key={s.pose}
+            pose={s.pose}
+            slot="steps-slot"
+            className="absolute left-0"
+            style={{ top: `${i * 100 + 50}svh` }}
+          />
         ))}
         <StageMark pose="out" className="absolute left-0" style={{ top: `${STEPS.length * 100 + 60}svh` }} />
 
-        <div className="sticky top-0 flex h-[100svh] flex-col overflow-hidden">
-          <div className="mx-auto flex w-full max-w-[1200px] flex-1 flex-col px-4 pb-6 pt-[84px] md:px-6 lg:pb-12 lg:pt-28">
+        <div data-stage-panel className="sticky top-0 flex h-[100svh] flex-col overflow-hidden">
+          <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col px-4 pb-6 pt-[84px] md:px-6 lg:pb-12 lg:pt-28">
             {/* Pasos: navegación y progreso */}
             <nav aria-label="Pasos de la venta" className="lg:max-w-[540px]">
               <ol className="grid grid-cols-4 gap-2 sm:gap-4">
                 {STEPS.map((s, i) => (
                   <li key={s.verb}>
                     <button
+                      ref={(el) => {
+                        buttons.current[i] = el;
+                      }}
                       type="button"
                       onClick={() => goTo(i)}
                       aria-current={i === active ? "step" : undefined}
+                      aria-controls={`paso-${s.pose}`}
                       className={`group flex min-h-11 w-full flex-col justify-end text-left text-[13px] font-medium transition-colors duration-200 sm:text-sm ${
                         i === active ? "text-ink" : "text-ink-faint hover:text-ink-muted"
                       }`}
@@ -175,34 +254,35 @@ export function HowItWorks() {
                 ))}
               </ol>
             </nav>
+            <p aria-live="polite" className="sr-only">
+              {`Paso ${active + 1} de ${STEPS.length}: ${STEPS[active].verb}. ${STEPS[active].title}`}
+            </p>
 
-            {/* En celulares, el espacio de arriba es del isotipo */}
-            <div aria-hidden="true" className="h-[30svh] shrink-0 lg:hidden" />
+            {/* En celulares, este hueco es del isotipo: el escenario toma su centro y su alto */}
+            <div id="steps-slot" aria-hidden="true" className="h-[22svh] shrink-0 lg:hidden" />
 
-            <div className="relative grid min-h-0 flex-1 lg:mt-10 lg:max-w-[540px]">
+            <div className="relative grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)] lg:mt-10 lg:max-w-[540px]">
               {STEPS.map((s, i) => {
                 const state = i === active ? "shown" : i < active ? "after" : "before";
                 return (
                   <motion.article
                     key={s.verb}
-                    aria-hidden={i !== active}
-                    inert={i !== active}
+                    id={`paso-${s.pose}`}
+                    data-step={i}
                     initial={false}
                     animate={state}
                     variants={variants}
                     transition={{ duration: reduce ? 0.25 : 0.75, ease: EASE }}
-                    className="col-start-1 row-start-1 flex min-h-0 flex-col"
+                    className={`col-start-1 row-start-1 flex min-h-0 flex-col motion-reduce:![clip-path:none] motion-reduce:!transform-none ${
+                      i === active ? "" : "pointer-events-none"
+                    }`}
                   >
                     <p className="text-sm text-blue-300">{s.service}</p>
                     <h3 className="font-display mt-2 text-[1.7rem] font-bold leading-[1.04] tracking-[-0.035em] text-ink sm:text-[2.2rem] lg:text-[2.6rem]">
                       {s.title}
                     </h3>
-                    <p className="mt-3 max-w-[44ch] text-[15px] leading-relaxed text-ink-muted md:text-base">{s.text}</p>
-                    <div className="mt-5 min-h-0 flex-1 lg:mt-7 lg:max-h-[330px]">
-                      <PreviewSuspendContext.Provider value={i !== active}>
-                        <s.Preview />
-                      </PreviewSuspendContext.Provider>
-                    </div>
+                    <p className="mt-3 max-w-[44ch] text-[15px] leading-relaxed text-ink-muted max-lg:[@media(max-height:720px)]:hidden md:text-base">{s.text}</p>
+                    <StepPreview Preview={s.Preview} suspended={i !== active} mounted={visited.has(i)} />
                   </motion.article>
                 );
               })}
@@ -211,22 +291,12 @@ export function HowItWorks() {
         </div>
       </div>
 
-      {/* Cierre: el hardware como módulo aparte y la nota de las vistas */}
+      {/* Cierre: el hardware como módulo aparte */}
       <div className="mx-auto max-w-[1200px] px-4 pb-24 pt-10 md:px-6 md:pb-32">
-        <div className="flex flex-col gap-4 border-t border-line pt-8 md:flex-row md:items-center md:justify-between">
-          <p className="max-w-[60ch] text-[15px] leading-relaxed text-ink-muted">
-            <span className="font-medium text-ink">Módulo aparte: hardware e IoT.</span> Sensores, placas y
-            control de acceso conectados, para negocios que lo necesitan.
-          </p>
-          <a
-            href="#proyectos"
-            className="group inline-flex min-h-11 shrink-0 items-center gap-2 text-sm font-medium text-ink transition-colors duration-150 hover:text-blue-300"
-          >
-            Ver proyectos
-            <ArrowDown size={15} weight="bold" aria-hidden="true" className="transition-transform duration-200 group-hover:translate-y-0.5" />
-          </a>
-        </div>
-        <p className="mt-4 text-xs text-ink-faint">Las vistas de cada paso son de ejemplo.</p>
+        <p className="max-w-[60ch] border-t border-line pt-8 text-[15px] leading-relaxed text-ink-muted">
+          <span className="font-medium text-ink">Módulo aparte: hardware e IoT.</span> Sensores, placas y control
+          de acceso conectados, para negocios que lo necesitan.
+        </p>
       </div>
     </section>
   );

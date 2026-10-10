@@ -18,7 +18,7 @@ import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as R
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LogoMark } from "@/components/logo";
-import { restPose, type DragState, type IsoPose } from "./pose";
+import { isotypeHeightPx, restPose, stageSignal, type DragState, type IsoPose } from "./pose";
 import { POSES, type PoseDef, type PoseKey, type StagePose } from "./choreography";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -33,17 +33,28 @@ const pointer = { current: { x: 0, y: 0 } };
 const DESKTOP = "(min-width: 1024px)";
 
 /** Marca de pose: cuando su borde superior llega al borde superior de la pantalla, el isotipo
- *  está en esa pose. Entre dos marcas, la pose se interpola. */
+ *  está en esa pose. Entre dos marcas, la pose se interpola. `slot` es el id del hueco que la
+ *  sección deja para el isotipo en celulares: la pose toma su centro y su alto. */
 export function StageMark({
   pose: key,
+  slot,
   className = "",
   style,
 }: {
   pose: PoseKey;
+  slot?: string;
   className?: string;
   style?: CSSProperties;
 }) {
-  return <div data-stage={key} aria-hidden="true" style={style} className={`pointer-events-none h-px w-px ${className}`} />;
+  return (
+    <div
+      data-stage={key}
+      data-slot={slot}
+      aria-hidden="true"
+      style={style}
+      className={`pointer-events-none h-px w-px ${className}`}
+    />
+  );
 }
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
@@ -51,16 +62,16 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 /** Superficie para girar el isotipo con el dedo o el mouse (el canvas no recibe eventos) */
 export function useStageDrag() {
-  const start = useRef({ x: 0, y: 0, lastX: 0, lastY: 0, lastT: 0 });
+  const start = useRef({ id: -1, x: 0, y: 0, lastX: 0, lastY: 0, lastT: 0 });
   const onPointerDown = (e: ReactPointerEvent<HTMLElement>) => {
-    if (drag.current.active) return; // un solo dedo
-    start.current = { x: e.clientX, y: e.clientY, lastX: e.clientX, lastY: e.clientY, lastT: e.timeStamp };
+    if (drag.current.active) return; // un solo dedo: los demás se ignoran
+    start.current = { id: e.pointerId, x: e.clientX, y: e.clientY, lastX: e.clientX, lastY: e.clientY, lastT: e.timeStamp };
     drag.current = { active: true, dx: 0, dy: 0, vx: 0, vy: 0 };
     e.currentTarget.setPointerCapture(e.pointerId);
   };
   const onPointerMove = (e: ReactPointerEvent<HTMLElement>) => {
     const d = drag.current;
-    if (!d.active) return;
+    if (!d.active || e.pointerId !== start.current.id) return;
     const s = start.current;
     const dt = Math.max(1, e.timeStamp - s.lastT) / 1000;
     // Velocidad suavizada (px/s) para que el resorte siga al soltar con la misma inercia
@@ -72,10 +83,23 @@ export function useStageDrag() {
     s.lastY = e.clientY;
     s.lastT = e.timeStamp;
   };
-  const onPointerUp = () => {
+  const onPointerUp = (e: ReactPointerEvent<HTMLElement>) => {
+    if (e.pointerId !== start.current.id) return;
+    // Si el dedo estuvo quieto antes de soltar, no hay inercia que heredar
+    if (e.timeStamp - start.current.lastT > 80) {
+      drag.current.vx = 0;
+      drag.current.vy = 0;
+    }
     drag.current.active = false;
+    start.current.id = -1;
   };
-  return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp };
+  return {
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    onPointerCancel: onPointerUp,
+    onLostPointerCapture: onPointerUp,
+  };
 }
 
 function hasWebGL() {
@@ -118,16 +142,38 @@ export function Stage() {
     let shown = false;
     const desktop = window.matchMedia(DESKTOP);
 
-    const poseOf = (key: PoseKey): StagePose => {
-      const def: PoseDef = POSES[key];
-      const base = { ...(desktop.matches ? def.desktop : def.mobile) };
-      return reduce ? { ...base, ...def.reduced } : base;
+    // Hueco reservado para el isotipo (celulares): su centro y su alto, en la pantalla, cuando
+    // la sección está a la vista. Dentro de un panel sticky se mide respecto del panel.
+    const slotPose = (pose: StagePose, slotId: string): StagePose => {
+      const el = document.getElementById(slotId);
+      if (!el || !el.offsetHeight) return pose;
+      const rect = el.getBoundingClientRect();
+      const panel = el.closest<HTMLElement>("[data-stage-panel]");
+      const top = panel ? rect.top - panel.getBoundingClientRect().top : rect.top + window.scrollY;
+      const vh = window.innerHeight;
+      // La S abierta ocupa más alto: ~0,47 unidades extra por cada punto de apertura
+      const extent = 1 + 0.47 * pose.spread;
+      const fit = (0.92 * rect.height) / (isotypeHeightPx(window.innerWidth, vh) * extent);
+      return { ...pose, y: 1 - (2 * (top + rect.height / 2)) / vh, scale: Math.min(pose.scale, fit) };
     };
 
     const measure = () => {
-      marks = Array.from(document.querySelectorAll<HTMLElement>("[data-stage]"))
-        .map((el) => ({ at: el.getBoundingClientRect().top + window.scrollY, pose: poseOf(el.dataset.stage as PoseKey) }))
+      const els = Array.from(document.querySelectorAll<HTMLElement>("[data-stage]"))
+        .map((el) => ({ el, at: el.getBoundingClientRect().top + window.scrollY }))
         .sort((a, b) => a.at - b.at);
+      const next: typeof marks = [];
+      for (const { el, at } of els) {
+        const def: PoseDef = POSES[el.dataset.stage as PoseKey];
+        let pose = { ...(desktop.matches ? def.desktop : def.mobile) };
+        if (!desktop.matches && el.dataset.slot) pose = slotPose(pose, el.dataset.slot);
+        if (reduce) {
+          const prev = next[next.length - 1];
+          // Sin zambullida: se queda en el lugar de la marca anterior y solo se desvanece
+          pose = def.reducedHold && prev ? { ...prev.pose, opacity: pose.opacity } : { ...pose, ...def.reduced };
+        }
+        next.push({ at, pose });
+      }
+      marks = next;
       update(window.scrollY);
     };
 
@@ -166,6 +212,8 @@ export function Stage() {
         shown = visible;
         setActive(visible);
       }
+      // Con reduced motion el loop es "demand": cada cambio de pose pide un cuadro
+      if (reduce && visible) stageSignal.invalidate();
     };
 
     const trigger = ScrollTrigger.create({

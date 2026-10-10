@@ -58,6 +58,7 @@ export function PreviewShell({
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {status}
+            <span className="text-[10.5px] text-ink-faint">Ejemplo</span>
           </div>
         </div>
         {onTogglePause && (
@@ -85,11 +86,6 @@ export function PreviewShell({
 
 export function LiveBadge({ label = "En vivo", paused = false }: { label?: string; paused?: boolean }) {
   return (
-    <span className={`flex items-center gap-1.5 text-[11px] ${paused ? "text-ink-muted" : "text-blue-300"}`}>
-      <span
-        className={`relative size-1.5 rounded-full ${paused ? "bg-ink-faint" : "live-dot bg-blue-400 text-blue-400"}`}
-      />
-      {paused ? "En pausa" : label}
-    </span>
+    <span className={`text-[11px] ${paused ? "text-ink-muted" : "text-blue-300"}`}>{paused ? "En pausa" : label}</span>
   );
 }

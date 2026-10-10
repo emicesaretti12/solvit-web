@@ -13,7 +13,7 @@ export type IsoPose = {
   x: number;
   /** Posición vertical en fracción de media pantalla (-1 abajo, 1 arriba) */
   y: number;
-  /** Profundidad en unidades de escena (positivo = hacia la cámara) */
+  /** Profundidad en fracción de la distancia de la cámara (positivo = hacia la cámara) */
   z: number;
   scale: number;
   /** Cinta destacada: 0 arriba, 1 pliegue, 2 abajo; -1 ninguna */
@@ -23,3 +23,27 @@ export type IsoPose = {
 export const restPose = (): IsoPose => ({ spread: 0, turn: 0, tilt: 0, x: 0, y: 0, z: 0, scale: 1, focus: -1 });
 
 export type DragState = { active: boolean; dx: number; dy: number; vx: number; vy: number };
+
+// Encuadre: la S mide 3,2 unidades de alto; la cámara se aleja hasta que entra con margen
+export const FOV = 28;
+const FIT_MARGIN = 1.35;
+const S_HEIGHT = 3.2;
+const S_WIDTH = 2.1;
+
+/** Distancia de cámara que encaja la S según el aspecto (ancho / alto) del canvas */
+export function fitDistance(aspect: number) {
+  const vfov = (FOV * Math.PI) / 180;
+  const hfov = 2 * Math.atan(Math.tan(vfov / 2) * aspect);
+  const h = S_HEIGHT * FIT_MARGIN;
+  const w = S_WIDTH * FIT_MARGIN * 1.25;
+  return Math.max(h / 2 / Math.tan(vfov / 2), w / 2 / Math.tan(hfov / 2));
+}
+
+/** Alto en px de la S (escala 1, armada) para una pantalla de w × h px */
+export function isotypeHeightPx(w: number, h: number) {
+  const halfH = fitDistance(w / Math.max(1, h)) * Math.tan((FOV * Math.PI) / 360);
+  return (S_HEIGHT / (2 * halfH)) * h;
+}
+
+/** Para pedir un cuadro cuando el loop está en modo "demand" (reduced motion) */
+export const stageSignal = { invalidate: () => {} };

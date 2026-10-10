@@ -8,7 +8,7 @@
   - componente de cliente: los logos y la navegación se arman acá
 */
 import type { ReactNode } from "react";
-import { siGoogleads, siInstagram, siMercadopago, siMeta, siWhatsapp } from "simple-icons";
+import { siGoogleads, siInstagram, siMeta, siWhatsapp } from "simple-icons";
 import HeroSection from "@/components/ui/hero-01-utils/hero";
 import type { NavigationSection } from "@/components/ui/hero-01-utils/header";
 import Header from "@/components/ui/hero-01-utils/header";
@@ -24,8 +24,8 @@ export default function AgencyHeroSection({ children }: { children?: ReactNode }
     { title: "Contacto", href: "#contacto" },
   ];
 
-  // Los canales y pagos que ya usan los clientes del negocio (logos reales, monocromos)
-  const brandList: BrandList[] = [siWhatsapp, siInstagram, siMeta, siGoogleads, siMercadopago].map((icon) => ({
+  // Canales donde escriben los clientes y plataformas de anuncios (logos reales, monocromos)
+  const brandList: BrandList[] = [siWhatsapp, siInstagram, siMeta, siGoogleads].map((icon) => ({
     name: icon.title,
     path: icon.path,
   }));

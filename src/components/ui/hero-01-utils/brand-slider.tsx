@@ -36,18 +36,20 @@ function Brand({ brand }: { brand: BrandList }) {
 export default function BrandSlider({ brandList }: { brandList: BrandList[] }) {
   // Con pocos logos va una fila quieta: la única marquesina de la página es la de clientes
   return (
-    <section aria-labelledby="plataformas-titulo" className="relative px-4 pb-20 pt-6 md:px-6 md:pb-28">
-      <div className="mx-auto flex max-w-[1200px] flex-col items-start gap-6 border-t border-line pt-8 md:flex-row md:items-center md:justify-between">
-        <p id="plataformas-titulo" className="text-sm text-ink-muted">
-          Funciona con lo que tus clientes ya usan
-        </p>
-        <ul className="flex flex-wrap items-center gap-x-8 gap-y-4 md:gap-x-12">
-          {brandList.map((brand) => (
-            <li key={brand.name} className="flex items-center text-ink-faint transition-colors duration-200 hover:text-ink">
-              <Brand brand={brand} />
-            </li>
-          ))}
-        </ul>
+    <section aria-labelledby="plataformas-titulo" className="relative pb-20 pt-6 md:pb-28">
+      <div className="mx-auto max-w-[1200px] px-4 md:px-6">
+        <div className="flex flex-col items-start gap-6 border-t border-line pt-8 md:flex-row md:items-center md:justify-between">
+          <p id="plataformas-titulo" className="text-sm text-ink-muted">
+            Trabajamos con
+          </p>
+          <ul className="flex flex-wrap items-center gap-x-8 gap-y-4 md:gap-x-12">
+            {brandList.map((brand) => (
+              <li key={brand.name} className="flex items-center text-ink-faint transition-colors duration-200 hover:text-ink">
+                <Brand brand={brand} />
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </section>
   );
