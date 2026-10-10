@@ -14,22 +14,40 @@
 */
 import { ArrowDown } from "@phosphor-icons/react";
 import { motion, useScroll, useTransform } from "motion/react";
-import { useRef } from "react";
+import { useRef, useSyncExternalStore } from "react";
 import { CONTACT_LABEL, PrimaryCta } from "@/components/cta";
 import { StageMark, useStageDrag } from "@/components/three/stage";
 
 const LINES = ["Especialistas en", "solucionar", "tus ventas."];
 
+const DESKTOP_QUERY = "(min-width: 1024px)";
+const subscribeDesktop = (onChange: () => void) => {
+  const query = window.matchMedia(DESKTOP_QUERY);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+};
+
 export default function HeroSection() {
   const ref = useRef<HTMLElement>(null);
   const drag = useStageDrag();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  // El texto se aleja en profundidad mientras la cámara entra en la S
-  const opacity = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.6], [1, 0.92]);
-  const y = useTransform(scrollYProgress, [0, 0.6], [0, -60]);
+  // El texto se aleja en profundidad mientras la cámara entra en la S. Celulares y escritorio
+  // tienen su propio ritmo (en el arranque, scroll 0, los dos valen lo mismo: el HTML coincide)
+  const desktop = useSyncExternalStore(subscribeDesktop, () => window.matchMedia(DESKTOP_QUERY).matches, () => false);
+  const opacityMobile = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
+  const scaleMobile = useTransform(scrollYProgress, [0, 0.6], [1, 0.92]);
+  const yMobile = useTransform(scrollYProgress, [0, 0.6], [0, -60]);
+  const opacityDesktop = useTransform(scrollYProgress, [0, 0.26], [1, 0]);
+  const scaleDesktop = useTransform(scrollYProgress, [0, 0.3], [1, 0.94]);
+  const yDesktop = useTransform(scrollYProgress, [0, 0.3], [0, 40]);
+  const opacity = desktop ? opacityDesktop : opacityMobile;
+  const scale = desktop ? scaleDesktop : scaleMobile;
+  const y = desktop ? yDesktop : yMobile;
   // Ya desvanecido, el bloque deja de recibir toques y foco (los botones no quedan invisibles pero activos)
-  const visibility = useTransform(opacity, (v) => (v < 0.02 ? "hidden" : "visible"));
+  const hide = (v: number) => (v < 0.02 ? "hidden" : "visible");
+  const visibilityMobile = useTransform(opacityMobile, hide);
+  const visibilityDesktop = useTransform(opacityDesktop, hide);
+  const visibility = desktop ? visibilityDesktop : visibilityMobile;
 
   return (
     <section
@@ -39,8 +57,8 @@ export default function HeroSection() {
       className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden pb-14 pt-28 lg:justify-center lg:pb-20"
     >
       <StageMark pose="hero" slot="hero-slot" className="absolute left-0 top-0" />
-      <StageMark pose="plunge" className="absolute left-0 top-[55%]" />
-      <StageMark pose="dive" className="absolute bottom-0 left-0" />
+      <StageMark pose="plunge" className="absolute left-0 top-[55%] lg:top-[38%]" />
+      <StageMark pose="dive" className="absolute bottom-0 left-0 lg:bottom-auto lg:top-[72%]" />
 
       {/* Arrastre del isotipo: mitad derecha en escritorio, la parte de arriba en celulares */}
       <div

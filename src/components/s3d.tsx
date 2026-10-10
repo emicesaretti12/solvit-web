@@ -44,36 +44,43 @@ export function S3D({ focus, play, className = "" }: { focus: number; play: bool
             : `translate3d(${OPEN[i]}) translateZ(${focused ? 46 : r.z}px) scale(${focused ? 1.06 : 1})`;
           const style = {
             "--rest": rest,
+            "--o": play ? 1 : 0,
             transform: play ? rest : FROM[i],
-            opacity: play ? 1 : 0,
             transitionDelay: play ? `${(assembled ? 2 - i : i) * 0.14 + 0.1}s` : "0s",
           } as CSSProperties;
+          // Apagada: colores más oscuros (no transparencia, que dejaría ver las capas de atrás)
+          const from = focused ? "#2d7bff" : dim ? "#0a2f8a" : r.from;
+          const to = focused ? "#8fe6ff" : dim ? "#1747b8" : r.to;
           return (
             <div
               key={i}
-              className="s3d-ribbon absolute inset-0 [transform-style:preserve-3d] motion-reduce:![transform:var(--rest)] motion-reduce:!opacity-100 motion-reduce:!transition-none"
+              className="s3d-ribbon absolute inset-0 [transform-style:preserve-3d] motion-reduce:![transform:var(--rest)] motion-reduce:!transition-none"
               style={style}
             >
-              {Array.from({ length: LAYERS }, (_, k) => {
+              {/* De atrás hacia adelante: la cara del frente se pinta última. La aparición va en
+                  cada capa (la opacidad en la cinta entera la aplanaría) */}
+              {Array.from({ length: LAYERS }, (_, n) => {
+                const k = LAYERS - 1 - n;
                 const front = k === 0;
+                const side = k === LAYERS - 1 ? (dim ? "#04123a" : "#061a52") : dim ? "#071f5c" : "#0a2f8a";
                 return (
                   <svg
                     key={k}
                     viewBox="0 0 515 787"
-                    className="absolute inset-0 size-full overflow-visible"
-                    style={{ transform: `translateZ(${-k * GAP}px)`, opacity: dim ? 0.38 : 1 }}
+                    className="s3d-layer absolute inset-0 size-full overflow-visible"
+                    style={{ transform: `translateZ(${-k * GAP}px)`, transitionDelay: style.transitionDelay }}
                   >
                     {front && (
                       <defs>
                         <linearGradient id={`${id}-${i}`} x1="0" y1="1" x2="1" y2="0">
-                          <stop offset="0" stopColor={focused ? "#2d7bff" : r.from} />
-                          <stop offset="1" stopColor={focused ? "#8fe6ff" : r.to} />
+                          <stop offset="0" stopColor={from} />
+                          <stop offset="1" stopColor={to} />
                         </linearGradient>
                       </defs>
                     )}
                     <polygon
                       points={r.points}
-                      fill={front ? `url(#${id}-${i})` : k === LAYERS - 1 ? "#061a52" : "#0a2f8a"}
+                      fill={front ? `url(#${id}-${i})` : side}
                       stroke={front ? "rgba(255,255,255,0.35)" : "none"}
                       strokeWidth={front ? 2 : 0}
                     />

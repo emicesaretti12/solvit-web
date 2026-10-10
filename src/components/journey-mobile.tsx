@@ -104,7 +104,7 @@ export function JourneyMobile() {
 
       <ol className="relative">
         <Row index={0} icon={<Globe weight="light" className="size-6" />}>
-          <ul className="flex flex-wrap gap-2">
+          <ul className="flex flex-wrap gap-2 [perspective:600px]">
             {CHANNELS.map((c, i) => (
               <li
                 key={c.label}
@@ -119,7 +119,7 @@ export function JourneyMobile() {
         </Row>
 
         <Row index={1} scanner icon={<Sparkle weight="light" className="size-6" />}>
-          <div className="flex flex-wrap items-center gap-2 text-[13px]">
+          <div className="flex flex-wrap items-center gap-2 text-[13px] [perspective:600px]">
             <span style={d(0.35)} className="journey-chip flex items-center gap-1.5 rounded-full border border-blue-400/60 bg-blue-500/15 px-3 py-1.5 text-ink">
               <span className="size-1.5 rounded-full bg-blue-400" />
               Quiere comprar

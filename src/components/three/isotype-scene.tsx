@@ -15,6 +15,10 @@ import * as THREE from "three";
 import { FOV, fitDistance, stageSignal, type DragState, type IsoPose } from "./pose";
 import { RIBBONS, SPREAD, STAGGER, STEP_SPREAD, StudioEnvironment, smoothstep, useRibbonGeometry } from "./ribbons";
 
+// La escena solo existe en el cliente (se importa con ssr: false). En celulares la S del hero se
+// comporta como en su primera versión: sin giro de entrada y con las cintas abriéndose juntas
+const MOBILE = typeof window !== "undefined" && window.matchMedia("(max-width: 1023.98px)").matches;
+
 
 function Ribbon({
   index,
@@ -45,7 +49,7 @@ function Ribbon({
     spread.current = reduce ? p.spread : THREE.MathUtils.damp(spread.current, p.spread, 6, dt);
     const raw = spread.current;
     const [lo, hi] = STAGGER[index];
-    const s = raw >= STEP_SPREAD ? raw : STEP_SPREAD * smoothstep(lo, hi, raw / STEP_SPREAD);
+    const s = MOBILE || raw >= STEP_SPREAD ? raw : STEP_SPREAD * smoothstep(lo, hi, raw / STEP_SPREAD);
     const [offset, rz, ry] = SPREAD[index];
     // La cinta del paso activo se adelanta hacia la cámara: en un celular, donde la S es chica,
     // se lee qué parte trabaja aunque el brillo no alcance
@@ -103,6 +107,14 @@ function Rig({
   const damped = useRef({ turn: start.turn, tilt: start.tilt, x: start.x, y: start.y, z: start.z, scale: start.scale });
   const clock = useRef(0);
   const lastZ = useRef(start.z);
+  // Entrada (solo escritorio): si la página abrió más abajo, el primer cuadro llega tarde y la
+  // S aparece ya en su pose
+  const intro = useRef(MOBILE ? 1 : 0);
+  const mountedAt = useRef(0);
+  const introChecked = useRef(false);
+  useEffect(() => {
+    mountedAt.current = performance.now();
+  }, []);
   const { camera, size } = useThree();
 
   useFrame((_, rawDt) => {
@@ -132,6 +144,12 @@ function Rig({
     look.current.x = THREE.MathUtils.damp(look.current.x, pointer.current.x, 3, dt);
     look.current.y = THREE.MathUtils.damp(look.current.y, pointer.current.y, 3, dt);
     const sway = reduce ? 0 : Math.sin(clock.current * 0.45) * 0.12;
+    if (!introChecked.current) {
+      introChecked.current = true;
+      if (performance.now() - mountedAt.current > 1200) intro.current = 1;
+    }
+    intro.current = reduce ? 1 : Math.min(1, intro.current + dt / 1.5);
+    const enter = 1 - Math.pow(1 - intro.current, 3); // ease-out cúbica
     const bob = reduce ? 0 : Math.sin(clock.current * 0.9) * 0.05;
 
     const k = damped.current;
@@ -165,11 +183,11 @@ function Rig({
     // Pose de reposo levemente girada, para que se lea el canto desde el primer cuadro
     g.rotation.set(
       0.14 + k.tilt + pitch.current.value + look.current.y * 0.18,
-      -0.42 + k.turn + yaw.current.value + sway + look.current.x * 0.3,
+      -0.42 + k.turn + yaw.current.value + sway + look.current.x * 0.3 - (1 - enter) * 1.25,
       0,
     );
     g.position.set(k.x * halfW * depth, k.y * halfH * depth + bob, k.z * cam.position.z);
-    g.scale.setScalar(k.scale);
+    g.scale.setScalar(k.scale * (0.82 + 0.18 * enter));
   });
 
   return (
@@ -211,7 +229,7 @@ export default function IsotypeScene({
 }) {
   return (
     <Canvas
-      dpr={[1, 1.75]}
+      dpr={[1, MOBILE ? 1.5 : 1.75]}
       frameloop={!active ? "never" : reduce ? "demand" : "always"}
       camera={{ fov: FOV, position: [0, 0, 9.5], near: 0.1, far: 60 }}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}

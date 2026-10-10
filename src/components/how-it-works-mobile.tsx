@@ -11,11 +11,37 @@
   - Todo es transform y opacidad (lo mueve el compositor); con reduced motion, sin giros
 */
 import { useInView } from "motion/react";
-import { useRef, type ComponentType } from "react";
+import { useEffect, useRef, type ComponentType, type ReactNode } from "react";
 import { PreviewSuspendContext } from "@/components/previews/preview-shell";
 import { S3D } from "@/components/s3d";
 
 export type MobileStep = { verb: string; service: string; title: string; text: string; Preview: ComponentType };
+
+/* Alto que nunca baja: la vista viva arranca completa (el HTML del servidor) y en su loop se
+   vacía y se vuelve a llenar; sin esto, todo lo que está debajo saltaría en cada vuelta */
+function LockHeight({ className = "", children }: { className?: string; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let max = 0;
+    const lock = () => {
+      el.style.minHeight = "";
+      const h = el.offsetHeight;
+      if (h > max) max = h;
+      el.style.minHeight = `${max}px`;
+    };
+    const ro = new ResizeObserver(lock);
+    ro.observe(el.firstElementChild ?? el);
+    lock();
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <div ref={ref} className={className}>
+      {children}
+    </div>
+  );
+}
 
 function StepCard({ step, index, last }: { step: MobileStep; index: number; last: boolean }) {
   const ref = useRef<HTMLLIElement>(null);
@@ -35,27 +61,28 @@ function StepCard({ step, index, last }: { step: MobileStep; index: number; last
         data-shown={shown}
         className="step-card relative overflow-hidden rounded-[1.6rem] border border-line bg-navy-850 p-5 shadow-[0_30px_60px_-40px_rgb(var(--shade-rgb)/0.9)]"
       >
+        {/* Paso: en su propia fila, arriba (la S nunca lo tapa) */}
+        <p className="relative z-10 flex flex-wrap items-baseline gap-x-2 text-sm">
+          <span className="font-mono text-[11px] tabular-nums text-ink-faint">0{index + 1}</span>
+          <span className="font-medium text-ink">{step.verb}</span>
+          <span className="text-blue-300">· {step.service}</span>
+        </p>
         {/* Escenario: la S en 3D parada sobre un piso en perspectiva que avanza hacia la pantalla */}
-        <div className="relative -mx-5 -mt-5 mb-5 h-[184px] overflow-hidden border-b border-line [perspective:520px]">
+        <div className="relative -mx-5 mb-5 mt-2 h-[168px] overflow-hidden border-b border-line [perspective:520px]">
           <div aria-hidden="true" className="absolute inset-x-[-50%] bottom-[-46%] h-[110%] [transform:rotateX(74deg)] [mask-image:linear-gradient(to_top,#000_15%,transparent_75%)]">
             <div className="step-floor absolute inset-x-0 -top-[28px] bottom-0 [background-image:linear-gradient(color-mix(in_oklab,var(--blue-400)_38%,transparent)_1px,transparent_1px),linear-gradient(90deg,color-mix(in_oklab,var(--blue-400)_38%,transparent)_1px,transparent_1px)] [background-size:28px_28px]" />
           </div>
-          <p className="absolute left-5 top-4 flex items-baseline gap-2 text-sm">
-            <span className="font-mono text-[11px] tabular-nums text-ink-faint">0{index + 1}</span>
-            <span className="font-medium text-ink">{step.verb}</span>
-            <span className="text-blue-300">· {step.service}</span>
-          </p>
-          <div className="absolute inset-x-0 bottom-3 top-9 flex items-center justify-center">
+          <div className="absolute inset-x-0 bottom-3 top-5 flex items-center justify-center">
             <S3D focus={last ? -2 : index} play={shown} className="h-full" />
           </div>
         </div>
         <h3 className="font-display text-[1.6rem] font-bold leading-[1.06] tracking-[-0.035em] text-ink">{step.title}</h3>
         <p className="mt-3 text-[15px] leading-relaxed text-ink-muted">{step.text}</p>
-        <div className="mt-5">
+        <LockHeight className="mt-5">
           <PreviewSuspendContext.Provider value={!live}>
             <Preview />
           </PreviewSuspendContext.Provider>
-        </div>
+        </LockHeight>
       </article>
     </li>
   );

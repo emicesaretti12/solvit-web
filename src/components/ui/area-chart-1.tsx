@@ -128,8 +128,8 @@ const AreaChartCard: React.FC<AreaChartCardProps> = ({
         )}
       </div>
 
-      <div className="mt-4 grid min-h-0 flex-1 gap-4 md:mt-6 md:grid-cols-[1.55fr_1fr] md:gap-8">
-        <div className="flex min-h-0 flex-col">
+      <div className="mt-4 grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] gap-4 md:mt-6 md:grid-cols-[1.55fr_1fr] md:gap-8">
+        <div className="flex min-h-0 min-w-0 flex-col">
           <ul className="mb-3 flex flex-wrap gap-x-5 gap-y-1.5" aria-label="Series">
             {series.map((item) => (
               <li key={item.key} className="flex items-center gap-2">
