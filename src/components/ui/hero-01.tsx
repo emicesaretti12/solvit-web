@@ -2,84 +2,40 @@
 
 /*
   Hero 01 · Agency Hero Section (ShadcnSpace, 21st.dev), adaptado a SEN:
-  - mismos datos y composición que el original (Header + HeroSection + BrandSlider), con
-    contenido de SEN: navegación por secciones, avatares de rubros reales y logos de plataformas
-  - el <main> lo arma este componente, como en el original; el resto de las secciones de la
-    página llegan como children y van a continuación del slider
-  - avatares sin caras de stock (íconos de rubros de proyectos reales); logos de simple-icons
-  - componente de cliente: los íconos (componentes) no se pueden pasar como props desde el
-    servidor; las secciones que llegan como children siguen renderizándose en el servidor
+  - misma composición que el original (Header + HeroSection + BrandSlider); el <main> lo arma
+    este componente y el resto de las secciones llegan como children, después del slider
+  - detrás de todo va el escenario 3D fijo (Stage) con el isotipo, que recorre la página
+  - componente de cliente: los logos y la navegación se arman acá
 */
 import type { ReactNode } from "react";
-import { BatteryCharging, BeerStein, Factory, FirstAidKit, Motorcycle } from "@phosphor-icons/react";
-import {
-  siEspressif,
-  siGoogleads,
-  siGooglecloud,
-  siInstagram,
-  siMercadopago,
-  siMeta,
-  siMongodb,
-  siNextdotjs,
-  siPostgresql,
-  siReact,
-  siSupabase,
-  siVercel,
-  siWhatsapp,
-} from "simple-icons";
+import { siGoogleads, siInstagram, siMercadopago, siMeta, siWhatsapp } from "simple-icons";
 import HeroSection from "@/components/ui/hero-01-utils/hero";
 import type { NavigationSection } from "@/components/ui/hero-01-utils/header";
 import Header from "@/components/ui/hero-01-utils/header";
 import BrandSlider, { type BrandList } from "@/components/ui/hero-01-utils/brand-slider";
-import type { AvatarList, HeroStat } from "@/components/ui/hero-01-utils/hero";
-import { DELIVERED, SECTORS } from "@/content/projects";
+import { Stage } from "@/components/three/stage";
 
 export default function AgencyHeroSection({ children }: { children?: ReactNode }) {
-  const avatarList: AvatarList[] = [
-    { image: "", icon: Motorcycle, label: "Concesionaria de motos" },
-    { image: "", icon: BatteryCharging, label: "Venta de baterías" },
-    { image: "", icon: Factory, label: "Industria" },
-    { image: "", icon: FirstAidKit, label: "Salud" },
-    { image: "", icon: BeerStein, label: "Cervecería" },
-  ];
-
-  const stats: HeroStat[] = [
-    { value: DELIVERED, prefix: "+", label: "proyectos entregados" },
-    { value: SECTORS, label: "rubros con clientes satisfechos" },
-    { value: 24, suffix: "/7", label: "agentes de IA atendiendo" },
-  ];
-
+  // Navegación en el orden de la página
   const navigationData: NavigationSection[] = [
-    { title: "Inicio", href: "#hero", isActive: true },
-    { title: "Servicios", href: "#servicios" },
+    { title: "Cómo funciona", href: "#como-funciona" },
     { title: "Proyectos", href: "#proyectos" },
-    { title: "Cómo trabajamos", href: "#flujo" },
-    { title: "Sectores", href: "#sectores" },
     { title: "Nosotros", href: "#nosotros" },
+    { title: "Contacto", href: "#contacto" },
   ];
 
-  // Canales, pagos, datos, nube y hardware con los que integramos (logos reales, monocromos)
-  const brandList: BrandList[] = [
-    siWhatsapp,
-    siInstagram,
-    siMeta,
-    siGoogleads,
-    siMercadopago,
-    siNextdotjs,
-    siReact,
-    siVercel,
-    siSupabase,
-    siPostgresql,
-    siMongodb,
-    siGooglecloud,
-    siEspressif,
-  ].map((icon) => ({ name: icon.title, path: icon.path }));
+  // Los canales y pagos que ya usan los clientes del negocio (logos reales, monocromos)
+  const brandList: BrandList[] = [siWhatsapp, siInstagram, siMeta, siGoogleads, siMercadopago].map((icon) => ({
+    name: icon.title,
+    path: icon.path,
+  }));
 
   return (
     <div className="relative flex flex-1 flex-col">
+      <Stage />
       <Header navigationData={navigationData} />
-      <main id="main" className="w-full max-w-full flex-1 overflow-x-clip">
-        <HeroSection avatarList={avatarList} stats={stats} />
+      <main id="main" className="relative z-10 w-full max-w-full flex-1 overflow-x-clip">
+        <HeroSection />
         <BrandSlider brandList={brandList} />
         {children}
       </main>

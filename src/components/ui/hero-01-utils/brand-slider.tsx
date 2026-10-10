@@ -1,12 +1,10 @@
 "use client";
 
 /*
-  BrandSlider del hero-01 (Agency Hero Section de ShadcnSpace), recreado para SEN: marquesina
-  infinita de logos. Acepta imágenes (image / lightimg para el tema claro, como el original) o
-  trazados de simple-icons (path), que toman el color del texto y funcionan en los dos temas.
-  Se pausa con hover o foco; con reduced motion queda una grilla quieta.
+  BrandSlider del hero-01 (Agency Hero Section de ShadcnSpace), recreado para SEN. Acepta
+  imágenes (image / lightimg para el tema claro, como el original) o trazados de simple-icons
+  (path), que toman el color del texto y funcionan en los dos temas.
 */
-import { cn } from "@/lib/utils";
 
 export interface BrandList {
   name: string;
@@ -36,34 +34,20 @@ function Brand({ brand }: { brand: BrandList }) {
 }
 
 export default function BrandSlider({ brandList }: { brandList: BrandList[] }) {
-  const row = (copy: number) => (
-    <ul
-      aria-hidden={copy > 0 || undefined}
-      className={cn(
-        "flex shrink-0 animate-marquee items-center gap-[var(--gap)] pr-[var(--gap)] group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]",
-        copy > 0 && "motion-reduce:hidden",
-        "motion-reduce:flex-wrap motion-reduce:justify-center motion-reduce:pr-0",
-      )}
-    >
-      {brandList.map((brand) => (
-        <li
-          key={`${copy}-${brand.name}`}
-          className="flex items-center text-ink-faint transition-colors duration-200 hover:text-ink"
-        >
-          <Brand brand={brand} />
-        </li>
-      ))}
-    </ul>
-  );
-
+  // Con pocos logos va una fila quieta: la única marquesina de la página es la de clientes
   return (
-    <section aria-labelledby="plataformas-titulo" className="relative pb-16 md:pb-24">
-      <p id="plataformas-titulo" className="px-4 text-center text-sm text-ink-muted">
-        Trabajamos con las plataformas que ya usás
-      </p>
-      <div className="group mx-auto mt-8 flex max-w-[1200px] overflow-hidden [--duration:45s] [--gap:3.5rem] [mask-image:linear-gradient(to_right,transparent,#000_12%,#000_88%,transparent)] motion-reduce:[mask-image:none] md:[--gap:4.5rem]">
-        {row(0)}
-        {row(1)}
+    <section aria-labelledby="plataformas-titulo" className="relative px-4 pb-20 pt-6 md:px-6 md:pb-28">
+      <div className="mx-auto flex max-w-[1200px] flex-col items-start gap-6 border-t border-line pt-8 md:flex-row md:items-center md:justify-between">
+        <p id="plataformas-titulo" className="text-sm text-ink-muted">
+          Funciona con lo que tus clientes ya usan
+        </p>
+        <ul className="flex flex-wrap items-center gap-x-8 gap-y-4 md:gap-x-12">
+          {brandList.map((brand) => (
+            <li key={brand.name} className="flex items-center text-ink-faint transition-colors duration-200 hover:text-ink">
+              <Brand brand={brand} />
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

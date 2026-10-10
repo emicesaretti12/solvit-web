@@ -28,7 +28,7 @@ import { LogoMark } from "@/components/logo";
 import { getLenis } from "@/components/smooth-scroll";
 import { CONTACT_LABEL, PrimaryCta } from "@/components/cta";
 import { Reveal } from "@/components/reveal";
-import { DELIVERED, PROJECTS, SECTORS, coverOf, type Project, type Specialty } from "@/content/projects";
+import { DELIVERED, PROJECTS, coverOf, type Project, type Specialty } from "@/content/projects";
 import { cn } from "@/lib/utils";
 
 type Filter = "Todos" | Specialty;
@@ -45,22 +45,19 @@ const altOf = (p: Project) => `Ilustración de ${p.name}: ${p.kind.toLowerCase()
 
 // Datos que flotan sobre la portada de cada caso destacado
 const FLOATING: Record<string, [string, string][]> = {
-  "cerveceria-automatica": [
-    ["Barril 3", "18 % de stock"],
-    ["Válvula", "Abierta · sirviendo"],
-  ],
   "motobox-cordoba": [
     ["CRM", "Usuarios por rol"],
     ["Sitio", "Fotos desde el CRM"],
+  ],
+  "baterias-cordoba": [
+    ["Catálogo", "Marcas y vehículos"],
+    ["SEO local", "52 páginas de aterrizaje"],
   ],
 };
 
 function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-line-strong bg-navy-900/60 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-ink-muted">
-      <span aria-hidden="true" className="size-1.5 rounded-full bg-blue-400 shadow-[0_0_10px_rgb(61_139_255/0.9)]" />
-      {children}
-    </span>
+    <span className="text-sm font-medium text-blue-300">{children}</span>
   );
 }
 
@@ -146,8 +143,8 @@ function Clients() {
           Clientes satisfechos
         </h3>
         <p className="max-w-[46ch] text-sm leading-relaxed text-ink-muted">
-          Empresas de {SECTORS} rubros que ya venden con lo que construimos: motos, baterías,
-          industria, salud, gastronomía, alquileres y más.
+          Negocios de motos, baterías, industria, salud, gastronomía, alquileres y más, que ya venden
+          con lo que construimos.
         </p>
       </Reveal>
       <div className="group mt-8 flex overflow-hidden border-y border-line py-6 [--duration:50s] [--gap:2rem] [mask-image:linear-gradient(to_right,transparent,#000_10%,#000_90%,transparent)] motion-reduce:[mask-image:none] md:py-8 md:[--gap:3rem]">
@@ -179,9 +176,9 @@ function FeaturedCase({ project, flip }: { project: Project; flip: boolean }) {
       <div className={cn("relative [perspective:1600px]", flip && "lg:order-2")}>
         <motion.div
           style={reduce ? undefined : { rotateX, scale, y: lift }}
-          className="relative origin-bottom rounded-[1.75rem] border border-line bg-navy-800 p-1.5 shadow-[0_50px_100px_-50px_rgb(var(--shade-rgb)/0.9)] light:shadow-[0_40px_80px_-50px_rgb(var(--shade-rgb)/0.4)]"
+          className="relative origin-bottom overflow-hidden rounded-2xl border border-line-strong bg-navy-900 shadow-[0_50px_100px_-50px_rgb(var(--shade-rgb)/0.9)] light:shadow-[0_40px_80px_-50px_rgb(var(--shade-rgb)/0.4)]"
         >
-          <div className="relative aspect-video overflow-hidden rounded-[calc(1.75rem-6px)] bg-navy-900 ring-1 ring-fg/5">
+          <div className="relative aspect-video">
             <Image src={coverOf(project)} alt={altOf(project)} fill sizes="(min-width: 1024px) 640px, 100vw" className="object-cover" />
           </div>
         </motion.div>
@@ -201,7 +198,7 @@ function FeaturedCase({ project, flip }: { project: Project; flip: boolean }) {
           >
             <div className={cn("animate-float", i === 1 && "[animation-delay:-3s]")}>
               <div className="rounded-2xl border border-line-strong bg-navy-850/90 px-4 py-3 shadow-[0_20px_50px_-20px_rgb(var(--shade-rgb)/0.8)] backdrop-blur-md light:shadow-[0_18px_40px_-22px_rgb(var(--shade-rgb)/0.35)]">
-                <p className="text-[11px] uppercase tracking-[0.16em] text-ink-faint">{label}</p>
+                <p className="text-xs text-ink-faint">{label}</p>
                 <p className="mt-1 text-sm font-medium text-ink">{value}</p>
               </div>
             </div>
@@ -238,7 +235,7 @@ function FeaturedCase({ project, flip }: { project: Project; flip: boolean }) {
           {project.url ? (
             <SiteLink url={project.url} name={project.name} />
           ) : (
-            <PrimaryCta label="Quiero un proyecto así" />
+            <PrimaryCta label={CONTACT_LABEL} />
           )}
         </div>
       </Reveal>
@@ -284,7 +281,7 @@ function ProjectIndex({
             Todos los proyectos
           </h3>
           <p className="mt-3 max-w-[52ch] text-base leading-relaxed text-ink-muted">
-            Una selección de lo que entregamos. Filtrá por especialidad.
+            Una selección de lo que entregamos, por especialidad.
           </p>
         </div>
         <div
@@ -336,7 +333,7 @@ function ProjectIndex({
         {/* Encabezados de columna (escritorio) */}
         <div
           aria-hidden="true"
-          className="hidden grid-cols-[8rem_minmax(0,1.6fr)_minmax(0,0.8fr)_minmax(0,1.1fr)_8.5rem] gap-6 border-b border-line pb-3 text-[11px] uppercase tracking-[0.16em] text-ink-faint lg:grid lg:pointer-fine:grid-cols-[minmax(0,1.6fr)_minmax(0,0.8fr)_minmax(0,1.1fr)_8.5rem]"
+          className="hidden grid-cols-[8rem_minmax(0,1.6fr)_minmax(0,0.8fr)_minmax(0,1.1fr)_8.5rem] gap-6 border-b border-line pb-3 text-xs text-ink-faint lg:grid lg:pointer-fine:grid-cols-[minmax(0,1.6fr)_minmax(0,0.8fr)_minmax(0,1.1fr)_8.5rem]"
         >
           <span className="lg:pointer-fine:hidden" />
           <span>Proyecto</span>
@@ -371,7 +368,7 @@ function ProjectIndex({
                     <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[17px] font-medium tracking-[-0.01em] text-ink transition-transform duration-300 ease-[var(--ease-out)] lg:text-[1.35rem] lg:group-hover:translate-x-1.5">
                       <span>{p.name}</span>
                       {p.featured && (
-                        <span className="shrink-0 rounded-full bg-blue-500/12 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-blue-300">
+                        <span className="shrink-0 rounded-md bg-blue-500/12 px-1.5 py-0.5 text-[11px] font-medium text-blue-300">
                           Destacado
                         </span>
                       )}
@@ -438,8 +435,8 @@ function ProjectIndex({
       </div>
 
       {/* Cierre: el total entregado y el siguiente paso */}
-      <Reveal className="mt-14 flex flex-col gap-6 rounded-[1.75rem] border border-line bg-navy-800 p-1.5 md:mt-16">
-        <div className="relative flex flex-col gap-6 overflow-hidden rounded-[calc(1.75rem-6px)] bg-navy-850 px-6 py-8 md:flex-row md:items-center md:justify-between md:px-10 md:py-10">
+      <Reveal className="mt-14 md:mt-16">
+        <div className="relative flex flex-col gap-6 overflow-hidden rounded-2xl border border-line bg-navy-850 px-6 py-8 md:flex-row md:items-center md:justify-between md:px-10 md:py-10">
           <div
             aria-hidden="true"
             className="pointer-events-none absolute -right-20 -top-28 size-[360px] rounded-full bg-[radial-gradient(closest-side,rgb(31_107_255/0.18),transparent)]"
@@ -498,9 +495,8 @@ export function Projects() {
       <div className="mx-auto max-w-[1200px] px-4 py-24 md:px-6 md:py-36">
         <Reveal>
           <PortfolioGallery
-            eyebrow={<Eyebrow>Proyectos realizados</Eyebrow>}
-            title="Proyectos reales, clientes satisfechos."
-            description={`Más de ${DELIVERED} proyectos entregados en ${SECTORS} rubros: sitios que venden, CRM propios, sistemas de reservas y hardware conectado.`}
+            title={`Más de ${DELIVERED} proyectos entregados.`}
+            description="Webs que venden, CRM a medida, sistemas de reservas y catálogos para clientes de motos, baterías, industria, salud, gastronomía y más."
             archiveButton={{ text: "Ver todos los proyectos", href: "#proyectos-lista" }}
             images={images}
             onImageClick={goTo}

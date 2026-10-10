@@ -2,9 +2,9 @@ import { Reveal } from "./reveal";
 import { ContactForm } from "./contact-form";
 
 const NEXT_STEPS = [
-  "Nos contás qué proceso o qué parte de las ventas te frena.",
-  "Analizamos tu operación y ubicamos el cuello de botella.",
-  "Te proponemos una solución concreta, por etapas medibles.",
+  "Nos contás cómo vendés hoy.",
+  "Te mostramos dónde se pierden clientes.",
+  "Te proponemos una solución por etapas, con números.",
 ];
 
 export function Contact() {
@@ -20,11 +20,10 @@ export function Contact() {
             id="contacto-titulo"
             className="font-display max-w-[14ch] text-[2.1rem] font-semibold leading-[1.04] tracking-[-0.035em] text-ink text-balance sm:text-5xl lg:text-[3.2rem]"
           >
-            Empecemos por tu cuello de botella.
+            Contanos dónde se te escapan las ventas.
           </h2>
           <p className="mt-6 max-w-[42ch] text-lg leading-relaxed text-ink-muted">
-            Un diagnóstico inicial, sin compromiso, con el mismo equipo que después diseña e
-            implementa la solución.
+            Diagnóstico sin compromiso, con el mismo equipo que después lo implementa.
           </p>
           <div className="relative mt-10 max-w-[44ch]">
             <span aria-hidden="true" className="absolute bottom-3 left-[13px] top-3 w-px bg-line-strong" />

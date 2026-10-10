@@ -2,20 +2,20 @@
 
 Fuente: brand board de SEN. Isotipo S en tres cintas plegadas, wordmark SEN extendido con el
 corte de la N en azul, versión oscura (navy medianoche), versión clara (blanco frío con el
-wordmark navy), versión monocroma y app icon con la lista SOFTWARE / HARDWARE / IA /
-MARKETING / CRECIMIENTO.
+wordmark navy) y versión monocroma.
 
 ## 1. Visual Theme & Atmosphere
 
-La web de una startup de ingeniería aplicada: precisa, silenciosa y con movimiento que explica.
-El tema oscuro (por defecto) es un navy medianoche profundo donde el azul eléctrico del isotipo
-aparece solo como señal: logo, acciones, líneas de datos y luz. El tema claro es la versión
-clara del board: blanco frío, tipografía navy y el mismo azul. Etiquetas en mayúsculas con
-tracking amplio como la bajada del logo, grano sutil y luces difusas.
+La web de una startup que soluciona ventas: una sola historia contada con un solo objeto. El
+isotipo de SEN, en 3D real (WebGL), recorre la página: armado en el hero, se abre en las tres
+etapas de una venta (cada cinta es una etapa) y se vuelve a armar como crecimiento. El tema
+oscuro (por defecto) es un navy medianoche plano donde el azul eléctrico aparece solo como
+señal: el isotipo, el corte de la N, la acción principal y el estado activo. El tema claro es
+la versión clara del board: blanco frío, tipografía navy y el mismo azul.
 
-- **Density:** 5 (equilibrada: mucha información, bien espaciada en capítulos)
-- **Variance:** 7 (asimétrica en el contenido, centrada solo en el hero)
-- **Motion:** 8 (cinemática: secciones fijadas al scroll, apilado, trazos que se dibujan, 3D)
+- **Density:** 3 (pocas cosas por pantalla, cada una con aire)
+- **Variance:** 7 (titular a la izquierda y objeto a la derecha; en celulares, objeto arriba)
+- **Motion:** 8 (cinemática y con sentido: el objeto cuenta el recorrido de la venta)
 
 ## 2. Color Palette & Roles
 
@@ -33,70 +33,73 @@ Los roles son tokens (`--navy-*`, `--ink-*`, `--line*`) que cambian con `data-th
 | Metadatos (`ink-faint`) | #7B8597 | #616C80 |
 | Líneas (`line` / `line-strong`) | gris azulado al 10 % / 18 % | navy al 9 % / 16 % |
 
-- **SEN Electric** (#1F6BFF): ÚNICO acento. CTA, foco, líneas activas, el corte de la N
-  (blanco sobre este azul: 4.6:1; el hover oscurece a #1556F0, nunca aclara).
+- **SEN Electric** (#1F6BFF): ÚNICO acento. CTA, foco, estado activo, el corte de la N.
 - **Electric para texto** (`blue-400`/`blue-300`): #3D8BFF/#8DB8FF en oscuro; en claro se
   oscurecen a #1A5FE6/#1652C9 para leerse como texto.
 - **Capas translúcidas:** color `fg` (blanco en oscuro, navy en claro): `bg-fg/5`,
   `border-fg/10`. Nunca `bg-white/x` para superficies.
-- **Isotipo:** degradé #0052FF → #1FDCFF (azul a cian) solo en el logo; el cian no se usa fuera.
+- **Isotipo:** degradé #0052FF → #1FDCFF (azul a cian), también en el objeto 3D.
 
-Prohibido: campos grandes de azul saturado, degradés violeta/azul "de IA", glows de neón,
-negro puro, colores de serie fuera de marca (los gráficos usan azul y blanco o navy).
+Prohibido: manchas de luz y retículas de fondo, glows, degradés violeta/azul "de IA", negro
+puro, campos grandes de azul saturado. La única luz de la página es la del objeto 3D.
 
 ## 3. Typography Rules
 
-- **Display:** Archivo semi-expandida (font-stretch 112.5%), SemiBold, tracking -0.035em.
-  Eco del wordmark extendido sin cansar en titulares largos.
-- **Brand:** Krona One: solo el wordmark SEN (en vectores) y la palabra SEN del portal.
+- **Display:** Archivo semi-expandida (font-stretch 112.5%), Bold, tracking -0.04em, interlineado
+  0.95. Titular del hero en 3 líneas como máximo.
+- **Brand:** Krona One: solo el wordmark SEN (en vectores).
 - **Body:** Geist 400/500, interlineado relajado, máximo ~65 caracteres por línea.
-- **Mono:** Geist Mono: datos, métricas, horarios, telemetría (números tabulares).
-- **Labels:** Geist 11px, mayúsculas, tracking 0.32em, `ink-muted` (como la bajada del logo).
-- **Prohibido:** Inter, serifas, gradientes fuertes en titulares, títulos de más de 3 líneas.
+- **Mono:** Geist Mono: datos, métricas e índices de pasos (números tabulares).
+- **Etiquetas:** en minúscula de oración (`text-sm`, `blue-300` o `ink-faint`). Sin pastillas con
+  punto ni mayúsculas con tracking amplio.
+- **Prohibido:** Inter, serifas, gradientes en titulares.
 
 ## 4. Component Stylings
 
 - **Botones:** pill. Primario SEN Electric con texto blanco y flecha en círculo anidado;
-  secundario con borde de línea. Feedback táctil scale(0.97) al presionar. 44px táctiles.
-- **Tarjetas:** doble bisel: carcasa 2rem con borde de 1px y padding 6px, núcleo
-  2rem - 6px en `navy-850`. Solo cuando la elevación ordena.
-- **Vistas vivas:** mini interfaces reales (CRM con roles, chat del agente de IA, embudo y el
-  nodo ESP32 del proyecto de la cervecería) rotuladas "Vista de ejemplo", con pausa.
-  Cada vista muestra un solo sistema: nunca se mezclan datos de proyectos distintos.
-- **Proyectos:** portadas de estudio con el dominio real; solo hechos confirmados.
-- **Inputs:** etiqueta arriba, error abajo (token `destructive`), 16px mínimo, foco azul.
-- **Toasts:** Sonner siguiendo el tema elegido, superficie `navy-850` y borde de línea.
+  secundario como enlace de texto con flecha. Feedback táctil scale(0.97). 44px táctiles.
+  Un solo texto para el contacto en todo el sitio: "Pedí tu diagnóstico".
+- **Tarjetas:** un solo borde de 1px y radio 16 a 28px, solo cuando la elevación ordena. Nada
+  de carcasas dobles.
+- **Vistas vivas:** mini interfaces reales (embudo de campañas, chat del agente de IA, CRM con
+  roles, tablero de la semana) con un ejemplo único y coherente (una moto 0km en cuotas). Una
+  sola nota por sección aclara que son de ejemplo. Se pausan fuera de pantalla.
+- **Proyectos:** solo hechos confirmados; la cervecería automática aparece solo como proyecto.
+- **Inputs:** etiqueta arriba, error abajo, 16px mínimo, foco azul.
 - **Tema:** botón en el header; el script del layout aplica la preferencia guardada antes
   de pintar (sin parpadeo).
-- **Carga:** esqueletos con la forma final. Sin spinners genéricos.
+- **Carga:** esqueletos con la forma final; el isotipo en SVG mientras carga WebGL.
 
 ## 5. Layout Principles
 
 - Contenedor máximo 1200px, gutter 16px en móvil y 24px en escritorio.
-- Capítulos con aire (py-24 a py-36). Cada sección usa una familia de layout distinta.
+- Página: hero → plataformas → Cómo funciona (atraer, atender, cerrar, crecer) → proyectos →
+  nosotros → contacto. Cada bloque tiene un solo trabajo.
 - Grilla CSS, nunca cuentas de porcentaje con flex. Menos de 768px: una sola columna.
 - Alturas completas con min-h-[100svh] y nunca h-screen.
 - Sin scroll horizontal en ningún ancho.
 
 ## 6. Motion & Interaction
 
-- **Motores:** GSAP + ScrollTrigger para fijar, apilar y dibujar con el scroll; Motion para
-  springs, layout y entradas; CSS para loops perpetuos (marquesinas, pulsos).
-  Lenis para inercia del scroll. Nunca GSAP y Motion sobre el mismo nodo.
-- **Escritorio y móvil:** las mismas animaciones; en celulares con versiones compactas
-  (variantes `stack:` y `stack-sm:`, consultas `STACK_QUERY` y `STACK_SM_QUERY`).
-- **Curvas:** ease-out cubic-bezier(0.23, 1, 0.32, 1); movimiento en pantalla
-  cubic-bezier(0.77, 0, 0.175, 1). Springs stiffness 100 / damping 20. Nunca ease-in.
-- **Cada animación tiene un propósito:** explicar el flujo, mostrar estado, dar feedback.
-- Solo transform y opacity. Las animaciones se pausan fuera de pantalla.
-- **Reduced motion:** sin inercia, sin fijados, sin loops; el contenido queda visible y quieto.
+- **Escenario 3D:** un solo canvas fijo detrás del contenido (`src/components/three`). Las
+  secciones dejan marcas `<StageMark pose="..."/>` y el director interpola la pose del isotipo
+  entre la marca anterior y la siguiente según el scroll (poses en `choreography.ts`). El
+  render se detiene cuando el objeto no se ve. three.js se carga solo en el cliente.
+- **Capítulos:** contenedor alto con panel `sticky` (sin pin de GSAP) y cambio de paso con un
+  barrido diagonal a 24,5°, la inclinación de las cintas del isotipo.
+- **Gestos:** el isotipo se gira con el dedo o el mouse; resorte con la velocidad del gesto
+  (amortiguación ~0,8). En touch solo el eje horizontal: el vertical es del scroll.
+- **Curvas:** entradas cubic-bezier(0.16, 1, 0.3, 1); springs para gestos. Nunca ease-in.
+- **Cada animación tiene un propósito:** contar el recorrido de la venta, mostrar estado o dar
+  feedback. Solo transform, opacity y clip-path.
+- **Reduced motion:** sin zambullida, sin apertura ni giros del isotipo; barridos como fundidos;
+  el titular visible desde el primer cuadro.
 
 ## 7. Anti-Patterns (Banned)
 
-- Sin emojis. Sin Inter. Sin negro puro. Sin glows de neón ni degradés violeta.
-- Sin campos de azul saturado a pantalla completa (el azul es señal, no fondo).
-- Sin tres tarjetas iguales en fila. Sin etiquetas tipo "SECCIÓN 01".
+- Sin emojis. Sin Inter. Sin negro puro. Sin glows ni manchas de luz.
+- Sin pastillas con punto ni etiquetas en mayúsculas sobre cada título.
+- Sin tres tarjetas iguales en fila. Sin etiquetas tipo "SECCIÓN 01". Una sola marquesina.
 - Sin guiones largos en los textos. Sin "Scroll para explorar" ni flechas que rebotan.
-- Sin nombres, testimonios, estrellas ni números inventados presentados como reales: los
-  datos de ejemplo van rotulados y los casos por industria aclaran que no son citas.
-- Sin clichés: "Elevar", "Sin fisuras", "Desatá", "Next-Gen", "Revolucionario".
+- Sin testimonios, nombres ni números inventados presentados como reales.
+- Sin clichés: "Elevar", "Sin fisuras", "Desatá", "Next-Gen", "Revolucionario", "No somos X".

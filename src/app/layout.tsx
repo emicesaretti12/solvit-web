@@ -31,13 +31,13 @@ const krona = Krona_One({
 });
 
 export const metadata: Metadata = {
-  title: "SEN Software · Ing. & Soluciones",
+  title: "SEN Software · Especialistas en solucionar tus ventas",
   description:
-    "Software a medida, inteligencia artificial, integración de hardware y marketing de performance para empresas que quieren escalar.",
+    "Marketing digital, agentes de IA que atienden por WhatsApp e Instagram y un CRM a tu medida: un solo equipo para que más consultas terminen en ventas.",
   openGraph: {
-    title: "SEN Software · Ing. & Soluciones",
+    title: "SEN Software · Especialistas en solucionar tus ventas",
     description:
-      "Software a medida, IA, hardware y marketing de performance integrados por un mismo equipo técnico.",
+      "Marketing, agentes de IA y CRM a medida, hechos por un mismo equipo para que más consultas terminen en ventas.",
     siteName: "SEN Software",
     locale: "es_AR",
     type: "website",

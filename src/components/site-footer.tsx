@@ -4,19 +4,17 @@ const COLUMNS = [
   {
     title: "Servicios",
     links: [
-      { href: "#servicios", label: "Desarrollo web y software a medida" },
-      { href: "#servicios", label: "Agentes de IA" },
-      { href: "#servicios", label: "Marketing digital" },
-      { href: "#servicios", label: "Hardware e IoT (módulo aparte)" },
+      { href: "#como-funciona", label: "Marketing digital" },
+      { href: "#como-funciona", label: "Agentes de IA" },
+      { href: "#como-funciona", label: "Desarrollo web y software a medida" },
+      { href: "#proyectos", label: "Hardware e IoT (módulo aparte)" },
     ],
   },
   {
     title: "SEN",
     links: [
       { href: "#proyectos", label: "Proyectos" },
-      { href: "#flujo", label: "Cómo trabajamos" },
-      { href: "#plataforma", label: "Plataforma" },
-      { href: "#sectores", label: "Sectores" },
+      { href: "#como-funciona", label: "Cómo funciona" },
       { href: "#nosotros", label: "Nosotros" },
       { href: "#contacto", label: "Contacto" },
     ],

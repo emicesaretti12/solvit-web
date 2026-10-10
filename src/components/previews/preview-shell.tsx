@@ -58,9 +58,6 @@ export function PreviewShell({
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {status}
-            <span className="rounded-full border border-line-strong px-2 py-0.5 text-[10px] text-ink-faint">
-              Vista de ejemplo
-            </span>
           </div>
         </div>
         {onTogglePause && (

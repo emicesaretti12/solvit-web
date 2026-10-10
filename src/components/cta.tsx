@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react";
 import { ArrowUpRight, ArrowDown } from "@phosphor-icons/react/dist/ssr";
 
-export const CONTACT_LABEL = "Agendar diagnóstico";
+export const CONTACT_LABEL = "Pedí tu diagnóstico";
 
 const base =
   "group inline-flex items-center gap-3 whitespace-nowrap rounded-full text-sm font-medium transition-[transform,background-color,border-color] duration-150 ease-out active:scale-[0.97]";

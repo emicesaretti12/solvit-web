@@ -66,10 +66,6 @@
   --fg-rgb: 255 255 255;
   /* Sombras y velos teñidos con el fondo */
   --shade-rgb: 1 8 20;
-  /* Relleno del wordmark del portal antes de entrar (blanco como el logo sobre navy) */
-  --portal-fill-from: #ffffff;
-  --portal-fill-via: #eef2fa;
-  --portal-fill-to: #bccdee;
   color-scheme: dark;
 }
 
@@ -95,9 +91,6 @@
   --blue-300: #1652c9;
   --fg-rgb: 11 18 34;
   --shade-rgb: 40 56 92;
-  --portal-fill-from: #0b1222;
-  --portal-fill-via: #16213a;
-  --portal-fill-to: #23345c;
   color-scheme: light;
 }
 
@@ -282,30 +275,34 @@ html.lenis body {
 }
 
 /* Órbitas del fondo del hero: giro lento y constante (lineal), solo transform */
-@keyframes orbit {
-  to {
-    transform: rotate(360deg);
+/* Hero: el titular entra línea por línea desde una máscara (CSS: se pinta sin JavaScript) */
+@keyframes hero-rise {
+  from {
+    transform: translateY(108%);
   }
 }
-.hero-orbit {
-  animation: orbit var(--orbit-duration, 60s) linear infinite;
+@keyframes hero-fade {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@keyframes hero-accent {
+  from {
+    transform: skewX(-24.5deg) scaleY(0);
+  }
+}
+.hero-line {
+  animation: hero-rise 1.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.hero-fade {
+  animation: hero-fade 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.hero-accent {
+  transform-origin: bottom;
+  animation: hero-accent 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.62s both;
 }
 
-/* Luces del fondo del hero: derivan lento (18 s), solo transform */
-@keyframes drift {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-  50% {
-    transform: translate3d(6%, 4%, 0);
-  }
-}
-.hero-drift {
-  animation: drift 18s var(--ease-in-out) infinite;
-}
-
-/* Flotación suave del isotipo 3D (se apaga con reduced motion) */
 @keyframes float-y {
   0%,
   100% {
@@ -348,111 +345,13 @@ html.lenis body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+  .hero-line,
+  .hero-fade,
+  .hero-accent,
   .animate-float,
-  .hero-orbit,
-  .hero-drift,
   .animate-marquee,
   .animate-marquee-reverse,
   .live-dot::after {
     animation: none !important;
   }
-}
-
-/* Glyph Portal: piezas de marca sobre el componente de ui/ */
-.sen-portal [data-gp-caption] {
-  inset: calc(var(--gp-word-bottom, 60%) + 76px) 16px auto;
-  justify-content: center;
-}
-.sen-portal [data-gp-hint] {
-  display: none;
-}
-.sen-portal [data-gp-enter] {
-  gap: 12px;
-  padding: 6px 6px 6px 20px;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  background: color-mix(in oklab, var(--navy-900) 60%, transparent);
-  color: var(--ink);
-  font-size: 14px;
-  font-weight: 500;
-  transition:
-    border-color 150ms ease,
-    transform 150ms var(--ease-out);
-}
-@media (hover: hover) and (pointer: fine) {
-  .sen-portal [data-gp-enter]:hover {
-    border-color: rgb(61 139 255 / 0.6);
-  }
-}
-.sen-portal [data-gp-enter]:active {
-  transform: scale(0.97);
-}
-/* Portal: foco visible del enlace con el estilo del sitio (el componente lo achica y apaga) */
-.sen-portal [data-gp-caption] [data-gp-enter]:focus-visible {
-  margin: 0;
-  padding: 6px 6px 6px 20px;
-  background: color-mix(in oklab, var(--navy-900) 60%, transparent);
-  color: var(--ink);
-  outline: 2px solid var(--blue-400);
-  outline-offset: 3px;
-}
-/* Portal: el enlace no puede quedar fuera del cuadro en pantallas bajas */
-.sen-portal [data-gp-caption] {
-  top: min(calc(var(--gp-word-bottom, 60%) + 76px), calc(100% - 48px));
-}
-/* Flecha del enlace en un círculo, como el resto de los botones del sitio */
-.sen-portal [data-gp-enter] > span {
-  display: flex;
-  width: 32px;
-  height: 32px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: rgb(var(--fg-rgb) / 0.06);
-}
-/* Una vez adentro, el enlace de la portada no puede quedar debajo del contenido */
-.sen-portal[data-gp-entered="true"] [data-gp-caption] {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Testimonios: columnas que se desplazan en loop; se pausan con hover, foco o el botón */
-@keyframes testimonials-scroll {
-  to {
-    transform: translateY(-50%);
-  }
-}
-.testimonials-track {
-  animation: testimonials-scroll var(--testimonials-duration, 15s) linear infinite;
-}
-.group\/column:hover .testimonials-track,
-.group\/column:focus-within .testimonials-track,
-[data-paused] .testimonials-track {
-  animation-play-state: paused;
-}
-@media (prefers-reduced-motion: reduce) {
-  .testimonials-track {
-    animation: none !important;
-  }
-}
-
-/* Galería dominó: si una foto no carga, que no aparezca el texto alternativo sobre la carta */
-[data-slot="domino-gallery"] img {
-  color: transparent;
-}
-
-/* Panel del portal: muestra la disciplina activa según el avance del zoom */
-.portal-hud [data-hud-item] {
-  opacity: 0;
-  transform: translateY(8px);
-  transition:
-    opacity 260ms var(--ease-out),
-    transform 260ms var(--ease-out);
-}
-.portal-hud[data-step="0"] [data-hud-item="0"],
-.portal-hud[data-step="1"] [data-hud-item="1"],
-.portal-hud[data-step="2"] [data-hud-item="2"],
-.portal-hud[data-step="3"] [data-hud-item="3"] {
-  opacity: 1;
-  transform: none;
 }

@@ -4,16 +4,16 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { CheckCircle, CircleNotch, WarningCircle } from "@phosphor-icons/react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { CONTACT_LABEL } from "./cta";
 
 type Status = "idle" | "sending" | "sent" | "error";
 type Errors = Partial<Record<"nombre" | "email" | "mensaje", string>>;
 
 const areas = [
-  "Más ventas: marketing, IA y CRM",
-  "Desarrollo web o software a medida",
-  "Agentes de IA",
-  "Marketing digital",
+  "No sé todavía, quiero un diagnóstico",
+  "Conseguir más consultas (marketing)",
+  "Responder más rápido (agente de IA)",
+  "Ordenar el seguimiento (CRM a medida)",
+  "Una web nueva o renovada",
   "Hardware e IoT",
 ];
 
@@ -192,7 +192,7 @@ export function ContactForm() {
               {status === "sending" && (
                 <CircleNotch size={16} className="animate-spin" />
               )}
-              {status === "sending" ? "Enviando" : CONTACT_LABEL}
+              {status === "sending" ? "Enviando" : "Enviar consulta"}
             </button>
           </div>
         </motion.form>

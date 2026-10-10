@@ -59,12 +59,12 @@ const weekday = (d: Date) => d.toLocaleDateString("es-AR", { weekday: "short" })
 
 // Un solo sistema: el CRM comercial (leads, agente de IA, asesores y campañas)
 const EVENTS: { icon: Icon; text: string; source: string }[] = [
-  { icon: WhatsappLogo, text: "Lead calificado: SUV 0km", source: "Agente IA" },
+  { icon: WhatsappLogo, text: "Consulta calificada: moto 0km", source: "Agente IA" },
   { icon: UserSwitch, text: "Asignado a Asesor 2", source: "CRM" },
   { icon: InstagramLogo, text: "Consulta: unidad 2 ambientes", source: "Instagram" },
   { icon: Megaphone, text: "CPA de Meta Ads −4,2 %", source: "Campañas" },
   { icon: CalendarCheck, text: "Visita agendada 16:30", source: "Agenda" },
-  { icon: FileText, text: "Propuesta enviada a Pedido mayorista", source: "CRM" },
+  { icon: FileText, text: "Propuesta enviada: pedido mayorista", source: "CRM" },
   { icon: Globe, text: "Formulario web: financiación", source: "Web" },
   { icon: ArrowsClockwise, text: "Seguimiento vencido, reasignado", source: "CRM" },
 ];
@@ -156,6 +156,20 @@ export function AppBar() {
         Datos de ejemplo
       </span>
     </div>
+  );
+}
+
+// Solo el gráfico de la semana, para el capítulo "Crecer"
+export function GrowthChart() {
+  const theme = useTheme();
+  return (
+    <AreaChartCard
+      title="Consultas de la semana"
+      series={SERIES[theme]}
+      metrics={METRICS}
+      formatTick={weekday}
+      className="h-full bg-navy-900/50"
+    />
   );
 }
 

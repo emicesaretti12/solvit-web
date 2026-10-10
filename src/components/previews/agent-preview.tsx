@@ -8,7 +8,7 @@ import { PreviewShell, LiveBadge, usePreviewLoop } from "./preview-shell";
 type Msg = { from: "cliente" | "agente"; text: string };
 
 const MESSAGES: Msg[] = [
-  { from: "cliente", text: "Hola, vi el anuncio del SUV 0km. ¿Tienen financiación?" },
+  { from: "cliente", text: "Hola, vi el anuncio de la moto 0km. ¿Tienen cuotas?" },
   { from: "agente", text: "Hola. Sí, hay planes de hasta 60 cuotas. ¿Para cuándo pensás la compra?" },
   { from: "cliente", text: "Este mes. Tengo un usado para entregar." },
   { from: "agente", text: "Perfecto. Le paso tu consulta a un asesor de ventas ahora mismo." },
@@ -16,7 +16,7 @@ const MESSAGES: Msg[] = [
 
 // Ficha que el agente va extrayendo de la conversación
 const FIELDS = [
-  { label: "Interés", value: "SUV 0km", after: 1 },
+  { label: "Interés", value: "Moto 0km", after: 1 },
   { label: "Financiación", value: "Sí, en cuotas", after: 2 },
   { label: "Plazo de compra", value: "Este mes", after: 3 },
   { label: "Permuta", value: "Usado", after: 3 },

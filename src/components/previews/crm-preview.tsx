@@ -20,8 +20,8 @@ const PERMISSIONS: { label: string; roles: Role[] }[] = [
 const CHANNEL: Record<string, Icon> = { whatsapp: WhatsappLogo, instagram: InstagramLogo, web: Globe };
 
 const ROWS = [
-  { id: 1, lead: "SUV 0km con financiación", channel: "whatsapp", stage: "Calificado", owner: "Asesor 1" },
-  { id: 2, lead: "Pedido mayorista de bebidas", channel: "web", stage: "Propuesta", owner: "Asesor 2" },
+  { id: 1, lead: "Moto 0km en cuotas", channel: "whatsapp", stage: "Calificado", owner: "Asesor 1" },
+  { id: 2, lead: "Pedido mayorista de baterías", channel: "web", stage: "Propuesta", owner: "Asesor 2" },
   { id: 3, lead: "Unidad 2 ambientes, inversor", channel: "instagram", stage: "Calificado", owner: "Asesor 3" },
   { id: 4, lead: "Mantenimiento de línea 2", channel: "web", stage: "Nuevo", owner: "Asesor 1" },
   { id: 5, lead: "Reclamo de entrega", channel: "whatsapp", stage: "Postventa", owner: "Soporte" },

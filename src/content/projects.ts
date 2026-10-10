@@ -27,21 +27,6 @@ export type Project = {
 
 export const PROJECTS: Project[] = [
   {
-    slug: "cerveceria-automatica",
-    name: "Cervecería automática",
-    sector: "Gastronomía",
-    kind: "Canilla automática",
-    specialties: ["Hardware e IoT", "Software a medida"],
-    summary:
-      "Canilla de cerveza controlada por un ESP32, con una pantalla animada para el cliente y telemetría del barril.",
-    highlights: [
-      "Placa ESP32 que controla el servido desde la canilla",
-      "Pantalla de canilla animada para quien se sirve",
-      "Telemetría del barril: flujo, válvula y stock",
-    ],
-    featured: true,
-  },
-  {
     slug: "motobox-cordoba",
     client: "Motobox Córdoba",
     name: "Motobox Córdoba",
@@ -67,7 +52,13 @@ export const PROJECTS: Project[] = [
     specialties: ["Desarrollo web", "SEO"],
     summary:
       "Sitio prerenderizado con catálogo por marcas, vehículos y servicios, y 52 páginas de aterrizaje para búsquedas locales.",
+    highlights: [
+      "Catálogo por marcas, vehículos y servicios",
+      "52 páginas de aterrizaje para búsquedas locales",
+      "Sitio prerenderizado: carga rápida en el celular",
+    ],
     url: "https://www.bateriascordoba.com.ar",
+    featured: true,
   },
   {
     slug: "adami-industrial",
@@ -136,6 +127,20 @@ export const PROJECTS: Project[] = [
     kind: "Catálogo online",
     specialties: ["Desarrollo web"],
     summary: "Catálogo digital de piezas de cerámica.",
+  },
+  {
+    slug: "cerveceria-automatica",
+    name: "Cervecería automática",
+    sector: "Gastronomía",
+    kind: "Canilla automática",
+    specialties: ["Hardware e IoT", "Software a medida"],
+    summary:
+      "Canilla de cerveza controlada por un ESP32, con una pantalla animada para el cliente y telemetría del barril.",
+    highlights: [
+      "Placa ESP32 que controla el servido desde la canilla",
+      "Pantalla de canilla animada para quien se sirve",
+      "Telemetría del barril: flujo, válvula y stock",
+    ],
   },
 ];
 

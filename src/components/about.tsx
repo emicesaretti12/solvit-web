@@ -4,27 +4,19 @@ import { Fragment, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { Compass, Target } from "@phosphor-icons/react";
 import { Reveal } from "./reveal";
 import { Wordmark } from "./logo";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-// El cierre de la propuesta de SEN, palabra por palabra
+// Quiénes somos, palabra por palabra
 const MANIFESTO =
-  "actúa como un motor de ingeniería aplicada que reemplaza la intuición y el trabajo manual por sistemas estructurados, trazables y altamente rentables.";
+  "es un equipo de ingenieros y desarrolladores que se ocupa de todo el camino de la venta, del anuncio al cierre.";
 
-const BLOCKS = [
-  {
-    icon: Target,
-    label: "Misión",
-    text: "Potenciar el crecimiento y la rentabilidad de los negocios transformando radicalmente sus procesos internos mediante software a medida, automatización con hardware e inteligencia artificial, respaldados por una estrategia de captación y marketing integral.",
-  },
-  {
-    icon: Compass,
-    label: "Visión",
-    text: "Consolidarse como el socio estratégico de referencia en innovación e ingeniería aplicada para empresas que buscan optimizar sus recursos, erradicar ineficiencias operativas y escalar sus modelos de negocio con tecnología propietaria.",
-  },
+const PRINCIPLES = [
+  "Hablamos de ventas, no de tecnología.",
+  "Un solo equipo: nadie se pasa la pelota.",
+  "Trabajamos por etapas que podés medir.",
 ];
 
 export function About() {
@@ -80,17 +72,13 @@ export function About() {
           ))}
         </p>
 
-        <div className="mt-20 grid gap-12 md:mt-28 md:grid-cols-2 md:gap-16">
-          {BLOCKS.map((b, i) => (
-            <Reveal key={b.label} delay={i * 0.08} className="border-t border-line-strong pt-8">
-              <h3 className="flex items-center gap-2.5 text-sm font-medium text-blue-300">
-                <b.icon size={18} weight="light" aria-hidden="true" />
-                {b.label}
-              </h3>
-              <p className="mt-5 text-lg leading-relaxed text-ink md:text-[1.3rem] md:leading-[1.55]">{b.text}</p>
+        <ul className="mt-16 grid gap-8 md:mt-24 md:grid-cols-3 md:gap-12">
+          {PRINCIPLES.map((p, i) => (
+            <Reveal key={p} as="li" delay={i * 0.08} className="border-t border-line-strong pt-6">
+              <p className="text-lg leading-snug text-ink md:text-xl">{p}</p>
             </Reveal>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );
