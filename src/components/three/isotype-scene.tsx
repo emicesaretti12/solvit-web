@@ -176,6 +176,13 @@ function Rig({
   const damped = useRef({ turn: start.turn, tilt: start.tilt, x: start.x, y: start.y, z: start.z, scale: start.scale });
   const clock = useRef(0);
   const intro = useRef(0);
+  // La entrada solo corre si la S está a la vista al cargar; si la página abrió más abajo,
+  // el primer cuadro llega mucho después y la S aparece ya en su pose
+  const mountedAt = useRef(0);
+  const introChecked = useRef(false);
+  useEffect(() => {
+    mountedAt.current = performance.now();
+  }, []);
   const lastZ = useRef(start.z);
   const { camera, size } = useThree();
 
@@ -206,6 +213,10 @@ function Rig({
     look.current.x = THREE.MathUtils.damp(look.current.x, pointer.current.x, 3, dt);
     look.current.y = THREE.MathUtils.damp(look.current.y, pointer.current.y, 3, dt);
     const sway = reduce ? 0 : Math.sin(clock.current * 0.45) * 0.12;
+    if (!introChecked.current) {
+      introChecked.current = true;
+      if (performance.now() - mountedAt.current > 1200) intro.current = 1;
+    }
     intro.current = reduce ? 1 : Math.min(1, intro.current + dt / 1.5);
     const enter = 1 - Math.pow(1 - intro.current, 3); // ease-out cúbica
     const bob = reduce ? 0 : Math.sin(clock.current * 0.9) * 0.05;

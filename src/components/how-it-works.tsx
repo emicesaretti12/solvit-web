@@ -231,7 +231,7 @@ export function HowItWorks() {
           className="absolute left-0"
           style={{ top: `${STEPS.length * 100 - 4}svh` }}
         />
-        <StageMark pose="out" className="absolute left-0" style={{ top: `${STEPS.length * 100 + 70}svh` }} />
+        <StageMark pose="out" className="absolute left-0" style={{ top: `${STEPS.length * 100 + 32}svh` }} />
 
         <div data-stage-panel className="sticky top-0 flex h-[100svh] flex-col overflow-hidden">
           <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col px-4 pb-6 pt-[84px] md:px-6 lg:pb-12 lg:pt-28">

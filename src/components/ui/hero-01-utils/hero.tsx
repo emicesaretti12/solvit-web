@@ -28,6 +28,8 @@ export default function HeroSection() {
   const opacity = useTransform(scrollYProgress, [0, 0.26], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.3], [1, 0.94]);
   const y = useTransform(scrollYProgress, [0, 0.3], [0, 40]);
+  // Ya desvanecido, el bloque deja de recibir toques y foco (los botones no quedan invisibles pero activos)
+  const visibility = useTransform(opacity, (v) => (v < 0.02 ? "hidden" : "visible"));
 
   return (
     <section
@@ -52,7 +54,7 @@ export default function HeroSection() {
 
       {/* Mismo estilo en servidor y cliente; con reduced motion, el CSS anula el movimiento y queda el fundido */}
       <motion.div
-        style={{ opacity, scale, y }}
+        style={{ opacity, scale, y, visibility }}
         className="pointer-events-none relative mx-auto w-full max-w-[1200px] origin-top-left px-4 md:px-6 motion-reduce:!transform-none"
       >
         <div className="pointer-events-auto max-w-[620px] lg:max-w-[min(54%,720px)]">

@@ -150,47 +150,48 @@ const DESKTOP: Layout = {
   },
 };
 
+// Bajo y ancho para que el diagrama crezca lo más posible: así los nombres se leen (≈ 10-13 px) aun en
+// celulares bajos, donde el panel deja poco alto para el diagrama
 const MOBILE: Layout = {
-  viewBox: "0 0 360 620",
+  viewBox: "0 0 360 500",
   r: 19,
   iconSize: 17,
-  labelSize: 11,
-  labelGap: 33,
+  labelSize: 13,
+  labelGap: 35,
   nodes: {
-    meta: { x: 36, y: 34 },
-    google: { x: 108, y: 34 },
-    web: { x: 180, y: 34 },
-    whatsapp: { x: 252, y: 34 },
-    instagram: { x: 324, y: 34 },
-    ai: { x: 180, y: 190 },
-    discard: { x: 312, y: 262 },
-    crm: { x: 180, y: 330 },
-    ventas: { x: 60, y: 450 },
-    postventa: { x: 180, y: 450 },
-    service: { x: 300, y: 450 },
-    venta: { x: 60, y: 556 },
+    meta: { x: 36, y: 30 },
+    google: { x: 108, y: 30 },
+    web: { x: 180, y: 30 },
+    whatsapp: { x: 252, y: 30 },
+    instagram: { x: 324, y: 30 },
+    ai: { x: 180, y: 145 },
+    discard: { x: 306, y: 205 },
+    crm: { x: 180, y: 250 },
+    ventas: { x: 60, y: 350 },
+    postventa: { x: 180, y: 350 },
+    service: { x: 300, y: 350 },
+    venta: { x: 60, y: 440 },
   },
   edges: {
-    "meta-ai": "M36 72 C 36 130, 180 110, 180 171",
-    "google-ai": "M108 72 C 108 130, 180 112, 180 171",
-    "web-ai": "M180 72 L 180 171",
-    "whatsapp-ai": "M252 72 C 252 130, 180 112, 180 171",
-    "instagram-ai": "M324 72 C 324 130, 180 110, 180 171",
-    "ai-crm": "M180 233 L 180 311",
-    "ai-discard": "M196 202 C 250 214, 300 222, 310 243",
-    "crm-ventas": "M180 373 C 180 410, 60 398, 60 431",
-    "crm-postventa": "M180 373 L 180 431",
-    "crm-service": "M180 373 C 180 410, 300 398, 300 431",
-    "ventas-venta": "M60 494 L 60 537",
-    "venta-chart": "M79 556 L 122 556",
+    "meta-ai": "M36 71 C 36 106, 180 96, 180 126",
+    "google-ai": "M108 71 C 108 106, 180 98, 180 126",
+    "web-ai": "M180 71 L 180 126",
+    "whatsapp-ai": "M252 71 C 252 106, 180 98, 180 126",
+    "instagram-ai": "M324 71 C 324 106, 180 96, 180 126",
+    "ai-crm": "M180 187 L 180 231",
+    "ai-discard": "M199 147 C 246 154, 292 164, 304 186",
+    "crm-ventas": "M180 292 C 180 318, 60 310, 60 331",
+    "crm-postventa": "M180 292 L 180 331",
+    "crm-service": "M180 292 C 180 318, 300 310, 300 331",
+    "ventas-venta": "M60 391 L 60 421",
+    "venta-chart": "M79 440 L 122 440",
   },
   chart: {
-    line: "M128 596 C 170 590, 190 566, 228 562 S 290 530, 334 512",
-    area: "M128 596 C 170 590, 190 566, 228 562 S 290 530, 334 512 L 334 606 L 128 606 Z",
+    line: "M128 484 C 170 480, 190 458, 228 454 S 290 426, 334 408",
+    area: "M128 484 C 170 480, 190 458, 228 454 S 290 426, 334 408 L 334 494 L 128 494 Z",
   },
 };
 
-const ease = [0.16, 1, 0.3, 1] as const;
 
 function Edge({
   prefix,
@@ -216,7 +217,7 @@ function Edge({
         id={`${prefix}-${id}`}
         d={d}
         pathLength={1}
-        strokeDasharray="1 1"
+        strokeDasharray="1 2"
         style={{ strokeDashoffset: dash }}
         className={`fill-none ${tone === "muted" ? "stroke-ink-faint" : "stroke-blue-400"}`}
         strokeWidth={tone === "muted" ? 1.5 : 2}
@@ -362,7 +363,7 @@ function Chart({ layout, sf, prefix }: { layout: Layout; sf: MotionValue<number>
       <motion.path
         d={layout.chart.line}
         pathLength={1}
-        strokeDasharray="1 1"
+        strokeDasharray="1 2"
         style={{ strokeDashoffset: dash }}
         className="fill-none stroke-blue-400"
         strokeWidth={2.5}
@@ -417,52 +418,48 @@ export function SalesFlow() {
 
   return (
     <section id="recorrido" aria-labelledby="recorrido-titulo" className="relative border-t border-line">
+      <div className="mx-auto max-w-[1200px] px-4 pt-24 md:px-6 md:pt-36">
+        <h2
+          id="recorrido-titulo"
+          className="font-display max-w-[20ch] text-[clamp(2.1rem,7.6vw,2.6rem)] font-bold leading-[1.02] tracking-[-0.04em] text-ink sm:text-[2.8rem] lg:max-w-none lg:text-[3.4rem]"
+        >
+          <MaskWords text="El camino de cada consulta, del anuncio a la venta." />
+        </h2>
+      </div>
+
       <div ref={track} className="relative" style={{ height: `${STAGES.length * 60 + 100}svh` }}>
         <div className="sticky top-0 flex h-[100svh] flex-col overflow-hidden">
-          <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col px-4 pb-6 pt-[92px] md:px-6 lg:pb-10 lg:pt-28">
-            <h2
-              id="recorrido-titulo"
-              className="font-display max-w-[20ch] text-[clamp(1.85rem,7vw,2.4rem)] font-bold leading-[1.02] tracking-[-0.04em] text-ink sm:text-[2.8rem] lg:max-w-none lg:text-[3.4rem]"
-            >
-              <MaskWords text="El camino de cada consulta, del anuncio a la venta." />
-            </h2>
-
-            <div className="relative mt-4 flex min-h-0 flex-1 items-center justify-center lg:mt-6">
-              <Diagram layout={MOBILE} sf={sf} className="h-full max-h-[60svh] w-full lg:hidden" />
-              <Diagram layout={DESKTOP} sf={sf} className="hidden h-full max-h-[58svh] w-full lg:block" />
+          <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col px-4 pb-6 pt-[84px] md:px-6 lg:pb-10 lg:pt-28">
+            <div className="relative flex min-h-0 flex-1 items-center justify-center">
+              <Diagram layout={MOBILE} sf={sf} className="h-full max-h-[64svh] w-full lg:hidden" />
+              <Diagram layout={DESKTOP} sf={sf} className="hidden h-full max-h-[62svh] w-full lg:block" />
             </div>
 
-            {/* Etapas: en escritorio las cinco a la vista; en celulares, la activa */}
-            <ol className="mt-4 grid gap-3 lg:mt-6 lg:grid-cols-5 lg:gap-6">
+            {/* Etapas: en escritorio las cinco a la vista; en celulares, la activa. En celulares
+                comparten una celda (el texto más largo fija el alto), así el diagrama no cambia
+                de tamaño al pasar de etapa */}
+            <ol className="mt-4 grid lg:mt-6 lg:grid-cols-5 lg:gap-6">
               {STAGES.map((s, i) => {
                 const on = i === active;
                 return (
                   <li
                     key={s.title}
                     aria-current={on ? "step" : undefined}
-                    className={`${on ? "block" : "sr-only lg:not-sr-only lg:block"} border-t pt-3 transition-colors duration-300 ${
-                      on ? "border-blue-400" : "border-line"
+                    className={`col-start-1 row-start-1 border-t pt-3 transition-[opacity,border-color] duration-500 ease-[var(--ease-out)] lg:col-start-auto lg:row-start-auto ${
+                      on ? "border-blue-400" : "border-line max-lg:opacity-0"
                     }`}
                   >
-                    <motion.div
-                      key={on ? `on-${i}` : `off-${i}`}
-                      initial={on ? { opacity: 0, transform: "translateY(8px)" } : false}
-                      animate={{ opacity: 1, transform: "translateY(0px)" }}
-                      transition={{ duration: 0.5, ease }}
-                      className="motion-reduce:!transform-none"
+                    <p className={`text-sm font-medium transition-colors duration-500 ${on ? "text-ink" : "text-ink-faint"}`}>
+                      <span className="mr-1.5 font-mono text-[11px] tabular-nums text-ink-faint">0{i + 1}</span>
+                      {s.title}
+                    </p>
+                    <p
+                      className={`mt-1 text-[13px] leading-relaxed transition-opacity duration-500 lg:text-sm ${
+                        on ? "text-ink-muted" : "text-ink-faint lg:opacity-0"
+                      }`}
                     >
-                      <p className={`text-sm font-medium ${on ? "text-ink" : "text-ink-faint"}`}>
-                        <span className="mr-1.5 font-mono text-[11px] tabular-nums text-ink-faint">0{i + 1}</span>
-                        {s.title}
-                      </p>
-                      <p
-                        className={`mt-1 text-[13px] leading-relaxed lg:text-sm ${
-                          on ? "text-ink-muted" : "text-ink-faint lg:opacity-0"
-                        }`}
-                      >
-                        {s.text}
-                      </p>
-                    </motion.div>
+                      {s.text}
+                    </p>
                   </li>
                 );
               })}

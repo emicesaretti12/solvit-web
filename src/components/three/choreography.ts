@@ -86,10 +86,11 @@ export const POSES = {
     mobile: p({ scale: 0.74, turn: 0.38, tilt: 0.06, focus: -2 }),
     reduced: { ...STILL, focus: -2 },
   },
-  // Se retira para dejar lugar a los proyectos (cuando el panel ya se soltó)
+  // Se retira cuando el panel se suelta: sube al menos tan rápido como el contenido (si no,
+  // quedaría atrás y cruzaría el titular y el tablero) y se apaga en el camino
   out: {
-    desktop: p({ x: 0.42, y: 0.4, z: -0.3, scale: 0.72, turn: 0.7, tilt: 0.1, opacity: 0 }),
-    mobile: p({ y: 0.75, z: -0.3, scale: 0.6, turn: 0.7, tilt: 0.1, opacity: 0 }),
+    desktop: p({ x: 0.42, y: 0.95, z: -0.3, scale: 0.72, turn: 0.7, tilt: 0.1, opacity: 0 }),
+    mobile: p({ y: 1.3, z: -0.3, scale: 0.6, turn: 0.7, tilt: 0.1, opacity: 0 }),
     reduced: STILL,
   },
 } satisfies Record<string, PoseDef>;

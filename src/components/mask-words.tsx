@@ -7,7 +7,8 @@ import { motion, useReducedMotion } from "motion/react";
   debajo de su propia línea, en cascada. Va adentro del <h2> (que conserva id y estilos).
   - El lector de pantalla lee la frase entera (sr-only); las palabras animadas son decorativas
   - Mismo estado inicial en servidor y cliente; con reduced motion aparece sin moverse
-  - El relleno inferior de cada máscara deja lugar a los descendentes (g, p, y)
+  - El relleno de cada máscara (compensado con margen negativo) deja lugar a los descendentes
+    y a los acentos y colas que sobresalen de la caja por el tracking negativo
 */
 const EASE = [0.23, 1, 0.32, 1] as const;
 
@@ -26,7 +27,7 @@ export function MaskWords({ text, delay = 0 }: { text: string; delay?: number })
       >
         {words.map((word, i) => (
           <span key={i}>
-            <span className="-mb-[0.14em] inline-block overflow-hidden pb-[0.14em] align-top">
+            <span className="-mx-[0.08em] -mb-[0.14em] inline-block overflow-hidden px-[0.08em] pb-[0.14em] align-top">
               <motion.span
                 className="inline-block motion-reduce:!transform-none"
                 variants={{
