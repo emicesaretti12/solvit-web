@@ -4,6 +4,8 @@
   Cómo funciona: el recorrido de una venta en cuatro pasos, en un solo panel fijo.
   Mientras se baja, el panel queda quieto y cambia de paso; en el escenario 3D se enciende la
   cinta de la S que corresponde (atraer, atender, cerrar) y en "crecer" la S se vuelve a armar.
+  En celulares la S vive dentro del panel (steps-isotype, en el hueco de arriba): viaja con el
+  scroll nativo junto al texto, sin el retraso de un canvas fijo que se reposiciona por código.
   Cada paso: el verbo, una frase y la vista viva del servicio que lo resuelve.
 
   - Sin GSAP pin: un contenedor alto con un panel sticky (convive con Lenis sin saltos)
@@ -33,9 +35,12 @@ import { AgentPreview } from "@/components/previews/agent-preview";
 import { CrmPreview } from "@/components/previews/crm-preview";
 import { MarketingPreview } from "@/components/previews/marketing-preview";
 import { PreviewSuspendContext } from "@/components/previews/preview-shell";
+import { LogoMark } from "@/components/logo";
 import { getLenis } from "@/components/smooth-scroll";
 import { StageMark } from "@/components/three/stage";
 import type { PoseKey } from "@/components/three/choreography";
+
+const StepsIsotype = dynamic(() => import("@/components/three/steps-isotype"), { ssr: false });
 
 const GrowthChart = dynamic(() => import("@/components/dashboard-chart").then((m) => m.GrowthChart), {
   ssr: false,
@@ -110,6 +115,57 @@ function RailSegment({ progress, index, total }: { progress: MotionValue<number>
     <span aria-hidden="true" className="relative mt-2 block h-[2px] w-full overflow-hidden rounded-full bg-fg/10">
       <motion.span style={{ scaleX: fill }} className="absolute inset-0 origin-left rounded-full bg-blue-400" />
     </span>
+  );
+}
+
+function hasWebGL() {
+  try {
+    const canvas = document.createElement("canvas");
+    return Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"));
+  } catch {
+    return false;
+  }
+}
+
+/* La S de los pasos en celulares (solo se monta en el cliente): el isotipo plano mientras carga
+   WebGL (o si no hay), después la S en 3D. El canvas se prepara cuando el navegador queda libre
+   o cuando la sección se acerca, nunca al cargar la página: compilar sus materiales en ese
+   momento trabaría el hero y el scroll del teléfono */
+function MobileSteps({ step, reduce }: { step: number; reduce: boolean }) {
+  const [gl] = useState(hasWebGL);
+  const [armed, setArmed] = useState(false);
+  const [ready, setReady] = useState(false);
+  const wrap = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = wrap.current;
+    if (!el || !gl) return;
+    const arm = () => setArmed(true);
+    const io = new IntersectionObserver(([entry]) => entry.isIntersecting && arm(), { rootMargin: "150% 0px" });
+    io.observe(el);
+    // Safari viejo no tiene requestIdleCallback: ahí espera un rato fijo
+    const ric = window.requestIdleCallback as typeof window.requestIdleCallback | undefined;
+    const idle = ric ? ric(arm, { timeout: 4000 }) : setTimeout(arm, 2500);
+    return () => {
+      io.disconnect();
+      if (ric) window.cancelIdleCallback(idle as number);
+      else clearTimeout(idle);
+    };
+  }, [gl]);
+
+  return (
+    <div ref={wrap} className="absolute inset-0">
+      <div
+        className={`absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-[var(--ease-out)] ${ready ? "opacity-0" : "opacity-100"}`}
+      >
+        <LogoMark className="h-[62%] w-auto" />
+      </div>
+      {gl && armed && (
+        <div className={`absolute inset-0 transition-opacity duration-700 ease-[var(--ease-out)] ${ready ? "opacity-100" : "opacity-0"}`}>
+          <StepsIsotype step={step} reduce={reduce} onReady={() => setReady(true)} />
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -218,7 +274,7 @@ export function HowItWorks() {
 
   return (
     <section id="como-funciona" aria-labelledby="como-titulo" className="relative">
-      <StageMark pose="arrive" slot="steps-slot" className="absolute left-0 top-0" />
+      <StageMark pose="arrive" className="absolute left-0 top-0" />
 
       <div className="mx-auto max-w-[1200px] px-4 pb-6 pt-24 md:px-6 md:pt-36">
         <h2
@@ -238,7 +294,6 @@ export function HowItWorks() {
           <StageMark
             key={s.pose}
             pose={s.pose}
-            slot="steps-slot"
             className="absolute left-0"
             style={{ top: `${i * 100 + 50}svh` }}
           />
@@ -246,11 +301,10 @@ export function HowItWorks() {
         {/* Crecer queda quieto hasta que el panel se suelta; recién ahí la S se retira */}
         <StageMark
           pose="crecer"
-          slot="steps-slot"
           className="absolute left-0"
           style={{ top: `${STEPS.length * 100 - 4}svh` }}
         />
-        <StageMark pose="out" slot="steps-slot" className="absolute left-0" style={{ top: `${STEPS.length * 100 + 32}svh` }} />
+        <StageMark pose="out" className="absolute left-0" style={{ top: `${STEPS.length * 100 + 32}svh` }} />
 
         <div data-stage-panel className="sticky top-0 flex h-[100svh] flex-col overflow-hidden">
           <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col px-4 pb-6 pt-[84px] md:px-6 lg:pb-12 lg:pt-28">
@@ -285,8 +339,10 @@ export function HowItWorks() {
               {`Paso ${active + 1} de ${STEPS.length}: ${STEPS[active].verb}. ${STEPS[active].title}`}
             </p>
 
-            {/* En celulares, este hueco es del isotipo: el escenario toma su centro y su alto */}
-            <div id="steps-slot" aria-hidden="true" className="h-[22svh] shrink-0 lg:hidden" />
+            {/* En celulares, este hueco es de la S de los pasos (con su propio canvas) */}
+            <div id="steps-slot" aria-hidden="true" className="relative h-[25svh] shrink-0 lg:hidden">
+              {mobile && <MobileSteps step={active} reduce={Boolean(reduce)} />}
+            </div>
 
             <div className="relative grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)] lg:mt-10 lg:max-w-[540px]">
               {STEPS.map((s, i) => {

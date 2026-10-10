@@ -9,8 +9,7 @@
     atraviesa la cámara igual en un celular que en un monitor
   - turn / tilt: radianes extra sobre la pose de reposo
   - En celulares, las poses con `slot` toman el lugar y el tamaño del hueco que la sección deja
-    para el isotipo (un elemento con ese id), así nunca tapa texto aunque la pantalla sea baja.
-    Si el hueco está en un panel sticky, la S además viaja con el panel cuando entra y sale
+    para el isotipo (un elemento con ese id), así nunca tapa texto aunque la pantalla sea baja
 */
 export type StagePose = {
   x: number;
@@ -37,6 +36,10 @@ export type PoseDef = {
 const base: StagePose = { x: 0, y: 0, z: 0, scale: 1, spread: 0, turn: 0, tilt: 0, focus: -1, opacity: 1 };
 const p = (o: Partial<StagePose>): StagePose => ({ ...base, ...o });
 
+// En celulares, en "Cómo funciona" este escenario se apaga: la S de los pasos tiene su propio
+// canvas dentro del panel (steps-isotype), que viaja con el scroll nativo sin retraso
+const OFF = p({ opacity: 0 });
+
 // Con reduced motion: sin zambullida, sin apertura ni giros; solo lugar, tamaño y luz
 const STILL: Partial<StagePose> = { z: 0, spread: 0, turn: 0, tilt: 0 };
 
@@ -62,37 +65,36 @@ export const POSES = {
   // Del otro lado: las cintas llegan desde el fondo, todavía abiertas
   arrive: {
     desktop: p({ x: 0.42, z: -0.7, scale: 0.9, spread: 0.9, turn: -0.9, tilt: 0.2, opacity: 0 }),
-    mobile: p({ z: -0.7, scale: 0.6, spread: 0.8, turn: -0.9, tilt: 0.2, opacity: 0 }),
+    mobile: OFF,
     reduced: STILL,
   },
   atraer: {
     desktop: p({ x: 0.42, y: -0.04, scale: 0.84, spread: 0.6, turn: -0.4, tilt: 0.08, focus: 0 }),
-    mobile: p({ scale: 0.62, spread: 0.55, turn: -0.4, tilt: 0.08, focus: 0 }),
+    mobile: OFF,
     reduced: STILL,
   },
   atender: {
     desktop: p({ x: 0.42, y: -0.04, scale: 0.84, spread: 0.6, turn: 0.32, tilt: -0.04, focus: 1 }),
-    mobile: p({ scale: 0.62, spread: 0.55, turn: 0.32, tilt: -0.04, focus: 1 }),
+    mobile: OFF,
     reduced: STILL,
   },
   cerrar: {
     desktop: p({ x: 0.42, y: -0.04, scale: 0.84, spread: 0.6, turn: -0.12, tilt: -0.16, focus: 2 }),
-    mobile: p({ scale: 0.62, spread: 0.55, turn: -0.12, tilt: -0.16, focus: 2 }),
+    mobile: OFF,
     reduced: STILL,
   },
   // Crecer: las cintas encajan de abajo hacia arriba (como apilar), la S sube apenas y brilla
   // entera. Sin vuelta completa: de canto las cintas se ven como piezas sueltas
   crecer: {
     desktop: p({ x: 0.42, y: 0.02, scale: 0.98, turn: 0.38, tilt: 0.06, focus: -2 }),
-    mobile: p({ scale: 0.74, turn: 0.38, tilt: 0.06, focus: -2 }),
+    mobile: OFF,
     reduced: { ...STILL, focus: -2 },
   },
   // Se retira cuando el panel se suelta: sube al menos tan rápido como el contenido (si no,
-  // quedaría atrás y cruzaría el titular y el tablero) y se apaga en el camino. En celulares
-  // toma el hueco del panel: sube pegada a él mientras se aleja y se apaga
+  // quedaría atrás y cruzaría el titular y el tablero) y se apaga en el camino
   out: {
     desktop: p({ x: 0.42, y: 0.95, z: -0.3, scale: 0.72, turn: 0.7, tilt: 0.1, opacity: 0 }),
-    mobile: p({ z: -0.3, scale: 0.6, turn: 0.7, tilt: 0.1, opacity: 0 }),
+    mobile: OFF,
     reduced: STILL,
   },
 } satisfies Record<string, PoseDef>;

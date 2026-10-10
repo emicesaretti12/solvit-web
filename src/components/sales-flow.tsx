@@ -11,19 +11,10 @@
     Las que solo consultaban se van en gris al costado
   - Solo atributos SVG (pathLength, r) y opacidad: sin transforms ni guiones en px, que Safari
     resuelve distinto
-  - Dos composiciones del mismo circuito: vertical en celulares, horizontal en escritorio
+  - En escritorio, este SVG horizontal; en celulares, sales-flow-mobile (vertical, con
+    animaciones que resuelve el compositor para que el teléfono no se trabe)
   - Fuera de pantalla las animaciones se pausan; con reduced motion no hay puntos en viaje
 */
-import {
-  ChatsCircle,
-  CheckCircle,
-  Globe,
-  Handshake,
-  Kanban,
-  Sparkle,
-  Wrench,
-  type Icon,
-} from "@phosphor-icons/react";
 import {
   animate,
   motion,
@@ -36,166 +27,9 @@ import {
   type MotionValue,
 } from "motion/react";
 import { useEffect, useId, useRef, useState } from "react";
-import { siGoogleads, siInstagram, siMeta, siWhatsapp } from "simple-icons";
 import { MaskWords } from "./mask-words";
-
-const STAGES = [
-  {
-    title: "Pauta, web y canales",
-    text: "Las consultas llegan de tus anuncios, tu web, WhatsApp e Instagram.",
-  },
-  {
-    title: "El agente de IA filtra",
-    text: "Responde al instante y separa a quien quiere comprar de quien solo consulta.",
-  },
-  {
-    title: "El CRM las ordena por área",
-    text: "Cada consulta calificada llega al área que corresponde: ventas, postventa o service.",
-  },
-  {
-    title: "Venta cerrada",
-    text: "El vendedor recibe la conversación completa y cierra.",
-  },
-  {
-    title: "Crecimiento",
-    text: "Ves qué anuncio trae ventas y repetís lo que funciona.",
-  },
-];
-
-type Glyph = { icon: Icon } | { path: string };
-type NodeDef = {
-  id: string;
-  label: string;
-  glyph: Glyph;
-  /** Momento (en etapas, 0 a 5) en que se enciende */
-  at: number;
-  tone?: "muted";
-};
-type EdgeDef = { id: string; stage: number; particles: number; tone?: "muted" };
-type Point = { x: number; y: number };
-type Layout = {
-  viewBox: string;
-  r: number;
-  iconSize: number;
-  labelSize: number;
-  labelGap: number;
-  nodes: Record<string, Point>;
-  /** Trazos; los que salen hacia abajo arrancan debajo del nombre del nodo, no lo cruzan */
-  edges: Record<string, string>;
-  chart: { line: string; area: string };
-};
-
-const SOURCES = [
-  { id: "meta", label: "Meta Ads", glyph: { path: siMeta.path } },
-  { id: "google", label: "Google Ads", glyph: { path: siGoogleads.path } },
-  { id: "web", label: "Tu web", glyph: { icon: Globe } },
-  { id: "whatsapp", label: "WhatsApp", glyph: { path: siWhatsapp.path } },
-  { id: "instagram", label: "Instagram", glyph: { path: siInstagram.path } },
-] as const;
-
-const NODES: NodeDef[] = [
-  ...SOURCES.map((s) => ({ ...s, glyph: s.glyph as Glyph, at: 0.15 })),
-  { id: "ai", label: "Agente de IA", glyph: { icon: Sparkle }, at: 0.9 },
-  { id: "discard", label: "Solo consultaban", glyph: { icon: ChatsCircle }, at: 1.75, tone: "muted" },
-  { id: "crm", label: "CRM", glyph: { icon: Kanban }, at: 1.9 },
-  { id: "ventas", label: "Ventas", glyph: { icon: Handshake }, at: 2.75 },
-  { id: "postventa", label: "Postventa", glyph: { icon: ChatsCircle }, at: 2.75 },
-  { id: "service", label: "Service", glyph: { icon: Wrench }, at: 2.75 },
-  { id: "venta", label: "Venta cerrada", glyph: { icon: CheckCircle }, at: 3.8 },
-];
-
-const EDGES: EdgeDef[] = [
-  ...SOURCES.map((s) => ({ id: `${s.id}-ai`, stage: 0, particles: 1 })),
-  { id: "ai-crm", stage: 1, particles: 2 },
-  { id: "ai-discard", stage: 1, particles: 1, tone: "muted" },
-  { id: "crm-ventas", stage: 2, particles: 1 },
-  { id: "crm-postventa", stage: 2, particles: 1 },
-  { id: "crm-service", stage: 2, particles: 1 },
-  { id: "ventas-venta", stage: 3, particles: 1 },
-  { id: "venta-chart", stage: 4, particles: 1 },
-];
-
-const DESKTOP: Layout = {
-  viewBox: "0 0 1160 460",
-  r: 26,
-  iconSize: 22,
-  labelSize: 13,
-  labelGap: 46,
-  nodes: {
-    meta: { x: 80, y: 50 },
-    google: { x: 80, y: 135 },
-    web: { x: 80, y: 220 },
-    whatsapp: { x: 80, y: 305 },
-    instagram: { x: 80, y: 390 },
-    ai: { x: 360, y: 220 },
-    discard: { x: 360, y: 390 },
-    crm: { x: 620, y: 220 },
-    ventas: { x: 860, y: 100 },
-    postventa: { x: 860, y: 220 },
-    service: { x: 860, y: 340 },
-    venta: { x: 1060, y: 100 },
-  },
-  edges: {
-    "meta-ai": "M106 50 C 230 50, 220 220, 334 220",
-    "google-ai": "M106 135 C 230 135, 220 220, 334 220",
-    "web-ai": "M106 220 L 334 220",
-    "whatsapp-ai": "M106 305 C 230 305, 220 220, 334 220",
-    "instagram-ai": "M106 390 C 230 390, 220 220, 334 220",
-    "ai-crm": "M386 220 L 594 220",
-    "ai-discard": "M360 280 L 360 364",
-    "crm-ventas": "M646 220 C 760 220, 750 100, 834 100",
-    "crm-postventa": "M646 220 L 834 220",
-    "crm-service": "M646 220 C 760 220, 750 340, 834 340",
-    "ventas-venta": "M886 100 L 1034 100",
-    "venta-chart": "M1060 160 L 1060 262",
-  },
-  chart: {
-    line: "M990 372 C 1020 366, 1032 344, 1056 340 S 1096 304, 1130 276",
-    area: "M990 372 C 1020 366, 1032 344, 1056 340 S 1096 304, 1130 276 L 1130 392 L 990 392 Z",
-  },
-};
-
-// Bajo y ancho para que el diagrama crezca lo más posible: así los nombres se leen (≈ 10-13 px) aun en
-// celulares bajos, donde el panel deja poco alto para el diagrama
-const MOBILE: Layout = {
-  viewBox: "0 0 360 500",
-  r: 19,
-  iconSize: 17,
-  labelSize: 13,
-  labelGap: 35,
-  nodes: {
-    meta: { x: 36, y: 30 },
-    google: { x: 108, y: 30 },
-    web: { x: 180, y: 30 },
-    whatsapp: { x: 252, y: 30 },
-    instagram: { x: 324, y: 30 },
-    ai: { x: 180, y: 145 },
-    discard: { x: 306, y: 205 },
-    crm: { x: 180, y: 250 },
-    ventas: { x: 60, y: 350 },
-    postventa: { x: 180, y: 350 },
-    service: { x: 300, y: 350 },
-    venta: { x: 60, y: 440 },
-  },
-  edges: {
-    "meta-ai": "M36 71 C 36 106, 180 96, 180 126",
-    "google-ai": "M108 71 C 108 106, 180 98, 180 126",
-    "web-ai": "M180 71 L 180 126",
-    "whatsapp-ai": "M252 71 C 252 106, 180 98, 180 126",
-    "instagram-ai": "M324 71 C 324 106, 180 96, 180 126",
-    "ai-crm": "M180 187 L 180 231",
-    "ai-discard": "M199 147 C 246 154, 292 164, 304 186",
-    "crm-ventas": "M180 292 C 180 318, 60 310, 60 331",
-    "crm-postventa": "M180 292 L 180 331",
-    "crm-service": "M180 292 C 180 318, 300 310, 300 331",
-    "ventas-venta": "M60 391 L 60 421",
-    "venta-chart": "M79 440 L 122 440",
-  },
-  chart: {
-    line: "M128 484 C 170 480, 190 458, 228 454 S 290 426, 334 408",
-    area: "M128 484 C 170 480, 190 458, 228 454 S 290 426, 334 408 L 334 494 L 128 494 Z",
-  },
-};
+import { MobileFlow } from "./sales-flow-mobile";
+import { DESKTOP, EDGES, NODES, STAGES, type EdgeDef, type Layout, type NodeDef, type Point } from "./sales-flow-data";
 
 // Cada cambio de etapa se reproduce con su propio tiempo (no atado a la velocidad del dedo)
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
@@ -259,12 +93,20 @@ function Particles({ d, edge, sf, r }: { d: string; edge: EdgeDef; sf: MotionVal
 
 function FlowNode({ def, at, layout, sf }: { def: NodeDef; at: Point; layout: Layout; sf: MotionValue<number> }) {
   const { r, iconSize, labelSize, labelGap } = layout;
-  const on = useTransform(sf, [def.at - 0.3, def.at], [0, 1]);
+  // Arranca en 0 aunque el nodo se encienda temprano (las fuentes): en la etapa -1 todo apagado
+  const on = useTransform(sf, [Math.max(0, def.at - 0.3), def.at], [0, 1]);
   const dim = useTransform(on, [0, 1], [0.35, 1]);
   // Al encenderse, el relleno crece desde el centro y una onda sale del nodo (y todo vuelve si
   // se retrocede). Solo atributos (r) y opacidad: nada de transforms sobre el SVG
   const fillR = useTransform(on, [0, 1], [r * 0.55, r]);
-  const wave = useTransform(sf, [def.at - 0.05, def.at + 0.45], [0, 1]);
+  // La onda corre con su propio tiempo cuando el nodo termina de encenderse (si saliera de sf,
+  // quedaría a medio abrir cuando la etapa se detiene)
+  const wave = useMotionValue(0);
+  useMotionValueEvent(on, "change", (v) => {
+    const prev = on.getPrevious() ?? 0;
+    if (v >= 0.999 && prev < 0.999) animate(wave, [0, 1], { duration: 0.9, ease: EASE_OUT });
+    else if (v < 0.5 && wave.get() > 0) wave.set(0);
+  });
   const waveR = useTransform(wave, [0, 1], [r, r * 2.1]);
   const waveOpacity = useTransform(wave, [0, 0.12, 1], [0, 0.6, 0]);
   const muted = def.tone === "muted";
@@ -364,7 +206,7 @@ function Diagram({ layout, sf, className }: { layout: Layout; sf: MotionValue<nu
     else el.pauseAnimations();
   }, [inView, reduce]);
 
-  const r = layout === MOBILE ? 3 : 4;
+  const r = 4;
   return (
     <svg ref={svg} viewBox={layout.viewBox} aria-hidden="true" preserveAspectRatio="xMidYMid meet" className={className}>
       {EDGES.map((e) => (
@@ -399,7 +241,8 @@ export function SalesFlow() {
   const sf = useMotionValue(0);
   useEffect(() => {
     const target = stage + 1;
-    if (reduce) {
+    // En celulares el diagrama es otro (sales-flow-mobile): el de escritorio no se anima
+    if (reduce || window.matchMedia("(max-width: 1023.98px)").matches) {
       sf.set(target);
       return;
     }
@@ -428,7 +271,9 @@ export function SalesFlow() {
         <div className="sticky top-0 flex h-[100svh] flex-col overflow-hidden">
           <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col px-4 pb-6 pt-[84px] md:px-6 lg:pb-10 lg:pt-28">
             <div className="relative flex min-h-0 flex-1 items-center justify-center">
-              <Diagram layout={MOBILE} sf={sf} className="h-full max-h-[64svh] w-full lg:hidden" />
+              <div className="h-full w-full lg:hidden">
+                <MobileFlow stage={stage} reduce={Boolean(reduce)} />
+              </div>
               <Diagram layout={DESKTOP} sf={sf} className="hidden h-full max-h-[62svh] w-full lg:block" />
             </div>
 
@@ -443,10 +288,10 @@ export function SalesFlow() {
                   <li
                     key={s.title}
                     aria-current={on ? "step" : undefined}
-                    className={`col-start-1 row-start-1 border-t pt-3 transition-[opacity,transform,border-color] ease-[var(--ease-out)] motion-reduce:!transform-none lg:col-start-auto lg:row-start-auto ${
+                    className={`col-start-1 row-start-1 border-t pt-3 transition-[opacity,translate,border-color] ease-[var(--ease-out)] motion-reduce:!translate-none lg:col-start-auto lg:row-start-auto ${
                       on
                         ? "border-blue-400 delay-150 duration-500"
-                        : "border-line duration-200 max-lg:-translate-y-2 max-lg:opacity-0"
+                        : `border-line duration-200 max-lg:opacity-0 ${i < active ? "max-lg:-translate-y-2" : "max-lg:translate-y-2"}`
                     }`}
                   >
                     <p className={`text-sm font-medium transition-colors duration-500 ${on ? "text-ink" : "text-ink-faint"}`}>
