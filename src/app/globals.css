@@ -345,14 +345,24 @@ html.lenis body {
   opacity: 0;
   stroke-dasharray: var(--len) var(--len);
   stroke-dashoffset: var(--len);
-  transition: stroke-dashoffset 0.3s var(--ease-out);
-}
-.flow-ready .flow-edge {
-  opacity: 1;
 }
 .flow-edge[data-on="true"] {
   stroke-dashoffset: 0;
+}
+/* Las transiciones recién valen con los largos medidos (si no, al montar, los trazos se verían
+   enteros y se replegarían) */
+.flow-ready .flow-edge {
+  opacity: 1;
+  transition: stroke-dashoffset 0.3s var(--ease-out);
+}
+.flow-ready .flow-edge[data-on="true"] {
   transition: stroke-dashoffset 0.75s var(--ease-out) var(--delay, 0s);
+}
+/* Diagrama muy angosto (celular acostado): sin nombres, que se pisarían; la etapa se lee abajo */
+@container (max-width: 240px) {
+  .flow-label {
+    display: none;
+  }
 }
 .flow-fade {
   opacity: 0;

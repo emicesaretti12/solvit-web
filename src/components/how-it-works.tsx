@@ -37,6 +37,7 @@ import { MarketingPreview } from "@/components/previews/marketing-preview";
 import { PreviewSuspendContext } from "@/components/previews/preview-shell";
 import { LogoMark } from "@/components/logo";
 import { getLenis } from "@/components/smooth-scroll";
+import { CanvasBoundary } from "@/components/three/canvas-boundary";
 import { StageMark } from "@/components/three/stage";
 import type { PoseKey } from "@/components/three/choreography";
 
@@ -128,9 +129,9 @@ function hasWebGL() {
 }
 
 /* La S de los pasos en celulares (solo se monta en el cliente): el isotipo plano mientras carga
-   WebGL (o si no hay), después la S en 3D. El canvas se prepara cuando el navegador queda libre
-   o cuando la sección se acerca, nunca al cargar la página: compilar sus materiales en ese
-   momento trabaría el hero y el scroll del teléfono */
+   WebGL (o si no hay), después la S en 3D. El canvas se prepara cuando la S del hero ya se
+   zambulló (en el primer rato libre) o cuando la sección se acerca, nunca al cargar la página ni
+   con el hero animándose: crear el contexto y la iluminación en ese momento trabaría el scroll */
 function MobileSteps({ step, reduce }: { step: number; reduce: boolean }) {
   const [gl] = useState(hasWebGL);
   const [armed, setArmed] = useState(false);
@@ -141,15 +142,30 @@ function MobileSteps({ step, reduce }: { step: number; reduce: boolean }) {
     const el = wrap.current;
     if (!el || !gl) return;
     const arm = () => setArmed(true);
-    const io = new IntersectionObserver(([entry]) => entry.isIntersecting && arm(), { rootMargin: "150% 0px" });
+    const io = new IntersectionObserver(([entry]) => entry.isIntersecting && arm(), { rootMargin: "100% 0px" });
     io.observe(el);
     // Safari viejo no tiene requestIdleCallback: ahí espera un rato fijo
     const ric = window.requestIdleCallback as typeof window.requestIdleCallback | undefined;
-    const idle = ric ? ric(arm, { timeout: 4000 }) : setTimeout(arm, 2500);
+    let idle: number | ReturnType<typeof setTimeout> | undefined;
+    const schedule = () => {
+      if (idle === undefined) idle = ric ? ric(arm, { timeout: 1500 }) : setTimeout(arm, 400);
+    };
+    const hero = document.getElementById("hero");
+    const pastHero = () => window.scrollY > (hero?.offsetHeight ?? window.innerHeight) * 0.75;
+    const onScroll = () => {
+      if (!pastHero()) return;
+      schedule();
+      window.removeEventListener("scroll", onScroll);
+    };
+    if (pastHero()) schedule();
+    else window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       io.disconnect();
-      if (ric) window.cancelIdleCallback(idle as number);
-      else clearTimeout(idle);
+      window.removeEventListener("scroll", onScroll);
+      if (idle !== undefined) {
+        if (ric) window.cancelIdleCallback(idle as number);
+        else clearTimeout(idle);
+      }
     };
   }, [gl]);
 
@@ -162,7 +178,9 @@ function MobileSteps({ step, reduce }: { step: number; reduce: boolean }) {
       </div>
       {gl && armed && (
         <div className={`absolute inset-0 transition-opacity duration-700 ease-[var(--ease-out)] ${ready ? "opacity-100" : "opacity-0"}`}>
-          <StepsIsotype step={step} reduce={reduce} onReady={() => setReady(true)} />
+          <CanvasBoundary>
+            <StepsIsotype step={step} reduce={reduce} onReady={() => setReady(true)} />
+          </CanvasBoundary>
         </div>
       )}
     </div>

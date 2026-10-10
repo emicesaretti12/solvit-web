@@ -18,6 +18,7 @@ import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as R
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LogoMark } from "@/components/logo";
+import { CanvasBoundary } from "./canvas-boundary";
 import { isotypeHeightPx, restPose, stageSignal, type DragState, type IsoPose } from "./pose";
 import { POSES, type PoseDef, type PoseKey, type StagePose } from "./choreography";
 
@@ -255,7 +256,9 @@ export function Stage() {
       </div>
       {gl && (
         <div className={`absolute inset-0 transition-opacity duration-700 ease-[var(--ease-out)] ${ready ? "opacity-100" : "opacity-0"}`}>
-          <Scene pose={pose} drag={drag} pointer={pointer} reduce={reduce} active={active} onReady={() => setReady(true)} />
+          <CanvasBoundary>
+            <Scene pose={pose} drag={drag} pointer={pointer} reduce={reduce} active={active} onReady={() => setReady(true)} />
+          </CanvasBoundary>
         </div>
       )}
     </div>

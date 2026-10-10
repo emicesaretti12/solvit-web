@@ -150,7 +150,7 @@ export const MOBILE: Layout = {
     "web-ai": "M180 71 L 180 126",
     "whatsapp-ai": "M252 71 C 252 106, 180 98, 180 126",
     "instagram-ai": "M324 71 C 324 106, 180 96, 180 126",
-    "ai-crm": "M180 187 L 180 231",
+    "ai-crm": "M180 196 L 180 231",
     "ai-discard": "M199 147 C 246 154, 292 164, 304 186",
     "crm-ventas": "M180 292 C 180 318, 60 310, 60 331",
     "crm-postventa": "M180 292 L 180 331",

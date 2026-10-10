@@ -38,6 +38,7 @@ type Shared = {
   reduce: boolean;
   /** Momento (performance.now) del último cambio de paso */
   changedAt: number;
+  /** Arrastre horizontal (solo cuando el gesto ya es claramente horizontal) */
   drag: { active: boolean; dx: number; vx: number };
 };
 
@@ -190,6 +191,8 @@ function Rig({ state }: { state: MutableRefObject<Shared> }) {
   const boost = useRef(0);
   const clock = useRef(0);
   const lastStep = useRef(state.current.step);
+  // Al tomar el arrastre, parte del giro que tenía (sin saltos ni cortar el latigazo)
+  const dragBase = useRef<number | null>(null);
 
   useFrame((_, rawDt) => {
     const g = root.current;
@@ -199,9 +202,11 @@ function Rig({ state }: { state: MutableRefObject<Shared> }) {
     const target = POSES[st.step];
 
     if (st.step !== lastStep.current) {
-      // Latigazo: el cambio de paso empuja el giro en su sentido y la órbita se acelera
+      // Latigazo: el cambio de paso empuja el giro en el mismo sentido en que gira la S (y en
+      // proporción), con tope: varios pasos seguidos no se acumulan en una vuelta de más
       if (!st.reduce) {
-        yaw.current.vel += Math.sign(st.step - lastStep.current) * 4.6;
+        const kick = 4.5 * (target.turn - POSES[lastStep.current].turn);
+        yaw.current.vel = THREE.MathUtils.clamp(yaw.current.vel + kick, -4, 4);
         boost.current = 1;
       }
       lastStep.current = st.step;
@@ -216,9 +221,11 @@ function Rig({ state }: { state: MutableRefObject<Shared> }) {
       spring(turn.current, target.turn, 30, 0.6, dt);
       spring(tilt.current, target.tilt, 30, 0.7, dt);
       if (st.drag.active) {
-        yaw.current.value = THREE.MathUtils.clamp(st.drag.dx * 0.012, -2.6, 2.6);
+        if (dragBase.current === null) dragBase.current = yaw.current.value - st.drag.dx * 0.012;
+        yaw.current.value = THREE.MathUtils.clamp(dragBase.current + st.drag.dx * 0.012, -2.6, 2.6);
         yaw.current.vel = st.drag.vx * 0.012;
       } else {
+        dragBase.current = null;
         spring(yaw.current, 0, 20, 0.5, dt);
       }
       intro.current = Math.min(1, intro.current + dt / 1.5);
@@ -243,6 +250,26 @@ function Rig({ state }: { state: MutableRefObject<Shared> }) {
       <Orbit state={state} boost={boost} />
     </>
   );
+}
+
+// Antes de mostrarse, compila los materiales sin trabar (compileAsync usa la compilación en
+// paralelo del navegador cuando existe) y dibuja un cuadro: así el primer cuadro visible, en
+// pleno scroll, no paga la compilación
+function Warmup({ onReady }: { onReady: MutableRefObject<(() => void) | undefined> }) {
+  const { gl, scene, camera } = useThree();
+  useEffect(() => {
+    let cancelled = false;
+    const done = () => {
+      if (cancelled) return;
+      gl.render(scene, camera);
+      onReady.current?.();
+    };
+    gl.compileAsync(scene, camera).then(done, done);
+    return () => {
+      cancelled = true;
+    };
+  }, [gl, scene, camera, onReady]);
+  return null;
 }
 
 // Encuadre: entra la S abierta (alto) y la órbita (ancho), con margen
@@ -272,9 +299,13 @@ export default function StepsIsotype({
 }) {
   const wrap = useRef<HTMLDivElement>(null);
   const state = useRef<Shared>({ step, reduce, changedAt: 0, drag: { active: false, dx: 0, vx: 0 } });
+  const ready = useRef(onReady);
+  useEffect(() => {
+    ready.current = onReady;
+  }, [onReady]);
   const invalidate = useRef<() => void>(() => {});
   const [visible, setVisible] = useState(false);
-  const drag = useRef({ id: -1, x: 0, lastX: 0, lastT: 0 });
+  const drag = useRef({ id: -1, x: 0, y: 0, lastX: 0, lastT: 0 });
 
   useEffect(() => {
     state.current.step = step;
@@ -296,16 +327,31 @@ export default function StepsIsotype({
     return () => io.disconnect();
   }, []);
 
-  // Girar con el dedo (horizontal); al soltar, el resorte hereda la velocidad
+  // Girar con el dedo en horizontal; al soltar, el resorte hereda la velocidad. Tocar la S o
+  // deslizar en vertical (scroll) no la toca: el arrastre recién toma el control cuando el gesto
+  // ya es claramente horizontal, y parte del giro que tenía (sin saltos ni cortar el latigazo)
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (state.current.drag.active || reduce) return;
-    drag.current = { id: e.pointerId, x: e.clientX, lastX: e.clientX, lastT: e.timeStamp };
-    state.current.drag = { active: true, dx: 0, vx: 0 };
-    e.currentTarget.setPointerCapture(e.pointerId);
+    drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY, lastX: e.clientX, lastT: e.timeStamp };
   };
   const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.pointerId !== drag.current.id) return;
     const d = state.current.drag;
-    if (!d.active || e.pointerId !== drag.current.id) return;
+    if (!d.active) {
+      const dx = e.clientX - drag.current.x;
+      const dy = e.clientY - drag.current.y;
+      if (Math.abs(dy) > 8 && Math.abs(dy) > Math.abs(dx)) {
+        drag.current.id = -1; // es scroll
+        return;
+      }
+      if (Math.abs(dx) < 8) return;
+      state.current.drag = { active: true, dx: 0, vx: 0 };
+      drag.current.x = e.clientX;
+      drag.current.lastX = e.clientX;
+      drag.current.lastT = e.timeStamp;
+      e.currentTarget.setPointerCapture(e.pointerId);
+      return;
+    }
     const dt = Math.max(1, e.timeStamp - drag.current.lastT) / 1000;
     d.vx = d.vx * 0.6 + ((e.clientX - drag.current.lastX) / dt) * 0.4;
     d.dx = e.clientX - drag.current.x;
@@ -314,9 +360,10 @@ export default function StepsIsotype({
   };
   const onPointerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (e.pointerId !== drag.current.id) return;
+    drag.current.id = -1;
+    if (!state.current.drag.active) return;
     if (e.timeStamp - drag.current.lastT > 80) state.current.drag.vx = 0;
     state.current.drag.active = false;
-    drag.current.id = -1;
   };
 
   return (
@@ -338,7 +385,6 @@ export default function StepsIsotype({
           invalidate.current = () => inv();
           gl.toneMapping = THREE.NeutralToneMapping;
           gl.toneMappingExposure = 0.95;
-          onReady?.();
         }}
         style={{ background: "transparent" }}
       >
@@ -349,6 +395,7 @@ export default function StepsIsotype({
         <directionalLight position={[5, -1, 2]} intensity={0.38} color="#7fb2ff" />
         <pointLight position={[3, -2, -3]} intensity={22} color="#1fdcff" distance={14} />
         <Rig state={state} />
+        <Warmup onReady={ready} />
       </Canvas>
     </div>
   );

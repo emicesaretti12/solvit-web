@@ -79,7 +79,7 @@ function Node({ def, on, delay }: { def: NodeDef; on: boolean; delay: number }) 
         )}
       </div>
       <span
-        className={`absolute left-1/2 top-full mt-[1.4cqw] -translate-x-1/2 whitespace-nowrap text-[max(10px,3.2cqw)] transition-colors duration-500 ${
+        className={`flow-label absolute left-1/2 top-full mt-[1.4cqw] -translate-x-1/2 whitespace-nowrap text-[max(10px,3.2cqw)] transition-colors duration-500 ${
           on ? (muted ? "text-ink-faint" : "text-ink-muted") : "text-ink-faint/70"
         }`}
       >
@@ -89,6 +89,7 @@ function Node({ def, on, delay }: { def: NodeDef; on: boolean; delay: number }) 
   );
 }
 
+/** stage: la etapa a la vista, que ya llega encadenada de a una (useChainedStage en sales-flow) */
 export function MobileFlow({ stage, reduce }: { stage: number; reduce: boolean }) {
   const box = useRef<HTMLDivElement>(null);
   const paths = useRef<Record<string, SVGPathElement | null>>({});
@@ -195,7 +196,7 @@ export function MobileFlow({ stage, reduce }: { stage: number; reduce: boolean }
   const chartOn = stage >= 4;
 
   return (
-    <div className="relative h-full max-h-[66svh] w-full [container-type:size]">
+    <div aria-hidden="true" className="relative h-full max-h-[66svh] w-full [container-type:size]">
       <div
         ref={box}
         className={`absolute left-1/2 top-1/2 aspect-[360/500] w-[min(100cqw,72cqh)] -translate-x-1/2 -translate-y-1/2 [container-type:inline-size] ${ready ? "flow-ready" : ""}`}

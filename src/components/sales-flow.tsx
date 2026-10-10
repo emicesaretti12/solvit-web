@@ -223,6 +223,25 @@ function Diagram({ layout, sf, className }: { layout: Layout; sf: MotionValue<nu
   );
 }
 
+/* La etapa que se muestra avanza de a una hacia la del scroll (~0,4 s por etapa): con un
+   deslizamiento rápido o un salto, las etapas igual se encienden en orden (y el texto acompaña
+   al diagrama). Hacia atrás, más rápido */
+function useChainedStage(target: number, reduce: boolean) {
+  const [shown, setShown] = useState(target);
+  const lastStep = useRef(0);
+  useEffect(() => {
+    if (shown === target) return;
+    const gap = reduce ? 0 : target > shown ? 420 : 160;
+    const wait = Math.max(0, gap - (performance.now() - lastStep.current));
+    const t = setTimeout(() => {
+      lastStep.current = performance.now();
+      setShown((s) => (reduce ? target : s + Math.sign(target - s)));
+    }, wait);
+    return () => clearTimeout(t);
+  }, [shown, target, reduce]);
+  return shown;
+}
+
 export function SalesFlow() {
   const track = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
@@ -254,7 +273,8 @@ export function SalesFlow() {
     return () => controls.stop();
   }, [stage, reduce, sf]);
 
-  const active = Math.max(0, stage);
+  const shown = useChainedStage(stage, Boolean(reduce));
+  const active = Math.max(0, shown);
 
   return (
     <section id="recorrido" aria-labelledby="recorrido-titulo" className="relative border-t border-line">
@@ -272,7 +292,7 @@ export function SalesFlow() {
           <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col px-4 pb-6 pt-[84px] md:px-6 lg:pb-10 lg:pt-28">
             <div className="relative flex min-h-0 flex-1 items-center justify-center">
               <div className="h-full w-full lg:hidden">
-                <MobileFlow stage={stage} reduce={Boolean(reduce)} />
+                <MobileFlow stage={shown} reduce={Boolean(reduce)} />
               </div>
               <Diagram layout={DESKTOP} sf={sf} className="hidden h-full max-h-[62svh] w-full lg:block" />
             </div>
