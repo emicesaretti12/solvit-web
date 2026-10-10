@@ -26,6 +26,18 @@ const RIBBONS: { key: string; points: number[][]; from: string; to: string; dept
 const UNIT = 787 / 3.2; // la S mide 3,2 unidades de alto
 const toScene = ([x, y]: number[]) => new THREE.Vector2((x - 257.5) / UNIT, -(y - 393.5) / UNIT);
 
+// Escalonado del armado (cinta: [desde, hasta] sobre spread / STEP_SPREAD): abajo encaja primero
+const STEP_SPREAD = 0.6;
+const STAGGER: [number, number][] = [
+  [0, 0.7],
+  [0.22, 0.86],
+  [0.45, 1],
+];
+const smoothstep = (a: number, b: number, v: number) => {
+  const t = Math.min(1, Math.max(0, (v - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+};
+
 // Hacia dónde se abre cada cinta cuando spread = 1 (posición, giro Z, giro Y)
 const SPREAD: [THREE.Vector3, number, number][] = [
   [new THREE.Vector3(0.55, 0.7, 0.55), 0.1, -0.35],
@@ -84,6 +96,7 @@ function Ribbon({
   // Arranca en la pose que ya calculó el escenario (sin viaje inicial desde el centro)
   const spread = useRef(pose.current.spread);
   const lit = useRef(pose.current.focus < 0 || pose.current.focus === index ? 1 : 0.32);
+  const glow = useRef(0);
 
   useEffect(() => () => geometry.dispose(), [geometry]);
 
@@ -92,17 +105,21 @@ function Ribbon({
     if (!g) return;
     const p = pose.current;
     spread.current = reduce ? p.spread : THREE.MathUtils.damp(spread.current, p.spread, 6, dt);
-    const s = spread.current;
+    const raw = spread.current;
+    const [lo, hi] = STAGGER[index];
+    const s = raw >= STEP_SPREAD ? raw : STEP_SPREAD * smoothstep(lo, hi, raw / STEP_SPREAD);
     const [offset, rz, ry] = SPREAD[index];
     g.position.set(center.x + offset.x * s, center.y + offset.y * s, ribbon.z + offset.z * s);
     g.rotation.set(0, ry * s, rz * s);
 
-    // Con una cinta destacada, las otras bajan la luz
+    // Con una cinta destacada, las otras bajan la luz; con focus -2 (crecer) brillan las tres
     const target = p.focus < 0 || p.focus === index ? 1 : 0.32;
     lit.current = reduce ? target : THREE.MathUtils.damp(lit.current, target, 8, dt);
+    const glowTarget = p.focus === index ? 0.18 : p.focus === -2 ? 0.16 * (1 - s / STEP_SPREAD) : 0;
+    glow.current = reduce ? glowTarget : THREE.MathUtils.damp(glow.current, glowTarget, 6, dt);
     if (material.current) {
       material.current.color.setScalar(lit.current);
-      material.current.emissiveIntensity = p.focus === index ? 0.18 : 0;
+      material.current.emissiveIntensity = glow.current;
     }
   });
 
@@ -158,6 +175,7 @@ function Rig({
   const start = pose.current;
   const damped = useRef({ turn: start.turn, tilt: start.tilt, x: start.x, y: start.y, z: start.z, scale: start.scale });
   const clock = useRef(0);
+  const intro = useRef(0);
   const lastZ = useRef(start.z);
   const { camera, size } = useThree();
 
@@ -188,6 +206,8 @@ function Rig({
     look.current.x = THREE.MathUtils.damp(look.current.x, pointer.current.x, 3, dt);
     look.current.y = THREE.MathUtils.damp(look.current.y, pointer.current.y, 3, dt);
     const sway = reduce ? 0 : Math.sin(clock.current * 0.45) * 0.12;
+    intro.current = reduce ? 1 : Math.min(1, intro.current + dt / 1.5);
+    const enter = 1 - Math.pow(1 - intro.current, 3); // ease-out cúbica
     const bob = reduce ? 0 : Math.sin(clock.current * 0.9) * 0.05;
 
     const k = damped.current;
@@ -218,11 +238,11 @@ function Rig({
     // Pose de reposo levemente girada, para que se lea el canto desde el primer cuadro
     g.rotation.set(
       0.14 + k.tilt + pitch.current.value + look.current.y * 0.18,
-      -0.42 + k.turn + yaw.current.value + sway + look.current.x * 0.3,
+      -0.42 + k.turn + yaw.current.value + sway + look.current.x * 0.3 - (1 - enter) * 1.25,
       0,
     );
     g.position.set(k.x * halfW, k.y * halfH + bob, k.z * cam.position.z);
-    g.scale.setScalar(k.scale);
+    g.scale.setScalar(k.scale * (0.82 + 0.18 * enter));
   });
 
   return (
@@ -246,6 +266,9 @@ function Fit() {
   return null;
 }
 
+// La escena solo existe en el cliente (se importa con ssr: false)
+const MOBILE = typeof window !== "undefined" && window.matchMedia("(max-width: 1023.98px)").matches;
+
 export default function IsotypeScene({
   pose,
   drag,
@@ -264,7 +287,7 @@ export default function IsotypeScene({
 }) {
   return (
     <Canvas
-      dpr={[1, 1.75]}
+      dpr={[1, MOBILE ? 1.5 : 1.75]}
       frameloop={!active ? "never" : reduce ? "demand" : "always"}
       camera={{ fov: FOV, position: [0, 0, 9.5], near: 0.1, far: 60 }}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}

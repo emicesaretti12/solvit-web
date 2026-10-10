@@ -25,6 +25,7 @@ import {
   type MotionValue,
 } from "motion/react";
 import { memo, useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
+import { MaskWords } from "@/components/mask-words";
 import { AgentPreview } from "@/components/previews/agent-preview";
 import { CrmPreview } from "@/components/previews/crm-preview";
 import { MarketingPreview } from "@/components/previews/marketing-preview";
@@ -205,7 +206,7 @@ export function HowItWorks() {
           id="como-titulo"
           className="font-display max-w-[16ch] text-[clamp(2.3rem,8.4vw,3rem)] font-bold leading-[0.98] tracking-[-0.04em] text-ink sm:text-[3.6rem] lg:text-[4.4rem]"
         >
-          Así convertimos consultas en ventas.
+          <MaskWords text="Así convertimos consultas en ventas." />
         </h2>
         <p className="mt-5 max-w-[46ch] text-base leading-relaxed text-ink-muted md:text-lg">
           Un solo equipo se encarga de los cuatro pasos, sin que ninguna consulta se pierda entre uno y otro.
@@ -223,7 +224,14 @@ export function HowItWorks() {
             style={{ top: `${i * 100 + 50}svh` }}
           />
         ))}
-        <StageMark pose="out" className="absolute left-0" style={{ top: `${STEPS.length * 100 + 60}svh` }} />
+        {/* Crecer queda quieto hasta que el panel se suelta; recién ahí la S se retira */}
+        <StageMark
+          pose="crecer"
+          slot="steps-slot"
+          className="absolute left-0"
+          style={{ top: `${STEPS.length * 100 - 4}svh` }}
+        />
+        <StageMark pose="out" className="absolute left-0" style={{ top: `${STEPS.length * 100 + 70}svh` }} />
 
         <div data-stage-panel className="sticky top-0 flex h-[100svh] flex-col overflow-hidden">
           <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col px-4 pb-6 pt-[84px] md:px-6 lg:pb-12 lg:pt-28">

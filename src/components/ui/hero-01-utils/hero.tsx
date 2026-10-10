@@ -25,9 +25,9 @@ export default function HeroSection() {
   const drag = useStageDrag();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   // El texto se aleja en profundidad mientras la cámara entra en la S
-  const opacity = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.6], [1, 0.92]);
-  const y = useTransform(scrollYProgress, [0, 0.6], [0, -60]);
+  const opacity = useTransform(scrollYProgress, [0, 0.26], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.3], [1, 0.94]);
+  const y = useTransform(scrollYProgress, [0, 0.3], [0, 40]);
 
   return (
     <section
@@ -37,8 +37,8 @@ export default function HeroSection() {
       className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden pb-14 pt-28 lg:justify-center lg:pb-20"
     >
       <StageMark pose="hero" slot="hero-slot" className="absolute left-0 top-0" />
-      <StageMark pose="plunge" className="absolute left-0 top-[55%]" />
-      <StageMark pose="dive" className="absolute bottom-0 left-0" />
+      <StageMark pose="plunge" className="absolute left-0 top-[38%]" />
+      <StageMark pose="dive" className="absolute left-0 top-[72%]" />
 
       {/* Arrastre del isotipo: mitad derecha en escritorio, la parte de arriba en celulares */}
       <div

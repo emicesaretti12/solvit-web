@@ -19,7 +19,7 @@ export type StagePose = {
   spread: number;
   turn: number;
   tilt: number;
-  /** Cinta destacada: 0 atraer, 1 atender, 2 cerrar; -1 ninguna */
+  /** Cinta destacada: 0 atraer, 1 atender, 2 cerrar; -1 ninguna; -2 las tres (crecer) */
   focus: number;
   opacity: number;
 };
@@ -46,15 +46,16 @@ export const POSES = {
     mobile: p({ x: 0.12, scale: 0.95 }),
   },
   // Mitad del hero: la S se abre y avanza hacia la cámara, todavía entera a la vista
+  // En celulares la S sube y avanza (no baja sobre el titular, que se desvanece debajo)
   plunge: {
     desktop: p({ x: 0.22, z: 0.42, scale: 1.1, spread: 1.1, turn: 0.7, tilt: 0.22 }),
-    mobile: p({ x: 0.04, y: 0.12, z: 0.42, scale: 1.1, spread: 1.1, turn: 0.7, tilt: 0.22 }),
+    mobile: p({ x: 0.05, y: 0.55, z: 0.4, scale: 1.05, spread: 1.1, turn: 0.7, tilt: 0.3 }),
     reducedHold: true,
   },
   // Salida del hero: las cintas se abren hacia los bordes y pasan al lado de la cámara
   dive: {
     desktop: p({ x: 0.04, z: 0.9, scale: 1.25, spread: 2.6, turn: 1.15, tilt: 0.38, opacity: 0 }),
-    mobile: p({ x: 0, y: 0.06, z: 0.9, scale: 1.25, spread: 2.6, turn: 1.15, tilt: 0.38, opacity: 0 }),
+    mobile: p({ x: 0, y: 0.45, z: 0.9, scale: 1.25, spread: 2.6, turn: 1.15, tilt: 0.42, opacity: 0 }),
     reducedHold: true,
   },
   // Del otro lado: las cintas llegan desde el fondo, todavía abiertas
@@ -78,16 +79,17 @@ export const POSES = {
     mobile: p({ scale: 0.62, spread: 0.55, turn: -0.12, tilt: -0.16, focus: 2 }),
     reduced: STILL,
   },
-  // Crecer: las tres cintas se vuelven a armar con una vuelta completa
+  // Crecer: las cintas encajan de abajo hacia arriba (como apilar), la S sube apenas y brilla
+  // entera. Sin vuelta completa: de canto las cintas se ven como piezas sueltas
   crecer: {
-    desktop: p({ x: 0.42, y: -0.04, scale: 0.96, turn: Math.PI * 2 }),
-    mobile: p({ scale: 0.72, turn: Math.PI * 2 }),
-    reduced: STILL,
+    desktop: p({ x: 0.42, y: 0.02, scale: 0.98, turn: 0.38, tilt: 0.06, focus: -2 }),
+    mobile: p({ scale: 0.74, turn: 0.38, tilt: 0.06, focus: -2 }),
+    reduced: { ...STILL, focus: -2 },
   },
-  // Se retira para dejar lugar a los proyectos
+  // Se retira para dejar lugar a los proyectos (cuando el panel ya se soltó)
   out: {
-    desktop: p({ x: 0.42, y: 0.35, z: -0.35, scale: 0.7, turn: Math.PI * 2.4, opacity: 0 }),
-    mobile: p({ y: 0.7, z: -0.35, scale: 0.6, turn: Math.PI * 2.4, opacity: 0 }),
+    desktop: p({ x: 0.42, y: 0.4, z: -0.3, scale: 0.72, turn: 0.7, tilt: 0.1, opacity: 0 }),
+    mobile: p({ y: 0.75, z: -0.3, scale: 0.6, turn: 0.7, tilt: 0.1, opacity: 0 }),
     reduced: STILL,
   },
 } satisfies Record<string, PoseDef>;

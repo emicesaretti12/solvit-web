@@ -150,7 +150,8 @@ export function Stage() {
       const rect = el.getBoundingClientRect();
       const panel = el.closest<HTMLElement>("[data-stage-panel]");
       const top = panel ? rect.top - panel.getBoundingClientRect().top : rect.top + window.scrollY;
-      const vh = window.innerHeight;
+      // Alto del canvas (100lvh), que es la referencia de las fracciones de pantalla
+      const vh = layer.current?.offsetHeight || window.innerHeight;
       // La S abierta ocupa más alto: ~0,47 unidades extra por cada punto de apertura
       const extent = 1 + 0.47 * pose.spread;
       const fit = (0.92 * rect.height) / (isotypeHeightPx(window.innerWidth, vh) * extent);
@@ -235,7 +236,14 @@ export function Stage() {
   }, [reduce]);
 
   return (
-    <div ref={layer} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0" style={{ opacity: 0 }}>
+    // Alto estable (100lvh): al aparecer o esconderse la barra del navegador el canvas no se
+    // redimensiona y la S no salta
+    <div
+      ref={layer}
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-x-0 top-0 z-0 h-[100lvh]"
+      style={{ opacity: 0 }}
+    >
       {/* Póster: el isotipo plano mientras carga WebGL (o si no hay) */}
       <div
         className={`absolute inset-0 flex items-center justify-center transition-opacity duration-700 ease-[var(--ease-out)] ${ready ? "opacity-0" : "opacity-100"}`}

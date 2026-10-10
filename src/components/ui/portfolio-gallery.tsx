@@ -16,6 +16,7 @@ import Image from "next/image";
 import { motion, useInView, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { useEffect, useId, useRef, useState, type MouseEvent, type ReactNode, type RefObject } from "react";
 import { cn } from "@/lib/utils";
+import { MaskWords } from "../mask-words";
 
 export interface PortfolioImage {
   src: string;
@@ -164,7 +165,7 @@ export function PortfolioGallery({
             id={headingId}
             className="font-display mt-5 max-w-[18ch] text-[2.1rem] font-semibold leading-[1.04] tracking-[-0.035em] text-ink text-balance sm:text-5xl lg:text-[3.6rem]"
           >
-            {title}
+            {typeof title === "string" ? <MaskWords text={title} /> : title}
           </h2>
           {description && (
             <p className="mt-5 max-w-[56ch] text-base leading-relaxed text-ink-muted text-pretty md:text-lg">
