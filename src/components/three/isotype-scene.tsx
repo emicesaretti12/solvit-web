@@ -102,14 +102,6 @@ function Rig({
   const start = pose.current;
   const damped = useRef({ turn: start.turn, tilt: start.tilt, x: start.x, y: start.y, z: start.z, scale: start.scale });
   const clock = useRef(0);
-  const intro = useRef(0);
-  // La entrada solo corre si la S está a la vista al cargar; si la página abrió más abajo,
-  // el primer cuadro llega mucho después y la S aparece ya en su pose
-  const mountedAt = useRef(0);
-  const introChecked = useRef(false);
-  useEffect(() => {
-    mountedAt.current = performance.now();
-  }, []);
   const lastZ = useRef(start.z);
   const { camera, size } = useThree();
 
@@ -140,12 +132,6 @@ function Rig({
     look.current.x = THREE.MathUtils.damp(look.current.x, pointer.current.x, 3, dt);
     look.current.y = THREE.MathUtils.damp(look.current.y, pointer.current.y, 3, dt);
     const sway = reduce ? 0 : Math.sin(clock.current * 0.45) * 0.12;
-    if (!introChecked.current) {
-      introChecked.current = true;
-      if (performance.now() - mountedAt.current > 1200) intro.current = 1;
-    }
-    intro.current = reduce ? 1 : Math.min(1, intro.current + dt / 1.5);
-    const enter = 1 - Math.pow(1 - intro.current, 3); // ease-out cúbica
     const bob = reduce ? 0 : Math.sin(clock.current * 0.9) * 0.05;
 
     const k = damped.current;
@@ -179,11 +165,11 @@ function Rig({
     // Pose de reposo levemente girada, para que se lea el canto desde el primer cuadro
     g.rotation.set(
       0.14 + k.tilt + pitch.current.value + look.current.y * 0.18,
-      -0.42 + k.turn + yaw.current.value + sway + look.current.x * 0.3 - (1 - enter) * 1.25,
+      -0.42 + k.turn + yaw.current.value + sway + look.current.x * 0.3,
       0,
     );
     g.position.set(k.x * halfW * depth, k.y * halfH * depth + bob, k.z * cam.position.z);
-    g.scale.setScalar(k.scale * (0.82 + 0.18 * enter));
+    g.scale.setScalar(k.scale);
   });
 
   return (
@@ -207,9 +193,6 @@ function Fit() {
   return null;
 }
 
-// La escena solo existe en el cliente (se importa con ssr: false)
-const MOBILE = typeof window !== "undefined" && window.matchMedia("(max-width: 1023.98px)").matches;
-
 export default function IsotypeScene({
   pose,
   drag,
@@ -228,7 +211,7 @@ export default function IsotypeScene({
 }) {
   return (
     <Canvas
-      dpr={[1, MOBILE ? 1.5 : 1.75]}
+      dpr={[1, 1.75]}
       frameloop={!active ? "never" : reduce ? "demand" : "always"}
       camera={{ fov: FOV, position: [0, 0, 9.5], near: 0.1, far: 60 }}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}

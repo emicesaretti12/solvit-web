@@ -4,17 +4,14 @@
   Cómo funciona: el recorrido de una venta en cuatro pasos, en un solo panel fijo.
   Mientras se baja, el panel queda quieto y cambia de paso; en el escenario 3D se enciende la
   cinta de la S que corresponde (atraer, atender, cerrar) y en "crecer" la S se vuelve a armar.
-  En celulares la S vive dentro del panel (steps-isotype, en el hueco de arriba): viaja con el
-  scroll nativo junto al texto, sin el retraso de un canvas fijo que se reposiciona por código.
   Cada paso: el verbo, una frase y la vista viva del servicio que lo resuelve.
+  En celulares, otra versión más simple (how-it-works-mobile): tarjetas en el scroll común que
+  se levantan en 3D, cada una con su S de capas en CSS; sin panel fijo ni canvas.
 
   - Sin GSAP pin: un contenedor alto con un panel sticky (convive con Lenis sin saltos)
   - El cambio de paso es un barrido en diagonal, con la inclinación de las cintas del isotipo
     (24,5°); con reduced motion, un fundido. Las variantes tienen las mismas claves en los dos
     casos: el HTML del servidor y el del cliente coinciden y nada queda trabado al hidratar
-  - En celulares no hay barrido (clip-path repinta todo el paso en cada cuadro): el paso que se
-    va sale rápido hacia arriba y el que llega entra desde abajo apenas después, sin que los dos
-    textos se pisen
   - Las vistas se escalan para entrar en el espacio que queda (nunca se cortan) y solo se
     montan al acercarse a su paso; las de los pasos que no se ven quedan en pausa
   - Los textos de los cuatro pasos quedan en el árbol de accesibilidad; al cambiar de paso se
@@ -29,19 +26,16 @@ import {
   useTransform,
   type MotionValue,
 } from "motion/react";
-import { memo, useEffect, useRef, useState, useSyncExternalStore, type ComponentType, type ReactNode } from "react";
+import { memo, useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
+import { HowItWorksMobile } from "@/components/how-it-works-mobile";
 import { MaskWords } from "@/components/mask-words";
 import { AgentPreview } from "@/components/previews/agent-preview";
 import { CrmPreview } from "@/components/previews/crm-preview";
 import { MarketingPreview } from "@/components/previews/marketing-preview";
 import { PreviewSuspendContext } from "@/components/previews/preview-shell";
-import { LogoMark } from "@/components/logo";
 import { getLenis } from "@/components/smooth-scroll";
-import { CanvasBoundary } from "@/components/three/canvas-boundary";
 import { StageMark } from "@/components/three/stage";
 import type { PoseKey } from "@/components/three/choreography";
-
-const StepsIsotype = dynamic(() => import("@/components/three/steps-isotype"), { ssr: false });
 
 const GrowthChart = dynamic(() => import("@/components/dashboard-chart").then((m) => m.GrowthChart), {
   ssr: false,
@@ -94,15 +88,6 @@ const STEPS: Step[] = [
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-// Las transiciones no van en el HTML: pueden depender del ancho sin romper la hidratación
-const MOBILE_QUERY = "(max-width: 1023.98px)";
-const subscribeMobile = (onChange: () => void) => {
-  const query = window.matchMedia(MOBILE_QUERY);
-  query.addEventListener("change", onChange);
-  return () => query.removeEventListener("change", onChange);
-};
-const useIsMobile = () =>
-  useSyncExternalStore(subscribeMobile, () => window.matchMedia(MOBILE_QUERY).matches, () => false);
 
 // Barrido en diagonal con la inclinación de las cintas: tan(24,5°) ≈ 0,46 del alto
 const SHOWN = "polygon(-46% 0%, 100% 0%, 146% 100%, 0% 100%)";
@@ -116,74 +101,6 @@ function RailSegment({ progress, index, total }: { progress: MotionValue<number>
     <span aria-hidden="true" className="relative mt-2 block h-[2px] w-full overflow-hidden rounded-full bg-fg/10">
       <motion.span style={{ scaleX: fill }} className="absolute inset-0 origin-left rounded-full bg-blue-400" />
     </span>
-  );
-}
-
-function hasWebGL() {
-  try {
-    const canvas = document.createElement("canvas");
-    return Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"));
-  } catch {
-    return false;
-  }
-}
-
-/* La S de los pasos en celulares (solo se monta en el cliente): el isotipo plano mientras carga
-   WebGL (o si no hay), después la S en 3D. El canvas se prepara cuando la S del hero ya se
-   zambulló (en el primer rato libre) o cuando la sección se acerca, nunca al cargar la página ni
-   con el hero animándose: crear el contexto y la iluminación en ese momento trabaría el scroll */
-function MobileSteps({ step, reduce }: { step: number; reduce: boolean }) {
-  const [gl] = useState(hasWebGL);
-  const [armed, setArmed] = useState(false);
-  const [ready, setReady] = useState(false);
-  const wrap = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = wrap.current;
-    if (!el || !gl) return;
-    const arm = () => setArmed(true);
-    const io = new IntersectionObserver(([entry]) => entry.isIntersecting && arm(), { rootMargin: "100% 0px" });
-    io.observe(el);
-    // Safari viejo no tiene requestIdleCallback: ahí espera un rato fijo
-    const ric = window.requestIdleCallback as typeof window.requestIdleCallback | undefined;
-    let idle: number | ReturnType<typeof setTimeout> | undefined;
-    const schedule = () => {
-      if (idle === undefined) idle = ric ? ric(arm, { timeout: 1500 }) : setTimeout(arm, 400);
-    };
-    const hero = document.getElementById("hero");
-    const pastHero = () => window.scrollY > (hero?.offsetHeight ?? window.innerHeight) * 0.75;
-    const onScroll = () => {
-      if (!pastHero()) return;
-      schedule();
-      window.removeEventListener("scroll", onScroll);
-    };
-    if (pastHero()) schedule();
-    else window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      io.disconnect();
-      window.removeEventListener("scroll", onScroll);
-      if (idle !== undefined) {
-        if (ric) window.cancelIdleCallback(idle as number);
-        else clearTimeout(idle);
-      }
-    };
-  }, [gl]);
-
-  return (
-    <div ref={wrap} className="absolute inset-0">
-      <div
-        className={`absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-[var(--ease-out)] ${ready ? "opacity-0" : "opacity-100"}`}
-      >
-        <LogoMark className="h-[62%] w-auto" />
-      </div>
-      {gl && armed && (
-        <div className={`absolute inset-0 transition-opacity duration-700 ease-[var(--ease-out)] ${ready ? "opacity-100" : "opacity-0"}`}>
-          <CanvasBoundary>
-            <StepsIsotype step={step} reduce={reduce} onReady={() => setReady(true)} />
-          </CanvasBoundary>
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -242,7 +159,6 @@ const StepPreview = memo(function StepPreview({
 
 export function HowItWorks() {
   const reduce = useReducedMotion();
-  const mobile = useIsMobile();
   const track = useRef<HTMLDivElement>(null);
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
   const [active, setActive] = useState(0);
@@ -279,15 +195,10 @@ export function HowItWorks() {
   // Las mismas variantes siempre (el servidor no conoce la preferencia y el HTML tiene que
   // coincidir): con reduced motion, el CSS del artículo anula el barrido y el desplazamiento
   // y queda solo el fundido
-  // En celulares, salida corta y entrada apenas después (los textos no se superponen); en
-  // escritorio, el barrido sale y entra a la vez
-  const staged = mobile && !reduce;
-  const enter = staged ? { duration: 0.55, delay: 0.14, ease: EASE } : { duration: reduce ? 0.25 : 0.75, ease: EASE };
-  const leave = staged ? { duration: 0.22, ease: EASE } : enter;
   const variants = {
-    shown: { clipPath: SHOWN, opacity: 1, transform: STILL, transition: enter },
-    before: { clipPath: BEFORE, opacity: 0, transform: "translateY(18px)", transition: leave },
-    after: { clipPath: AFTER, opacity: 0, transform: "translateY(-18px)", transition: leave },
+    shown: { clipPath: SHOWN, opacity: 1, transform: STILL },
+    before: { clipPath: BEFORE, opacity: 0, transform: "translateY(18px)" },
+    after: { clipPath: AFTER, opacity: 0, transform: "translateY(-18px)" },
   };
 
   return (
@@ -306,8 +217,13 @@ export function HowItWorks() {
         </p>
       </div>
 
-      {/* Un tramo de scroll por paso; el panel queda fijo mientras tanto */}
-      <div ref={track} className="relative" style={{ height: `${(STEPS.length + 1) * 100}svh` }}>
+      {/* Celulares: tarjetas en el scroll común, con 3D en CSS (sin panel fijo) */}
+      <div className="lg:hidden">
+        <HowItWorksMobile steps={STEPS} />
+      </div>
+
+      {/* Escritorio: un tramo de scroll por paso; el panel queda fijo mientras tanto */}
+      <div ref={track} className="relative hidden lg:block" style={{ height: `${(STEPS.length + 1) * 100}svh` }}>
         {STEPS.map((s, i) => (
           <StageMark
             key={s.pose}
@@ -357,10 +273,6 @@ export function HowItWorks() {
               {`Paso ${active + 1} de ${STEPS.length}: ${STEPS[active].verb}. ${STEPS[active].title}`}
             </p>
 
-            {/* En celulares, este hueco es de la S de los pasos (con su propio canvas) */}
-            <div id="steps-slot" aria-hidden="true" className="relative h-[25svh] shrink-0 lg:hidden">
-              {mobile && <MobileSteps step={active} reduce={Boolean(reduce)} />}
-            </div>
 
             <div className="relative grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)] lg:mt-10 lg:max-w-[540px]">
               {STEPS.map((s, i) => {
@@ -373,7 +285,8 @@ export function HowItWorks() {
                     initial={false}
                     animate={state}
                     variants={variants}
-                    className={`col-start-1 row-start-1 flex min-h-0 flex-col max-lg:![clip-path:none] motion-reduce:![clip-path:none] motion-reduce:!transform-none ${
+                    transition={{ duration: reduce ? 0.25 : 0.75, ease: EASE }}
+                    className={`col-start-1 row-start-1 flex min-h-0 flex-col motion-reduce:![clip-path:none] motion-reduce:!transform-none ${
                       i === active ? "" : "pointer-events-none"
                     }`}
                   >

@@ -337,76 +337,158 @@ html.lenis body {
   animation: live-ping 1.8s var(--ease-out) infinite;
 }
 
-/* Recorrido de la consulta en celulares (sales-flow-mobile). Lo que se mueve todo el tiempo
-   (consultas, escáner del agente, pulsos) es transform u opacidad: lo resuelve el compositor y
-   no compite con el scroll. Los tramos se dibujan con una transición de stroke-dashoffset solo
-   al cambiar de etapa. --len lo mide el componente; --delay ordena cada etapa */
-.flow-edge {
+/* Celulares: "Cómo funciona" y el recorrido en el scroll común, con 3D en CSS. Todo es
+   transform y opacidad (lo mueve el compositor del teléfono); data-shown lo pone un
+   IntersectionObserver cuando el bloque entra en pantalla */
+.step-card {
+  transform-origin: 50% 0;
+  transform: rotateX(-62deg) translateY(36px) scale(0.94);
   opacity: 0;
-  stroke-dasharray: var(--len) var(--len);
-  stroke-dashoffset: var(--len);
+  transition:
+    transform 1s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.6s var(--ease-out);
 }
-.flow-edge[data-on="true"] {
-  stroke-dashoffset: 0;
-}
-/* Las transiciones recién valen con los largos medidos (si no, al montar, los trazos se verían
-   enteros y se replegarían) */
-.flow-ready .flow-edge {
+.step-card[data-shown="true"] {
+  transform: none;
   opacity: 1;
-  transition: stroke-dashoffset 0.3s var(--ease-out);
 }
-.flow-ready .flow-edge[data-on="true"] {
-  transition: stroke-dashoffset 0.75s var(--ease-out) var(--delay, 0s);
+/* Piso del escenario de cada paso: la grilla avanza una celda y vuelve (sin corte) */
+.step-floor {
+  animation: step-floor 1.6s linear infinite;
 }
-/* Diagrama muy angosto (celular acostado): sin nombres, que se pisarían; la etapa se lee abajo */
-@container (max-width: 240px) {
-  .flow-label {
-    display: none;
+@keyframes step-floor {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(28px);
   }
 }
-.flow-fade {
-  opacity: 0;
-  transition: opacity 0.3s var(--ease-out);
+.s3d-sway {
+  transform: rotateX(10deg) rotateY(-22deg);
+  animation: s3d-sway 6.5s ease-in-out infinite alternate;
 }
-.flow-fade[data-on="true"] {
-  opacity: 1;
-  transition: opacity 0.9s var(--ease-out) var(--delay, 0s);
-}
-.flow-node {
+.s3d-ribbon {
   transition:
-    opacity 0.3s var(--ease-out),
-    background-color 0.3s var(--ease-out),
-    border-color 0.3s var(--ease-out),
-    color 0.3s var(--ease-out);
+    transform 1.15s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.5s var(--ease-out);
 }
-.flow-node[data-on="true"] {
-  transition-duration: 0.45s;
-  transition-delay: var(--delay, 0s);
-  animation: flow-pop 0.7s var(--ease-out) var(--delay, 0s) both;
+@keyframes s3d-sway {
+  from {
+    transform: rotateX(12deg) rotateY(-28deg);
+  }
+  to {
+    transform: rotateX(6deg) rotateY(24deg);
+  }
 }
-.flow-node[data-on="true"] .flow-ring {
-  animation: flow-ring 1.1s var(--ease-out) var(--delay, 0s) both;
+/* Una consulta que baja por la línea: un brillo corto dentro de una franja tan alta como la
+   línea, que se desplaza su propio alto (así el movimiento es solo transform) */
+.journey-dot {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 0, var(--blue-400) 4%, transparent 9%);
+  animation: journey-fall 4.2s linear infinite;
+}
+@keyframes journey-fall {
+  from {
+    transform: translateY(-10%);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+.journey-row {
+  transform-origin: 0 0;
+  transform: rotateX(-55deg) translateY(28px);
+  opacity: 0;
+  transition:
+    transform 0.95s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.55s var(--ease-out);
+}
+[data-shown="true"] > .journey-row {
+  transform: none;
+  opacity: 1;
+}
+.journey-node {
+  transition:
+    border-color 0.5s var(--ease-out),
+    background-color 0.5s var(--ease-out);
+}
+[data-shown="true"] .journey-node {
+  border-color: var(--blue-400);
+  background-color: color-mix(in oklab, var(--blue-400) 14%, var(--navy-850));
+  animation: flow-pop 0.7s var(--ease-out) 0.15s both;
+}
+.journey-ring {
+  opacity: 0;
+}
+[data-shown="true"] .journey-ring {
+  animation: flow-ring 1.1s var(--ease-out) 0.15s both;
+}
+.journey-chip {
+  transform: translateZ(-140px) rotateY(75deg);
+  opacity: 0;
+  transition:
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s),
+    opacity 0.5s var(--ease-out) var(--d, 0s);
+}
+[data-shown="true"] .journey-chip {
+  transform: none;
+  opacity: 1;
+}
+[data-shown="true"] .journey-chip-muted {
+  transform: translateY(6px);
+  opacity: 0.55;
+}
+/* Cartas: salen apiladas del centro, acostadas, y se reparten */
+.journey-card {
+  transform: translateX(var(--from, 0)) rotateX(70deg) translateZ(-40px);
+  opacity: 0;
+  transition:
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s),
+    opacity 0.45s var(--ease-out) var(--d, 0s);
+}
+[data-shown="true"] .journey-card {
+  transform: none;
+  opacity: 1;
+}
+/* Barras en 3D (frente, techo y lateral) que crecen desde la base */
+.journey-bar {
+  position: relative;
+  flex: 1;
+  max-width: 26px;
+  background: linear-gradient(to top, #0b4fe0, var(--blue-400));
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s);
+}
+.journey-bar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 7px;
+  background: #8fd0ff;
+  transform: skewX(-45deg);
+  transform-origin: bottom left;
+}
+.journey-bar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 100%;
+  width: 7px;
+  background: #0838a8;
+  transform: skewY(-45deg);
+  transform-origin: top left;
+}
+[data-shown="true"] .journey-bar {
+  transform: scaleY(1);
 }
 .flow-scan {
   animation: flow-spin 1.6s linear infinite;
-}
-.flow-dot {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 1.8cqw;
-  height: 1.8cqw;
-  margin: -0.9cqw 0 0 -0.9cqw;
-  border-radius: 999px;
-  background: var(--blue-400);
-  box-shadow: 0 0 1.6cqw var(--blue-400);
-  opacity: 0;
-  will-change: transform, opacity;
-  pointer-events: none;
-}
-.flow-dot[data-tone="muted"] {
-  background: var(--ink-faint);
-  box-shadow: none;
 }
 @keyframes flow-pop {
   0% {
@@ -456,12 +538,20 @@ html.lenis body {
   .animate-marquee,
   .animate-marquee-reverse,
   .live-dot::after,
-  .flow-node,
-  .flow-ring,
+  .step-floor,
+  .s3d-sway,
+  .journey-dot,
+  .journey-node,
+  .journey-ring,
   .flow-scan {
     animation: none !important;
   }
-  .flow-dot {
-    display: none;
+  .step-card,
+  .journey-row,
+  .journey-chip,
+  .journey-card,
+  .journey-bar {
+    transform: none !important;
+    opacity: 1 !important;
   }
 }

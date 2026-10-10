@@ -11,8 +11,8 @@
     Las que solo consultaban se van en gris al costado
   - Solo atributos SVG (pathLength, r) y opacidad: sin transforms ni guiones en px, que Safari
     resuelve distinto
-  - En escritorio, este SVG horizontal; en celulares, sales-flow-mobile (vertical, con
-    animaciones que resuelve el compositor para que el teléfono no se trabe)
+  - Esto es el escritorio; en celulares, journey-mobile: bloques en vertical en el scroll
+    común, cada uno con su escena en 3D con CSS (sin panel fijo)
   - Fuera de pantalla las animaciones se pausan; con reduced motion no hay puntos en viaje
 */
 import {
@@ -28,7 +28,7 @@ import {
 } from "motion/react";
 import { useEffect, useId, useRef, useState } from "react";
 import { MaskWords } from "./mask-words";
-import { MobileFlow } from "./sales-flow-mobile";
+import { JourneyMobile } from "./journey-mobile";
 import { DESKTOP, EDGES, NODES, STAGES, type EdgeDef, type Layout, type NodeDef, type Point } from "./sales-flow-data";
 
 // Cada cambio de etapa se reproduce con su propio tiempo (no atado a la velocidad del dedo)
@@ -287,13 +287,16 @@ export function SalesFlow() {
         </h2>
       </div>
 
-      <div ref={track} className="relative" style={{ height: `${STAGES.length * 60 + 100}svh` }}>
+      {/* Celulares: el recorrido en el scroll común, con bloques que entran en 3D */}
+      <div className="lg:hidden">
+        <JourneyMobile />
+      </div>
+
+      {/* Escritorio: el circuito en un panel fijo que se arma con el scroll */}
+      <div ref={track} className="relative hidden lg:block" style={{ height: `${STAGES.length * 60 + 100}svh` }}>
         <div className="sticky top-0 flex h-[100svh] flex-col overflow-hidden">
           <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col px-4 pb-6 pt-[84px] md:px-6 lg:pb-10 lg:pt-28">
             <div className="relative flex min-h-0 flex-1 items-center justify-center">
-              <div className="h-full w-full lg:hidden">
-                <MobileFlow stage={shown} reduce={Boolean(reduce)} />
-              </div>
               <Diagram layout={DESKTOP} sf={sf} className="hidden h-full max-h-[62svh] w-full lg:block" />
             </div>
 

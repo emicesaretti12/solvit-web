@@ -36,8 +36,8 @@ export type PoseDef = {
 const base: StagePose = { x: 0, y: 0, z: 0, scale: 1, spread: 0, turn: 0, tilt: 0, focus: -1, opacity: 1 };
 const p = (o: Partial<StagePose>): StagePose => ({ ...base, ...o });
 
-// En celulares, en "Cómo funciona" este escenario se apaga: la S de los pasos tiene su propio
-// canvas dentro del panel (steps-isotype), que viaja con el scroll nativo sin retraso
+// En celulares, después del hero este escenario se apaga: "Cómo funciona" y el recorrido
+// tienen su propia versión, con animaciones 3D en CSS y scroll común (sin panel fijo)
 const OFF = p({ opacity: 0 });
 
 // Con reduced motion: sin zambullida, sin apertura ni giros; solo lugar, tamaño y luz
@@ -50,16 +50,15 @@ export const POSES = {
     mobile: p({ x: 0.12, scale: 0.95 }),
   },
   // Mitad del hero: la S se abre y avanza hacia la cámara, todavía entera a la vista
-  // En celulares la S sube y avanza (no baja sobre el titular, que se desvanece debajo)
   plunge: {
     desktop: p({ x: 0.22, z: 0.42, scale: 1.1, spread: 1.1, turn: 0.7, tilt: 0.22 }),
-    mobile: p({ x: 0.05, y: 0.55, z: 0.4, scale: 1.05, spread: 1.1, turn: 0.7, tilt: 0.3 }),
+    mobile: p({ x: 0.04, y: 0.12, z: 0.42, scale: 1.1, spread: 1.1, turn: 0.7, tilt: 0.22 }),
     reducedHold: true,
   },
   // Salida del hero: las cintas se abren hacia los bordes y pasan al lado de la cámara
   dive: {
     desktop: p({ x: 0.04, z: 0.9, scale: 1.25, spread: 2.6, turn: 1.15, tilt: 0.38, opacity: 0 }),
-    mobile: p({ x: 0, y: 0.45, z: 0.9, scale: 1.25, spread: 2.6, turn: 1.15, tilt: 0.42, opacity: 0 }),
+    mobile: p({ x: 0, y: 0.06, z: 0.9, scale: 1.25, spread: 2.6, turn: 1.15, tilt: 0.38, opacity: 0 }),
     reducedHold: true,
   },
   // Del otro lado: las cintas llegan desde el fondo, todavía abiertas
