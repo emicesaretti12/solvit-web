@@ -18,9 +18,12 @@ export type IsoPose = {
   scale: number;
   /** Cinta destacada: 0 arriba, 1 pliegue, 2 abajo; -1 ninguna */
   focus: number;
+  /** Cuánto se corrió el panel que contiene el hueco del isotipo (fracción de media pantalla,
+   *  positivo = hacia arriba). Se aplica sin amortiguar: la S entra y sale pegada al panel */
+  ride: number;
 };
 
-export const restPose = (): IsoPose => ({ spread: 0, turn: 0, tilt: 0, x: 0, y: 0, z: 0, scale: 1, focus: -1 });
+export const restPose = (): IsoPose => ({ spread: 0, turn: 0, tilt: 0, x: 0, y: 0, z: 0, scale: 1, focus: -1, ride: 0 });
 
 export type DragState = { active: boolean; dx: number; dy: number; vx: number; vy: number };
 

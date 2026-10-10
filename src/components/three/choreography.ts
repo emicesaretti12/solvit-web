@@ -9,7 +9,8 @@
     atraviesa la cámara igual en un celular que en un monitor
   - turn / tilt: radianes extra sobre la pose de reposo
   - En celulares, las poses con `slot` toman el lugar y el tamaño del hueco que la sección deja
-    para el isotipo (un elemento con ese id), así nunca tapa texto aunque la pantalla sea baja
+    para el isotipo (un elemento con ese id), así nunca tapa texto aunque la pantalla sea baja.
+    Si el hueco está en un panel sticky, la S además viaja con el panel cuando entra y sale
 */
 export type StagePose = {
   x: number;
@@ -87,10 +88,11 @@ export const POSES = {
     reduced: { ...STILL, focus: -2 },
   },
   // Se retira cuando el panel se suelta: sube al menos tan rápido como el contenido (si no,
-  // quedaría atrás y cruzaría el titular y el tablero) y se apaga en el camino
+  // quedaría atrás y cruzaría el titular y el tablero) y se apaga en el camino. En celulares
+  // toma el hueco del panel: sube pegada a él mientras se aleja y se apaga
   out: {
     desktop: p({ x: 0.42, y: 0.95, z: -0.3, scale: 0.72, turn: 0.7, tilt: 0.1, opacity: 0 }),
-    mobile: p({ y: 1.3, z: -0.3, scale: 0.6, turn: 0.7, tilt: 0.1, opacity: 0 }),
+    mobile: p({ z: -0.3, scale: 0.6, turn: 0.7, tilt: 0.1, opacity: 0 }),
     reduced: STILL,
   },
 } satisfies Record<string, PoseDef>;

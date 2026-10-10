@@ -138,27 +138,40 @@ export function Stage() {
 
   // Director: marcas del documento → pose interpolada según el scroll
   useEffect(() => {
-    let marks: { at: number; pose: StagePose }[] = [];
+    // panel: el panel sticky que contiene el hueco (dónde empieza su tramo, cuánto mide el
+    // tramo y cuánto mide el panel), para saber en cada scroll cuánto se corrió de su lugar
+    type Panel = { top: number; track: number; height: number };
+    let marks: { at: number; pose: StagePose; panel?: Panel }[] = [];
     let shown = false;
+    let vh = window.innerHeight;
     const desktop = window.matchMedia(DESKTOP);
 
     // Hueco reservado para el isotipo (celulares): su centro y su alto, en la pantalla, cuando
-    // la sección está a la vista. Dentro de un panel sticky se mide respecto del panel.
-    const slotPose = (pose: StagePose, slotId: string): StagePose => {
+    // la sección está a la vista. Dentro de un panel sticky se mide respecto del panel (y en
+    // cada scroll se suma lo que el panel se corrió: así la S entra y sale pegada a él)
+    const slotPose = (pose: StagePose, slotId: string): { pose: StagePose; panel?: Panel } => {
       const el = document.getElementById(slotId);
-      if (!el || !el.offsetHeight) return pose;
+      if (!el || !el.offsetHeight) return { pose };
       const rect = el.getBoundingClientRect();
-      const panel = el.closest<HTMLElement>("[data-stage-panel]");
-      const top = panel ? rect.top - panel.getBoundingClientRect().top : rect.top + window.scrollY;
-      // Alto del canvas (100lvh), que es la referencia de las fracciones de pantalla
-      const vh = layer.current?.offsetHeight || window.innerHeight;
-      // La S abierta ocupa más alto: ~0,47 unidades extra por cada punto de apertura
+      const panelEl = el.closest<HTMLElement>("[data-stage-panel]");
+      const panelRect = panelEl?.getBoundingClientRect();
+      const top = panelRect ? rect.top - panelRect.top : rect.top + window.scrollY;
+      // La S abierta ocupa más alto: ~0,47 unidades extra por cada punto de apertura. Dentro de
+      // un panel se deja aire arriba y abajo (la S no toca la navegación ni el texto)
       const extent = 1 + 0.47 * pose.spread;
-      const fit = (0.92 * rect.height) / (isotypeHeightPx(window.innerWidth, vh) * extent);
-      return { ...pose, y: 1 - (2 * (top + rect.height / 2)) / vh, scale: Math.min(pose.scale, fit) };
+      const room = panelEl ? 0.8 : 0.92;
+      const fit = (room * rect.height) / (isotypeHeightPx(window.innerWidth, vh) * extent);
+      const trackEl = panelEl?.parentElement;
+      const panel =
+        panelEl && trackEl
+          ? { top: trackEl.getBoundingClientRect().top + window.scrollY, track: trackEl.offsetHeight, height: panelEl.offsetHeight }
+          : undefined;
+      return { pose: { ...pose, y: 1 - (2 * (top + rect.height / 2)) / vh, scale: Math.min(pose.scale, fit) }, panel };
     };
 
     const measure = () => {
+      // Alto del canvas (100lvh), que es la referencia de las fracciones de pantalla
+      vh = layer.current?.offsetHeight || window.innerHeight;
       const els = Array.from(document.querySelectorAll<HTMLElement>("[data-stage]"))
         .map((el) => ({ el, at: el.getBoundingClientRect().top + window.scrollY }))
         .sort((a, b) => a.at - b.at);
@@ -166,13 +179,14 @@ export function Stage() {
       for (const { el, at } of els) {
         const def: PoseDef = POSES[el.dataset.stage as PoseKey];
         let pose = { ...(desktop.matches ? def.desktop : def.mobile) };
-        if (!desktop.matches && el.dataset.slot) pose = slotPose(pose, el.dataset.slot);
+        let panel: Panel | undefined;
+        if (!desktop.matches && el.dataset.slot) ({ pose, panel } = slotPose(pose, el.dataset.slot));
         if (reduce) {
           const prev = next[next.length - 1];
           // Sin zambullida: se queda en el lugar de la marca anterior y solo se desvanece
           pose = def.reducedHold && prev ? { ...prev.pose, opacity: pose.opacity } : { ...pose, ...def.reduced };
         }
-        next.push({ at, pose });
+        next.push({ at, pose, panel });
       }
       marks = next;
       update(window.scrollY);
@@ -203,10 +217,19 @@ export function Stage() {
       p.turn = lerp(A.turn, B.turn, t);
       p.tilt = lerp(A.tilt, B.tilt, t);
       p.focus = t < 0.5 ? A.focus : B.focus;
+      // Panel sticky: arriba de su tramo todavía viene subiendo (corrimiento hacia abajo), al
+      // final ya se va (hacia arriba); mientras está fijo, 0
+      const P = a.panel ?? b.panel;
+      if (P) {
+        const panelTop = Math.min(Math.max(P.top - y, 0), P.top + P.track - P.height - y);
+        p.ride = (-2 * panelTop) / vh;
+      } else {
+        p.ride = 0;
+      }
       const opacity = lerp(A.opacity, B.opacity, t);
       if (layer.current) layer.current.style.opacity = String(opacity);
       if (poster.current) {
-        poster.current.style.transform = `translate(${p.x * 50}vw, ${-p.y * 50}vh) scale(${p.scale})`;
+        poster.current.style.transform = `translate(${p.x * 50}vw, ${-(p.y + p.ride) * 50}vh) scale(${p.scale})`;
       }
       const visible = opacity > 0.01;
       if (visible !== shown) {

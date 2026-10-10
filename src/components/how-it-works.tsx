@@ -10,6 +10,9 @@
   - El cambio de paso es un barrido en diagonal, con la inclinación de las cintas del isotipo
     (24,5°); con reduced motion, un fundido. Las variantes tienen las mismas claves en los dos
     casos: el HTML del servidor y el del cliente coinciden y nada queda trabado al hidratar
+  - En celulares no hay barrido (clip-path repinta todo el paso en cada cuadro): el paso que se
+    va sale rápido hacia arriba y el que llega entra desde abajo apenas después, sin que los dos
+    textos se pisen
   - Las vistas se escalan para entrar en el espacio que queda (nunca se cortan) y solo se
     montan al acercarse a su paso; las de los pasos que no se ven quedan en pausa
   - Los textos de los cuatro pasos quedan en el árbol de accesibilidad; al cambiar de paso se
@@ -24,7 +27,7 @@ import {
   useTransform,
   type MotionValue,
 } from "motion/react";
-import { memo, useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
+import { memo, useEffect, useRef, useState, useSyncExternalStore, type ComponentType, type ReactNode } from "react";
 import { MaskWords } from "@/components/mask-words";
 import { AgentPreview } from "@/components/previews/agent-preview";
 import { CrmPreview } from "@/components/previews/crm-preview";
@@ -84,6 +87,16 @@ const STEPS: Step[] = [
 ];
 
 const EASE = [0.16, 1, 0.3, 1] as const;
+
+// Las transiciones no van en el HTML: pueden depender del ancho sin romper la hidratación
+const MOBILE_QUERY = "(max-width: 1023.98px)";
+const subscribeMobile = (onChange: () => void) => {
+  const query = window.matchMedia(MOBILE_QUERY);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+};
+const useIsMobile = () =>
+  useSyncExternalStore(subscribeMobile, () => window.matchMedia(MOBILE_QUERY).matches, () => false);
 
 // Barrido en diagonal con la inclinación de las cintas: tan(24,5°) ≈ 0,46 del alto
 const SHOWN = "polygon(-46% 0%, 100% 0%, 146% 100%, 0% 100%)";
@@ -155,6 +168,7 @@ const StepPreview = memo(function StepPreview({
 
 export function HowItWorks() {
   const reduce = useReducedMotion();
+  const mobile = useIsMobile();
   const track = useRef<HTMLDivElement>(null);
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
   const [active, setActive] = useState(0);
@@ -191,10 +205,15 @@ export function HowItWorks() {
   // Las mismas variantes siempre (el servidor no conoce la preferencia y el HTML tiene que
   // coincidir): con reduced motion, el CSS del artículo anula el barrido y el desplazamiento
   // y queda solo el fundido
+  // En celulares, salida corta y entrada apenas después (los textos no se superponen); en
+  // escritorio, el barrido sale y entra a la vez
+  const staged = mobile && !reduce;
+  const enter = staged ? { duration: 0.55, delay: 0.14, ease: EASE } : { duration: reduce ? 0.25 : 0.75, ease: EASE };
+  const leave = staged ? { duration: 0.22, ease: EASE } : enter;
   const variants = {
-    shown: { clipPath: SHOWN, opacity: 1, transform: STILL },
-    before: { clipPath: BEFORE, opacity: 0, transform: "translateY(18px)" },
-    after: { clipPath: AFTER, opacity: 0, transform: "translateY(-18px)" },
+    shown: { clipPath: SHOWN, opacity: 1, transform: STILL, transition: enter },
+    before: { clipPath: BEFORE, opacity: 0, transform: "translateY(18px)", transition: leave },
+    after: { clipPath: AFTER, opacity: 0, transform: "translateY(-18px)", transition: leave },
   };
 
   return (
@@ -231,7 +250,7 @@ export function HowItWorks() {
           className="absolute left-0"
           style={{ top: `${STEPS.length * 100 - 4}svh` }}
         />
-        <StageMark pose="out" className="absolute left-0" style={{ top: `${STEPS.length * 100 + 32}svh` }} />
+        <StageMark pose="out" slot="steps-slot" className="absolute left-0" style={{ top: `${STEPS.length * 100 + 32}svh` }} />
 
         <div data-stage-panel className="sticky top-0 flex h-[100svh] flex-col overflow-hidden">
           <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col px-4 pb-6 pt-[84px] md:px-6 lg:pb-12 lg:pt-28">
@@ -280,8 +299,7 @@ export function HowItWorks() {
                     initial={false}
                     animate={state}
                     variants={variants}
-                    transition={{ duration: reduce ? 0.25 : 0.75, ease: EASE }}
-                    className={`col-start-1 row-start-1 flex min-h-0 flex-col motion-reduce:![clip-path:none] motion-reduce:!transform-none ${
+                    className={`col-start-1 row-start-1 flex min-h-0 flex-col max-lg:![clip-path:none] motion-reduce:![clip-path:none] motion-reduce:!transform-none ${
                       i === active ? "" : "pointer-events-none"
                     }`}
                   >

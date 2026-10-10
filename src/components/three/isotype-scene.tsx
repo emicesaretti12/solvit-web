@@ -97,6 +97,7 @@ function Ribbon({
   const spread = useRef(pose.current.spread);
   const lit = useRef(pose.current.focus < 0 || pose.current.focus === index ? 1 : 0.32);
   const glow = useRef(0);
+  const pop = useRef(pose.current.focus === index ? 1 : 0);
 
   useEffect(() => () => geometry.dispose(), [geometry]);
 
@@ -109,8 +110,12 @@ function Ribbon({
     const [lo, hi] = STAGGER[index];
     const s = raw >= STEP_SPREAD ? raw : STEP_SPREAD * smoothstep(lo, hi, raw / STEP_SPREAD);
     const [offset, rz, ry] = SPREAD[index];
-    g.position.set(center.x + offset.x * s, center.y + offset.y * s, ribbon.z + offset.z * s);
+    // La cinta del paso activo se adelanta hacia la cámara: en un celular, donde la S es chica,
+    // se lee qué parte trabaja aunque el brillo no alcance
+    pop.current = reduce ? (p.focus === index ? 1 : 0) : THREE.MathUtils.damp(pop.current, p.focus === index ? 1 : 0, 7, dt);
+    g.position.set(center.x + offset.x * s, center.y + offset.y * s, ribbon.z + offset.z * s + pop.current * 0.45);
     g.rotation.set(0, ry * s, rz * s);
+    g.scale.setScalar(1 + pop.current * 0.05);
 
     // Con una cinta destacada, las otras bajan la luz; con focus -2 (crecer) brillan las tres
     const target = p.focus < 0 || p.focus === index ? 1 : 0.32;
@@ -241,10 +246,13 @@ function Rig({
     k.z = THREE.MathUtils.damp(k.z, p.z, 4, dt);
     k.scale = THREE.MathUtils.damp(k.scale, p.scale, 5, dt);
 
-    // x/y llegan en fracción de pantalla: se pasan a unidades según el encuadre actual
+    // x/y llegan en fracción de pantalla: se pasan a unidades según el encuadre actual. Detrás
+    // del plano de la pantalla (z < 0) se compensa la perspectiva, así la S queda en el lugar
+    // pedido aunque venga desde el fondo (si no, se corre hacia el centro y pisa el texto)
     const cam = camera as THREE.PerspectiveCamera;
     const halfH = cam.position.z * Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2);
     const halfW = halfH * (size.width / Math.max(1, size.height));
+    const depth = k.z < 0 ? 1 - k.z : 1;
 
     // Pose de reposo levemente girada, para que se lea el canto desde el primer cuadro
     g.rotation.set(
@@ -252,7 +260,8 @@ function Rig({
       -0.42 + k.turn + yaw.current.value + sway + look.current.x * 0.3 - (1 - enter) * 1.25,
       0,
     );
-    g.position.set(k.x * halfW, k.y * halfH + bob, k.z * cam.position.z);
+    // El corrimiento del panel (ride) va directo, sin amortiguar: la S viaja con el panel
+    g.position.set(k.x * halfW * depth, (k.y + p.ride) * halfH * depth + bob, k.z * cam.position.z);
     g.scale.setScalar(k.scale * (0.82 + 0.18 * enter));
   });
 
