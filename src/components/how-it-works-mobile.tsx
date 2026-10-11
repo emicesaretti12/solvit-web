@@ -8,6 +8,11 @@
     del paso: la cinta que trabaja se adelanta y brilla. En crecer, las tres cintas encajan
   - Una línea a la izquierda une los pasos y una consulta (un punto de luz) la recorre
   - La vista viva de cada paso corre solo con la tarjeta a la vista
+  - Donde el navegador las tiene, animaciones ligadas al scroll (animation-timeline: view(), en
+    el compositor y sin JS): la tarjeta se despliega al ritmo del dedo y se aleja en
+    profundidad al salir, una luz la cruza al pasar por el centro, el número gigante del paso
+    queda detrás en paralaje y la línea se llena con una punta de luz que sigue el scroll. Sin
+    ese soporte, todo queda como antes (transiciones al entrar)
   - Todo es transform y opacidad (lo mueve el compositor); con reduced motion, sin giros
 */
 import { useInView } from "motion/react";
@@ -72,6 +77,13 @@ function StepCard({ step, index, last }: { step: MobileStep; index: number; last
           <div aria-hidden="true" className="absolute inset-x-[-50%] bottom-[-46%] h-[110%] [transform:rotateX(74deg)] [mask-image:linear-gradient(to_top,#000_15%,transparent_75%)]">
             <div className="step-floor absolute inset-x-0 -top-[28px] bottom-0 [background-image:linear-gradient(color-mix(in_oklab,var(--blue-400)_38%,transparent)_1px,transparent_1px),linear-gradient(90deg,color-mix(in_oklab,var(--blue-400)_38%,transparent)_1px,transparent_1px)] [background-size:28px_28px]" />
           </div>
+          {/* Número gigante del paso, detrás de la S (paralaje con el scroll) */}
+          <span
+            aria-hidden="true"
+            className="step-num font-display pointer-events-none absolute -right-2 top-1/2 -translate-y-1/2 select-none text-[148px] font-bold leading-none tracking-[-0.06em] text-transparent [-webkit-text-stroke:1.5px_color-mix(in_oklab,var(--blue-400)_45%,transparent)]"
+          >
+            0{index + 1}
+          </span>
           <div className="absolute inset-x-0 bottom-3 top-5 flex items-center justify-center">
             <S3D focus={last ? -2 : index} play={shown} className="h-full" />
           </div>
@@ -92,9 +104,12 @@ export function HowItWorksMobile({ steps }: { steps: MobileStep[] }) {
   return (
     <div className="relative mx-auto max-w-[640px] px-4 pb-6 pt-4">
       {/* Línea que une los pasos, con una consulta que la recorre */}
-      <div aria-hidden="true" className="absolute bottom-16 left-4 top-14 w-[3px] -translate-x-px overflow-hidden">
-        <span className="absolute inset-y-0 left-px w-px bg-line-strong" />
+      <div aria-hidden="true" className="absolute bottom-16 left-4 top-14 w-4 -translate-x-1/2 overflow-hidden">
+        <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-line-strong" />
         <span className="journey-dot" />
+        {/* Con scroll ligado: la línea se llena y una punta de luz sigue al dedo */}
+        <span className="rail-fill" />
+        <span className="rail-head" />
       </div>
       <ol className="relative space-y-6">
         {steps.map((s, i) => (

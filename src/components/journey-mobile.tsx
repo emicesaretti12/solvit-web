@@ -11,7 +11,9 @@
   - Venta cerrada: el check rebota con una onda
   - Crecimiento: barras en 3D que crecen de a una
   Todo es transform y opacidad con transiciones CSS (lo mueve el compositor del teléfono);
-  con reduced motion aparece directo, sin giros.
+  con reduced motion aparece directo, sin giros. Donde el navegador tiene animaciones ligadas al
+  scroll (animation-timeline: view()), los bloques, los canales, las cartas y las barras se
+  arman al ritmo del dedo y la línea se llena con una punta de luz que sigue el scroll.
 */
 import { ChartLineUp, ChatsCircle, CheckCircle, Globe, Handshake, Kanban, Sparkle, Wrench, type Icon } from "@phosphor-icons/react";
 import { useInView } from "motion/react";
@@ -50,7 +52,8 @@ const AREAS: { label: string; icon: Icon }[] = [
 // Alturas de las barras (relativas): una curva que sube, sin cifras inventadas
 const BARS = [0.28, 0.36, 0.33, 0.5, 0.62, 0.78, 1];
 
-const d = (s: number) => ({ "--d": `${s}s` }) as CSSProperties;
+// --d: retardo de la transición al entrar; --n: orden (con scroll ligado, escalona el tramo)
+const d = (s: number, n = 0) => ({ "--d": `${s}s`, "--n": n }) as CSSProperties;
 
 function Row({
   index,
@@ -96,10 +99,13 @@ export function JourneyMobile() {
   return (
     <div className="relative mx-auto max-w-[640px] px-4 pb-16 pt-10">
       {/* La línea que une las etapas, con consultas que bajan */}
-      <div aria-hidden="true" className="absolute bottom-24 left-[43px] top-14 w-[3px] overflow-hidden">
-        <span className="absolute inset-y-0 left-px w-px bg-line-strong" />
+      <div aria-hidden="true" className="absolute bottom-24 left-[44px] top-14 w-4 -translate-x-1/2 overflow-hidden">
+        <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-line-strong" />
         <span className="journey-dot" />
         <span className="journey-dot [animation-delay:-2s]" />
+        {/* Con scroll ligado: la línea se llena y una punta de luz sigue al dedo */}
+        <span className="rail-fill" />
+        <span className="rail-head" />
       </div>
 
       <ol className="relative">
@@ -108,7 +114,7 @@ export function JourneyMobile() {
             {CHANNELS.map((c, i) => (
               <li
                 key={c.label}
-                style={d(0.15 + i * 0.09)}
+                style={d(0.15 + i * 0.09, i)}
                 className="journey-chip flex items-center gap-2 rounded-full border border-line bg-navy-850 py-1.5 pl-2 pr-3 text-[13px] text-ink"
               >
                 <Mark glyph={c.glyph} className="size-4 text-ink" />
@@ -124,7 +130,7 @@ export function JourneyMobile() {
               <span className="size-1.5 rounded-full bg-blue-400" />
               Quiere comprar
             </span>
-            <span style={d(0.55)} className="journey-chip journey-chip-muted flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-ink-faint">
+            <span style={d(0.55, 1)} className="journey-chip journey-chip-muted flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-ink-faint">
               <span className="size-1.5 rounded-full bg-ink-faint" />
               Solo consultaba
             </span>
@@ -136,7 +142,7 @@ export function JourneyMobile() {
             {AREAS.map((a, i) => (
               <div
                 key={a.label}
-                style={{ ...d(0.2 + i * 0.12), "--from": `${(1 - i) * 100}%` } as CSSProperties}
+                style={{ ...d(0.2 + i * 0.12, i), "--from": `${(1 - i) * 100}%` } as CSSProperties}
                 className="journey-card flex flex-col items-center gap-1.5 rounded-2xl border border-line bg-navy-850 px-2 py-3 text-[13px] text-ink"
               >
                 <a.icon weight="light" className="size-5 text-blue-300" />
@@ -151,7 +157,7 @@ export function JourneyMobile() {
         <Row index={4} icon={<ChartLineUp weight="light" className="size-6" />}>
           <div className="flex h-28 items-end gap-2.5 border-b border-line pb-px pl-1 pr-3">
             {BARS.map((h, i) => (
-              <span key={i} style={{ ...d(0.15 + i * 0.08), height: `${h * 100}%` }} className="journey-bar" />
+              <span key={i} style={{ ...d(0.15 + i * 0.08, i), height: `${h * 100}%` }} className="journey-bar" />
             ))}
           </div>
         </Row>

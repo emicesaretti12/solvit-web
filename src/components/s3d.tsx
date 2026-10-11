@@ -8,6 +8,9 @@
     apagan. focus -2 (crecer): la S armada, las tres encendidas
   - Al entrar en pantalla (play) las cintas llegan desde el fondo, giradas, y encajan en su
     lugar de a una; después la S se balancea despacio
+  - Donde el navegador tiene animaciones ligadas al scroll (animation-timeline: view()), las
+    cintas encajan al ritmo del dedo y la S gira con el scroll y se acerca al pasar por el
+    centro (en el compositor, sin JS); si no, entran con su transición
   - Con reduced motion queda quieta en su pose final
 */
 import { useId, type CSSProperties } from "react";
@@ -34,6 +37,7 @@ export function S3D({ focus, play, className = "" }: { focus: number; play: bool
   const assembled = focus === -2;
   return (
     <div aria-hidden="true" className={`relative aspect-[515/787] [perspective:700px] ${className}`}>
+      <div className="s3d-scroll absolute inset-0 [transform-style:preserve-3d]">
       <div className={`s3d-sway absolute inset-0 [transform-style:preserve-3d] ${play ? "" : "[animation-play-state:paused]"}`}>
         {RIBBONS.map((r, i) => {
           const focused = focus === i;
@@ -42,11 +46,14 @@ export function S3D({ focus, play, className = "" }: { focus: number; play: bool
           const rest = assembled
             ? `translate3d(0, 0, ${r.z}px)`
             : `translate3d(${OPEN[i]}) translateZ(${focused ? 46 : r.z}px) scale(${focused ? 1.06 : 1})`;
+          const order = assembled ? 2 - i : i;
           const style = {
             "--rest": rest,
+            "--from": FROM[i],
+            "--n": order,
             "--o": play ? 1 : 0,
             transform: play ? rest : FROM[i],
-            transitionDelay: play ? `${(assembled ? 2 - i : i) * 0.14 + 0.1}s` : "0s",
+            transitionDelay: play ? `${order * 0.14 + 0.1}s` : "0s",
           } as CSSProperties;
           // Apagada: colores más oscuros (no transparencia, que dejaría ver las capas de atrás)
           const from = focused ? "#2d7bff" : dim ? "#0a2f8a" : r.from;
@@ -90,6 +97,7 @@ export function S3D({ focus, play, className = "" }: { focus: number; play: bool
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );

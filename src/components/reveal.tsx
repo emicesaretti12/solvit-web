@@ -17,9 +17,10 @@ export function Reveal({
   const reduce = useReducedMotion();
   const Comp = motion[as];
   return (
-    // El mismo estado inicial en servidor y cliente; con reduced motion aparece sin moverse
+    // El mismo estado inicial en servidor y cliente; con reduced motion aparece sin moverse.
+    // sd-rise: en celulares con animaciones ligadas al scroll, sube al ritmo del dedo (CSS)
     <Comp
-      className={className}
+      className={className ? `sd-rise ${className}` : "sd-rise"}
       initial={{ opacity: 0, transform: "translateY(24px)" }}
       whileInView={{ opacity: 1, transform: "translateY(0px)" }}
       viewport={{ once: true, amount: 0.2 }}

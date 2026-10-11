@@ -176,7 +176,10 @@ function FeaturedCase({ project, flip }: { project: Project; flip: boolean }) {
           className="relative origin-bottom overflow-hidden motion-reduce:!transform-none rounded-2xl border border-line-strong bg-navy-900 shadow-[0_50px_100px_-50px_rgb(var(--shade-rgb)/0.9)] light:shadow-[0_40px_80px_-50px_rgb(var(--shade-rgb)/0.4)]"
         >
           <div className="relative aspect-video">
-            <Image src={coverOf(project)} alt={altOf(project)} fill sizes="(min-width: 1024px) 640px, 100vw" className="object-cover" />
+            {/* sd-parallax: en celulares con scroll ligado, la imagen se desliza dentro del marco */}
+            <div className="sd-parallax absolute inset-0">
+              <Image src={coverOf(project)} alt={altOf(project)} fill sizes="(min-width: 1024px) 640px, 100vw" className="object-cover" />
+            </div>
           </div>
         </motion.div>
       </div>
