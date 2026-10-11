@@ -9,7 +9,9 @@
     atraviesa la cámara igual en un celular que en un monitor
   - turn / tilt: radianes extra sobre la pose de reposo
   - En celulares, las poses con `slot` toman el lugar y el tamaño del hueco que la sección deja
-    para el isotipo (un elemento con ese id), así nunca tapa texto aunque la pantalla sea baja
+    para el isotipo (un elemento con ese id), así nunca tapa texto aunque la pantalla sea baja.
+    El hero queda fijado mientras dura su recorrido (rise, center, plunge y dive solo existen
+    ahí): la S sale de su hueco recién cuando el texto ya se fue
 */
 export type StagePose = {
   x: number;
@@ -49,16 +51,28 @@ export const POSES = {
     desktop: p({ x: 0.6, y: -0.02, scale: 0.98 }),
     mobile: p({ x: 0.12, scale: 0.95 }),
   },
+  // Celulares (hero fijado): la S gira y se abre un poco en su hueco mientras se va el texto
+  rise: {
+    desktop: p({ x: 0.6, y: -0.02, scale: 0.98 }),
+    mobile: p({ x: 0.1, scale: 1, spread: 0.35, turn: 0.75, tilt: 0.14 }),
+    reducedHold: true,
+  },
+  // Celulares: ya sin texto, la S llega al centro de la pantalla, más grande y abierta
+  center: {
+    desktop: p({ x: 0.6, y: -0.02, scale: 0.98 }),
+    mobile: p({ x: 0, y: 0.06, z: 0.1, scale: 1.25, spread: 0.95, turn: 1.3, tilt: 0.3 }),
+    reducedHold: true,
+  },
   // Mitad del hero: la S se abre y avanza hacia la cámara, todavía entera a la vista
   plunge: {
     desktop: p({ x: 0.22, z: 0.42, scale: 1.1, spread: 1.1, turn: 0.7, tilt: 0.22 }),
-    mobile: p({ x: 0.04, y: 0.12, z: 0.42, scale: 1.1, spread: 1.1, turn: 0.7, tilt: 0.22 }),
+    mobile: p({ x: 0, y: 0.02, z: 0.5, scale: 1.3, spread: 1.7, turn: 1.6, tilt: 0.4 }),
     reducedHold: true,
   },
   // Salida del hero: las cintas se abren hacia los bordes y pasan al lado de la cámara
   dive: {
     desktop: p({ x: 0.04, z: 0.9, scale: 1.25, spread: 2.6, turn: 1.15, tilt: 0.38, opacity: 0 }),
-    mobile: p({ x: 0, y: 0.06, z: 0.9, scale: 1.25, spread: 2.6, turn: 1.15, tilt: 0.38, opacity: 0 }),
+    mobile: p({ x: 0, y: 0, z: 0.92, scale: 1.35, spread: 2.9, turn: 1.9, tilt: 0.46, opacity: 0 }),
     reducedHold: true,
   },
   // Del otro lado: las cintas llegan desde el fondo, todavía abiertas

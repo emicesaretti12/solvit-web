@@ -1,14 +1,18 @@
 # Design System: SEN Software · Ing. & Soluciones
 
 Fuente: brand board de SEN. Isotipo S en tres cintas plegadas, wordmark SEN extendido con el
-corte de la N en azul, versión oscura (navy medianoche), versión clara (blanco frío con el
-wordmark navy) y versión monocroma.
+corte de la N en azul y la bajada "Ingeniería y desarrollo de software", versión oscura (navy
+medianoche), versión clara (blanco frío con el wordmark navy) y versión monocroma. El board
+cierra con el ícono de app (la S sobre un cuadrado navy con borde azul) y los pilares Software,
+Hardware, IA, Marketing y Crecimiento.
 
 ## 1. Visual Theme & Atmosphere
 
-La web de una startup que soluciona ventas: una sola historia contada con un solo objeto. El
-isotipo de SEN, en 3D real (WebGL), recorre la página: armado en el hero, se abre en las tres
-etapas de una venta (cada cinta es una etapa) y se vuelve a armar como crecimiento. El tema
+La web de un equipo de ingeniería que soluciona ventas con cinco servicios: desarrollo web,
+software a medida, agentes de IA, hardware e IoT y marketing digital. El isotipo de SEN, en 3D
+real (WebGL), abre el hero; en escritorio recorre la página (se abre en las tres etapas de una
+venta, cada cinta es una etapa, y se vuelve a armar como crecimiento). Cada servicio tiene su
+propio objeto 3D en CSS. El tema
 oscuro (por defecto) es un navy medianoche plano donde el azul eléctrico aparece solo como
 señal: el isotipo, el corte de la N, la acción principal y el estado activo. El tema claro es
 la versión clara del board: blanco frío, tipografía navy y el mismo azul.
@@ -48,6 +52,9 @@ puro, campos grandes de azul saturado. La única luz de la página es la del obj
 - **Display:** Archivo semi-expandida (font-stretch 112.5%), Bold, tracking -0.04em, interlineado
   0.95. Titular del hero en 3 líneas como máximo.
 - **Brand:** Krona One: solo el wordmark SEN (en vectores).
+- **Bajada de marca:** "Ingeniería y desarrollo de software", en mayúsculas con tracking amplio
+  solo en el lockup del logo y en los pilares del footer (como en el board). En el hero va como
+  etiqueta normal, en minúscula de oración.
 - **Body:** Geist 400/500, interlineado relajado, máximo ~65 caracteres por línea.
 - **Mono:** Geist Mono: datos, métricas e índices de pasos (números tabulares).
 - **Etiquetas:** en minúscula de oración (`text-sm`, `blue-300` o `ink-faint`). Sin pastillas con
@@ -64,6 +71,10 @@ puro, campos grandes de azul saturado. La única luz de la página es la del obj
 - **Vistas vivas:** mini interfaces reales (embudo de campañas, chat del agente de IA, CRM con
   roles, tablero de la semana) con un ejemplo único y coherente (una moto 0km en cuotas). Una
   sola nota por sección aclara que son de ejemplo. Se pausan fuera de pantalla.
+- **Servicios:** cinco tarjetas, una por servicio (desarrollo web, software a medida, agentes de
+  IA, hardware e IoT, marketing digital), cada una con su objeto 3D en CSS, su promesa en una
+  línea y sus entregables. En celulares son un mazo; en escritorio, una grilla con la de web
+  grande (dos filas).
 - **Proyectos:** solo hechos confirmados; la cervecería automática aparece solo como proyecto.
 - **Inputs:** etiqueta arriba, error abajo, 16px mínimo, foco azul.
 - **Tema:** botón en el header; el script del layout aplica la preferencia guardada antes
@@ -73,18 +84,36 @@ puro, campos grandes de azul saturado. La única luz de la página es la del obj
 ## 5. Layout Principles
 
 - Contenedor máximo 1200px, gutter 16px en móvil y 24px en escritorio.
-- Página: hero → plataformas → Cómo funciona (atraer, atender, cerrar, crecer) → proyectos →
-  nosotros → contacto. Cada bloque tiene un solo trabajo.
+- Página: hero → plataformas → servicios → Cómo funciona (atraer, atender, cerrar, crecer) →
+  recorrido de una consulta → proyectos → nosotros → contacto. Cada bloque tiene un solo trabajo.
 - Grilla CSS, nunca cuentas de porcentaje con flex. Menos de 768px: una sola columna.
 - Alturas completas con min-h-[100svh] y nunca h-screen.
 - Sin scroll horizontal en ningún ancho.
 
 ## 6. Motion & Interaction
 
-- **Escenario 3D:** un solo canvas fijo detrás del contenido (`src/components/three`). Las
+- **Escenario 3D:** un solo canvas detrás del contenido (`src/components/three`). Las
   secciones dejan marcas `<StageMark pose="..."/>` y el director interpola la pose del isotipo
   entre la marca anterior y la siguiente según el scroll (poses en `choreography.ts`). El
   render se detiene cuando el objeto no se ve. three.js se carga solo en el cliente.
+  En escritorio la S recorre la página. En celulares el hero queda fijado (sticky) durante un
+  tramo de scroll: primero se va el texto, después la S gira en su hueco, llega al centro, se
+  abre y la cámara la atraviesa; recién ahí el hero se suelta. Nunca pasa por encima del
+  titular. Con reduced motion el hero no se fija y la S sube con la página.
+- **Titulares (celulares):** cada palabra se para en 3D sobre su base, de a una, al ritmo del
+  dedo (MaskWords). Tarjetas grandes (galería, formulario, principios, cierre de proyectos) se
+  paran desde inclinadas; los logos giran de canto a frente.
+- **Cierre:** el wordmark del pie tiene volumen (capas en profundidad) y se para desde el piso
+  al llegar al final.
+- **Objetos 3D en CSS (servicios):** placas con espesor (cara de arriba y los dos cantos que ve
+  la cámara) en un espacio isométrico, o capas en profundidad (`services-3d.tsx`,
+  `scenes.css`). Se arman cuando llega su tarjeta (data-on) y corren su loop solo a la vista
+  (data-live). Nunca opacidad sobre un elemento con preserve-3d (lo aplana): los fundidos van en
+  las caras y los grupos 3D se ocultan con visibility.
+- **Mazo de servicios (celulares):** cada tarjeta queda pegada debajo del header y la siguiente
+  la tapa; la de abajo se inclina hacia atrás, se achica y se apaga, y el objeto de arriba gira
+  con el scroll. Todo con animaciones ligadas al scroll en el compositor (sin soporte, el mazo
+  se apila igual). Solo con 640px de alto o más; si no, lista común.
 - **Capítulos:** contenedor alto con panel `sticky` (sin pin de GSAP) y cambio de paso con un
   barrido diagonal a 24,5°, la inclinación de las cintas del isotipo.
 - **Gestos:** el isotipo se gira con el dedo o el mouse; resorte con la velocidad del gesto
@@ -93,7 +122,12 @@ puro, campos grandes de azul saturado. La única luz de la página es la del obj
 - **Cada animación tiene un propósito:** contar el recorrido de la venta, mostrar estado o dar
   feedback. Solo transform, opacity y clip-path.
 - **Reduced motion:** sin zambullida, sin apertura ni giros del isotipo; barridos como fundidos;
-  el titular visible desde el primer cuadro.
+  el titular visible desde el primer cuadro; objetos de servicios armados y quietos, sin loops
+  y sin mazo inclinado.
+- **Moneda de venta:** en el recorrido de celulares, "Venta cerrada" gira una moneda con espesor
+  (el check adelante, el isotipo atrás).
+- **Grano:** solo en escritorio (en un teléfono casi no se ve y es otra capa de pantalla
+  completa para el compositor).
 
 ## 7. Anti-Patterns (Banned)
 

@@ -17,8 +17,9 @@
 */
 import { useInView } from "motion/react";
 import { useEffect, useRef, type ComponentType, type ReactNode } from "react";
-import { PreviewSuspendContext } from "@/components/previews/preview-shell";
+import { PreviewPlaceholder, PreviewSuspendContext } from "@/components/previews/preview-shell";
 import { S3D } from "@/components/s3d";
+import { SafeBoundary } from "@/components/safe-boundary";
 
 export type MobileStep = { verb: string; service: string; title: string; text: string; Preview: ComponentType };
 
@@ -92,7 +93,9 @@ function StepCard({ step, index, last }: { step: MobileStep; index: number; last
         <p className="mt-3 text-[15px] leading-relaxed text-ink-muted">{step.text}</p>
         <LockHeight className="mt-5">
           <PreviewSuspendContext.Provider value={!live}>
-            <Preview />
+            <SafeBoundary fallback={<PreviewPlaceholder />}>
+              <Preview />
+            </SafeBoundary>
           </PreviewSuspendContext.Provider>
         </LockHeight>
       </article>

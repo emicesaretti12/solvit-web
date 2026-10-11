@@ -32,14 +32,15 @@ import { MaskWords } from "@/components/mask-words";
 import { AgentPreview } from "@/components/previews/agent-preview";
 import { CrmPreview } from "@/components/previews/crm-preview";
 import { MarketingPreview } from "@/components/previews/marketing-preview";
-import { PreviewSuspendContext } from "@/components/previews/preview-shell";
+import { PreviewPlaceholder, PreviewSuspendContext } from "@/components/previews/preview-shell";
+import { SafeBoundary } from "@/components/safe-boundary";
 import { getLenis } from "@/components/smooth-scroll";
 import { StageMark } from "@/components/three/stage";
 import type { PoseKey } from "@/components/three/choreography";
 
 const GrowthChart = dynamic(() => import("@/components/dashboard-chart").then((m) => m.GrowthChart), {
   ssr: false,
-  loading: () => <div className="h-[300px] rounded-[1.25rem] border border-line bg-navy-900/50" />,
+  loading: PreviewPlaceholder,
 });
 
 type Step = {
@@ -151,7 +152,13 @@ const StepPreview = memo(function StepPreview({
   return (
     <div inert={suspended} className="mt-5 flex min-h-0 flex-1 flex-col lg:mt-7">
       <FitBox>
-        <PreviewSuspendContext.Provider value={suspended}>{mounted ? <Preview /> : null}</PreviewSuspendContext.Provider>
+        <PreviewSuspendContext.Provider value={suspended}>
+          {mounted ? (
+            <SafeBoundary fallback={<PreviewPlaceholder />}>
+              <Preview />
+            </SafeBoundary>
+          ) : null}
+        </PreviewSuspendContext.Provider>
       </FitBox>
     </div>
   );
@@ -304,13 +311,7 @@ export function HowItWorks() {
         </div>
       </div>
 
-      {/* Cierre: el hardware como módulo aparte */}
-      <div className="mx-auto max-w-[1200px] px-4 pb-24 pt-10 md:px-6 md:pb-32">
-        <p className="max-w-[60ch] border-t border-line pt-8 text-[15px] leading-relaxed text-ink-muted">
-          <span className="font-medium text-ink">Módulo aparte: hardware e IoT.</span> Sensores, placas y control
-          de acceso conectados, para negocios que lo necesitan.
-        </p>
-      </div>
+      <div aria-hidden="true" className="pb-16 md:pb-24" />
     </section>
   );
 }

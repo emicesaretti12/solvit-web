@@ -5,6 +5,7 @@ import { SmoothScroll } from "@/components/smooth-scroll";
 import { Toaster } from "@/components/toaster";
 import { THEME_SCRIPT } from "@/lib/theme-config";
 import "./globals.css";
+import "./scenes.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,13 +32,13 @@ const krona = Krona_One({
 });
 
 export const metadata: Metadata = {
-  title: "SEN Software · Especialistas en solucionar tus ventas",
+  title: "SEN Software · Ingeniería y desarrollo de software",
   description:
-    "Marketing digital, agentes de IA que atienden por WhatsApp e Instagram y un CRM a tu medida: un solo equipo para que más consultas terminen en ventas.",
+    "Desarrollo web, software a medida, agentes de IA, hardware e IoT y marketing digital: un solo equipo de ingeniería para que tu negocio venda más.",
   openGraph: {
-    title: "SEN Software · Especialistas en solucionar tus ventas",
+    title: "SEN Software · Ingeniería y desarrollo de software",
     description:
-      "Marketing, agentes de IA y CRM a medida, hechos por un mismo equipo para que más consultas terminen en ventas.",
+      "Desarrollo web, software a medida, agentes de IA, hardware e IoT y marketing, hechos por un mismo equipo para que vendas más.",
     siteName: "SEN Software",
     locale: "es_AR",
     type: "website",

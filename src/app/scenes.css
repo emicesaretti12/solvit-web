@@ -1,0 +1,868 @@
+/*
+  Escenas 3D en CSS: los objetos de los servicios (services-3d.tsx), el mazo de tarjetas de
+  celulares (services.tsx) y la moneda de "Venta cerrada" del recorrido.
+
+  Reglas de la casa:
+  - Solo transform y opacidad (las mueve el compositor del teléfono)
+  - Nunca opacidad sobre un elemento con preserve-3d: lo aplanaría. Los fundidos van en las hojas
+    (.scn-face) y los grupos 3D se ocultan con visibility
+  - Cada loop (.scn-anim) arranca transparente o desde su pose de reposo y corre solo con la
+    tarjeta a la vista (data-live); con reduced motion no hay loops ni armado
+*/
+
+:root {
+  --ease-scn: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-sine: cubic-bezier(0.37, 0, 0.63, 1);
+  --scn-top: #10233f;
+  --scn-front: #0a1a33;
+  --scn-left: #06122a;
+  --scn-edge: rgb(141 184 255 / 0.3);
+  --scn-bar: #0c1d38;
+  --scn-ghost: rgb(160 178 210 / 0.08);
+  --scn-line: rgb(219 228 243 / 0.55);
+  --scn-faint: rgb(160 178 210 / 0.22);
+  --scn-pin: #9fb0c8;
+  --scn-hole: #020815;
+  --scn-floor: rgb(0 4 12 / 0.6);
+  --hw-board: #0b1d3a;
+  --ia-layer: #05112a;
+}
+
+:root[data-theme="light"] {
+  --scn-top: #ffffff;
+  --scn-front: #dbe4f1;
+  --scn-left: #c5d2e6;
+  --scn-edge: rgb(31 107 255 / 0.24);
+  --scn-bar: #e9eef6;
+  --scn-ghost: rgb(11 18 34 / 0.05);
+  --scn-line: rgb(35 52 92 / 0.5);
+  --scn-faint: rgb(11 18 34 / 0.13);
+  --scn-pin: #8a97ab;
+  --scn-hole: #c9d3e2;
+  --scn-floor: rgb(40 56 92 / 0.2);
+  --hw-board: #e6edf7;
+  --ia-layer: #a9bbd6;
+}
+
+/* ---------- Escena y piezas ---------- */
+
+.scn {
+  position: absolute;
+  inset: 0;
+  perspective: 1000px;
+  perspective-origin: 50% 35%;
+}
+/* Sombra de contacto bajo el objeto (un degradé, sin desenfoque) */
+.scn-floor {
+  left: 50%;
+  bottom: 7%;
+  width: 66%;
+  height: 20%;
+  margin-left: -33%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--scn-floor), transparent);
+}
+.scn-rig {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  transform: scale(var(--fit, 1)) rotateX(4deg) rotateY(-8deg);
+}
+.scn-overlay {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform: scale(var(--fit, 1));
+}
+/* Espacio isométrico: el plano de la mesa inclinado y girado; +Z es "arriba" */
+.scn-iso {
+  position: absolute;
+  transform-style: preserve-3d;
+  transform: rotateX(56deg) rotateZ(-40deg);
+}
+.scn-obj,
+.scn-part,
+.scn-loop,
+.scn-slab {
+  position: absolute;
+  transform-style: preserve-3d;
+}
+.scn-part {
+  transform: translateZ(var(--z, 0px));
+  transition: transform 1.1s var(--ease-scn) var(--d, 0s);
+}
+.scn-loop,
+.scn-slab {
+  inset: 0;
+}
+.scn-face {
+  position: absolute;
+  transition: opacity 0.6s var(--ease-scn) var(--d, 0s);
+}
+.scn-top {
+  inset: 0;
+  border-radius: 3px;
+  background: var(--scn-top);
+  box-shadow: inset 0 0 0 1px var(--scn-edge);
+}
+.scn-top > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* Cantos: el de adelante cuelga del borde de abajo, el de la izquierda del borde izquierdo */
+.scn-front {
+  left: 0;
+  top: 100%;
+  width: 100%;
+  transform-origin: 50% 0;
+  transform: rotateX(90deg);
+  background: var(--scn-front);
+}
+.scn-left {
+  top: 0;
+  height: 100%;
+  transform-origin: 100% 50%;
+  transform: rotateY(90deg);
+  background: var(--scn-left);
+}
+.scn-slab-dark > .scn-front {
+  background: #050b17;
+}
+.scn-slab-dark > .scn-left {
+  background: #03070f;
+}
+/* Etiqueta que mira siempre a la cámara (deshace el giro del espacio isométrico) */
+.scn-tag {
+  white-space: nowrap;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--navy-850);
+  padding: 4px 9px;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--ink-muted);
+}
+
+/* ---------- Web ---------- */
+
+.web-window {
+  background: var(--scn-top);
+}
+.web-hero {
+  background: linear-gradient(120deg, #0052ff, #1fdcff);
+  box-shadow: none;
+}
+.web-cta {
+  border-radius: 8px;
+  background: #1f6bff;
+  box-shadow: none;
+}
+.web-ripple {
+  position: absolute;
+  inset: -2px;
+  border-radius: 10px;
+  border: 1.5px solid #8db8ff;
+  opacity: 0;
+  animation: web-ripple 3.4s var(--ease-scn) infinite;
+}
+.scn-bob {
+  animation: scn-bob 4.4s var(--ease-sine) infinite alternate;
+}
+.web-press {
+  animation: web-press 3.4s var(--ease-scn) infinite;
+}
+@keyframes scn-bob {
+  to {
+    transform: translateZ(-5px);
+  }
+}
+@keyframes web-press {
+  0%,
+  62%,
+  100% {
+    transform: translateZ(0);
+  }
+  70% {
+    transform: translateZ(-8px);
+  }
+  82% {
+    transform: translateZ(0);
+  }
+}
+@keyframes web-ripple {
+  0%,
+  68% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  72% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.6, 2.4);
+    opacity: 0;
+  }
+}
+
+/* ---------- Software a medida ---------- */
+
+.sw-label {
+  left: 100%;
+  top: 100%;
+  transform-origin: 0 0;
+  transform: translateZ(7px) rotateZ(40deg) rotateX(-56deg) translate(12px, -50%);
+}
+.sw-ticket {
+  position: absolute;
+  left: 10.7%;
+  top: 30.8%;
+  width: 20%;
+  height: 13.5%;
+  border-radius: 3px;
+  background: #1f6bff;
+  animation: sw-ticket 6s var(--ease-scn) infinite;
+}
+@keyframes sw-ticket {
+  0%,
+  26% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  34%,
+  60% {
+    transform: translateX(147%);
+    opacity: 1;
+  }
+  68%,
+  90% {
+    transform: translateX(293%);
+    opacity: 1;
+  }
+  96% {
+    transform: translateX(293%);
+    opacity: 0;
+  }
+  97% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+/* Riel por la esquina de adelante: se para sobre el plano con rotateX */
+.sw-rail {
+  left: -9px;
+  top: 112px;
+  width: 2px;
+  height: 82px;
+  transform-origin: 50% 0;
+  transform: rotateX(90deg);
+  background: linear-gradient(to bottom, color-mix(in oklab, var(--blue-400) 55%, transparent), transparent);
+}
+.sw-dot {
+  position: absolute;
+  left: -11px;
+  top: 109px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3d8bff;
+  opacity: 0;
+  animation: sw-dot 2.4s var(--ease-sine) infinite;
+}
+@keyframes sw-dot {
+  0% {
+    transform: translateZ(6px) rotateZ(40deg) rotateX(-56deg);
+    opacity: 0;
+  }
+  18%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateZ(86px) rotateZ(40deg) rotateX(-56deg);
+    opacity: 0;
+  }
+}
+
+/* ---------- Agentes de IA ---------- */
+
+.ia-obj,
+.ia-orbit,
+.ia-spin,
+.ia-slot,
+.ia-counter,
+.ia-core-pos,
+.ia-core {
+  position: absolute;
+  transform-style: preserve-3d;
+}
+.ia-orbit {
+  transform: rotateX(-13deg);
+}
+.ia-path {
+  left: -96px;
+  top: -96px;
+  width: 192px;
+  height: 192px;
+  border-radius: 50%;
+  border: 1px dashed var(--line-strong);
+  transform: rotateX(90deg);
+}
+.ia-spin {
+  animation: ia-spin 18s linear infinite;
+}
+.ia-counter {
+  animation: ia-counter 18s linear infinite;
+}
+@keyframes ia-spin {
+  to {
+    transform: rotateY(360deg);
+  }
+}
+@keyframes ia-counter {
+  to {
+    transform: rotateY(-360deg);
+  }
+}
+.ia-bubble {
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  border-radius: 14px 14px 14px 4px;
+  border: 1px solid var(--line-strong);
+  background: var(--navy-800);
+  padding: 6px 9px;
+  font-size: 11.5px;
+  line-height: 1;
+  color: var(--ink);
+  transform: translate(-50%, -50%);
+  transition:
+    transform 0.8s var(--ease-scn) var(--d, 0s),
+    opacity 0.5s var(--ease-scn) var(--d, 0s);
+}
+.ia-bubble-agent {
+  border-color: transparent;
+  border-radius: 14px 14px 4px 14px;
+  background: #1f6bff;
+  color: #fff;
+}
+.ia-core {
+  animation: ia-sway 6.5s var(--ease-sine) infinite alternate;
+  transform: rotateY(-18deg) rotateX(6deg);
+}
+@keyframes ia-sway {
+  from {
+    transform: rotateY(-18deg) rotateX(6deg);
+  }
+  to {
+    transform: rotateY(20deg) rotateX(-5deg);
+  }
+}
+.ia-core-pos {
+  transition: transform 1.2s var(--ease-scn) 0.1s;
+}
+.ia-layer,
+.ia-front {
+  left: -46px;
+  top: -46px;
+  width: 92px;
+  height: 92px;
+  border-radius: 25px;
+}
+.ia-layer {
+  background: var(--ia-layer);
+}
+.ia-front {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(160deg, #10264d, #061330);
+  box-shadow: inset 0 0 0 1px rgb(61 139 255 / 0.6);
+  transform: translateZ(1px);
+}
+
+/* ---------- Hardware e IoT ---------- */
+
+.hw-board {
+  background: var(--hw-board);
+}
+.hw-chip {
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  background: #08111f;
+  box-shadow: inset 0 0 0 1px rgb(141 184 255 / 0.22);
+}
+.hw-pin1 {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgb(160 178 210 / 0.6);
+}
+.hw-cap {
+  background: #c9d6ea;
+  box-shadow: none;
+}
+.hw-led {
+  background: #1a2b4a;
+  box-shadow: none;
+}
+.hw-led-on {
+  position: absolute;
+  inset: 1px;
+  border-radius: 2px;
+  background: #3d8bff;
+  animation: hw-blink 1.6s steps(1, end) infinite;
+}
+.hw-rings {
+  width: 0;
+  height: 0;
+  transform: translateZ(9px);
+}
+.hw-ring {
+  position: absolute;
+  left: -32px;
+  top: -32px;
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  border: 1.5px solid var(--blue-400);
+  opacity: 0;
+  animation: hw-ring 2.6s cubic-bezier(0.25, 0.6, 0.35, 1) infinite;
+}
+.hw-hover {
+  animation: hw-hover 3.8s var(--ease-sine) infinite alternate;
+}
+@keyframes hw-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  65% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+@keyframes hw-hover {
+  to {
+    transform: translateZ(4px);
+  }
+}
+@keyframes hw-blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+/* ---------- Marketing ---------- */
+
+.scn-marketing .scn-rig {
+  left: calc(50% - 44px);
+}
+.scn-marketing .scn-overlay {
+  left: calc(50% - 44px);
+}
+.mk-obj,
+.mk-drops {
+  position: absolute;
+  transform-style: preserve-3d;
+}
+.mk-obj {
+  transform: rotateX(-20deg);
+}
+.mk-ring {
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in oklab, var(--blue-400) 80%, transparent);
+  background: radial-gradient(closest-side, transparent 60%, color-mix(in oklab, var(--blue-400) 14%, transparent));
+  transform: translateY(var(--y)) rotateX(90deg);
+  transition:
+    transform 1s var(--ease-scn) var(--d, 0s),
+    opacity 0.6s var(--ease-scn) var(--d, 0s);
+}
+/* Arista: del borde del anillo de arriba (radio 82, y -50) al de abajo (radio 24, y 52) */
+.mk-wall {
+  left: -0.5px;
+  top: -57.6px;
+  width: 1px;
+  height: 117.3px;
+  background: linear-gradient(to bottom, var(--blue-400), transparent);
+  opacity: 0.45;
+  transform: rotateY(var(--a)) translateX(53px) rotateZ(29.6deg);
+}
+.mk-drop {
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-faint);
+  opacity: 0;
+  animation: mk-drop 2.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+.mk-drop-win {
+  background: #3d8bff;
+}
+@keyframes mk-drop {
+  0% {
+    transform: translate3d(var(--x0), -88px, var(--z0));
+    opacity: 0;
+  }
+  14%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--x1), var(--y1), var(--z1));
+    opacity: 0;
+  }
+}
+/* La venta: una moneda que mira a la cámara al final del embudo */
+.mk-sale {
+  left: -15px;
+  top: -15px;
+  width: 30px;
+  height: 30px;
+  transform: translateY(86px) rotateX(20deg);
+}
+.mk-sale-coin {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #1f6bff;
+  color: #fff;
+  animation: mk-coin 3.2s var(--ease-scn) infinite;
+}
+@keyframes mk-coin {
+  0%,
+  86%,
+  100% {
+    transform: scale(1);
+  }
+  92% {
+    transform: scale(1.18);
+  }
+}
+.mk-labels {
+  position: absolute;
+  inset: 0;
+}
+.mk-labels > li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 11.5px;
+  line-height: 1;
+  color: var(--ink-muted);
+  transform: translateY(-50%);
+}
+.mk-labels > li::before {
+  content: "";
+  width: 12px;
+  height: 1px;
+  background: var(--line-strong);
+}
+.mk-labels > li:last-child {
+  color: var(--blue-300);
+}
+
+/* ---------- Armado y loops ---------- */
+
+/* Los loops esperan a la tarjeta (sin JS no corren) */
+.scn-anim {
+  animation-play-state: paused;
+}
+.svc-card[data-live="true"] .scn-anim {
+  animation-play-state: running;
+}
+
+/* Sin armar: cada pieza en su punto de partida y las caras transparentes */
+@media (prefers-reduced-motion: no-preference) {
+  .js .svc-card[data-on="false"] .scn-part {
+    transform: translateZ(var(--from, var(--z, 0px)));
+  }
+  .js .svc-card[data-on="false"] .scn-face {
+    opacity: 0;
+  }
+  .js .svc-card[data-on="false"] .mk-drops {
+    visibility: hidden;
+  }
+  .js .svc-card[data-on="false"] .ia-core-pos {
+    transform: rotateY(-120deg) scale(0.72);
+  }
+  .js .svc-card[data-on="false"] .ia-bubble {
+    transform: translate(-50%, -50%) scale(0.6);
+  }
+  .js .svc-card[data-on="false"] .mk-ring {
+    transform: translateY(calc(var(--y) - 64px)) rotateX(90deg);
+  }
+}
+
+/* ---------- Tarjetas y mazo ---------- */
+
+.svc-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  background: var(--navy-950);
+  opacity: 0;
+  pointer-events: none;
+}
+.svc-stage {
+  --fit: 0.88;
+}
+@media (min-width: 375px) {
+  .svc-stage {
+    --fit: 0.97;
+  }
+}
+@media (min-width: 1024px) {
+  .svc-stage {
+    height: 236px;
+    --fit: 1.06;
+  }
+  /* La tarjeta grande ocupa dos filas: el objeto toma todo el alto que deja el texto */
+  .svc-item-web .svc-stage {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 420px;
+    --fit: 1.85;
+  }
+  .svc-item-web .svc-body {
+    flex: none;
+  }
+  .svc-card {
+    transition: border-color 0.3s var(--ease-scn);
+  }
+  .svc-card:hover {
+    border-color: var(--line-strong);
+  }
+}
+
+/* Mazo (celulares con alto suficiente): cada tarjeta se pega debajo del header, un poco más
+   abajo que la anterior, y la siguiente la tapa */
+@media (max-width: 1023.98px) and (min-height: 640px) {
+  .svc-item {
+    position: sticky;
+    top: calc(max(1rem, env(safe-area-inset-top)) + 4.25rem + var(--i) * 0.75rem);
+    padding-bottom: 1.5rem;
+    /* La perspectiva va en el contenedor y no dentro de la animación: así el navegador puede
+       calcular la escala de la tarjeta y la rasteriza nítida */
+    perspective: 1400px;
+    perspective-origin: 50% 0;
+  }
+  .svc-card {
+    transform-origin: 50% 0;
+    box-shadow: 0 -18px 40px -26px rgb(var(--shade-rgb) / 0.9);
+  }
+}
+@media (max-width: 1023.98px) and (max-height: 639.98px) {
+  .svc-item + .svc-item {
+    margin-top: 1rem;
+  }
+}
+
+/* Con animaciones ligadas al scroll: la tarjeta tapada se inclina hacia atrás, se achica y se
+   apaga; el objeto de cada tarjeta gira desde que llega hasta que queda tapado. En escritorio (y
+   celulares bajos) cada objeto gira mientras cruza la pantalla */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (max-width: 1023.98px) and (min-height: 640px) {
+    .svc-deck {
+      view-timeline: --svc-deck block;
+    }
+    .svc-card:not([data-last]) {
+      animation: svc-recede linear both;
+      animation-timeline: --svc-deck;
+      animation-range: var(--r0) var(--r1);
+    }
+    .svc-card:not([data-last])::after {
+      animation: svc-dim linear both;
+      animation-timeline: --svc-deck;
+      animation-range: var(--r0) var(--r1);
+    }
+    .svc-card .scn-rig {
+      animation: var(--turn, scn-turn) linear both;
+      animation-timeline: --svc-deck;
+      animation-range: var(--t0) var(--t1);
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) and (min-width: 1024px), (prefers-reduced-motion: no-preference) and (max-height: 639.98px) {
+    .svc-card .scn-rig {
+      animation: var(--turn, scn-turn) linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+.scn-marketing {
+  --turn: scn-turn-y;
+}
+@keyframes svc-recede {
+  to {
+    transform: translateY(-10px) rotateX(14deg) scale(0.88);
+  }
+}
+@keyframes svc-dim {
+  to {
+    opacity: 0.62;
+  }
+}
+@keyframes scn-turn {
+  from {
+    transform: scale(var(--fit, 1)) rotateX(7deg) rotateY(-22deg);
+  }
+  to {
+    transform: scale(var(--fit, 1)) rotateX(-4deg) rotateY(16deg);
+  }
+}
+@keyframes scn-turn-y {
+  from {
+    transform: scale(var(--fit, 1)) rotateY(-26deg);
+  }
+  to {
+    transform: scale(var(--fit, 1)) rotateY(22deg);
+  }
+}
+
+/* ---------- Recorrido: la moneda de "Venta cerrada" ---------- */
+
+.coin {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  transform-style: preserve-3d;
+  transform: rotateY(-20deg);
+  transition: transform 1.3s var(--ease-scn) 0.2s;
+}
+.js [data-shown="false"] .coin {
+  transform: rotateY(-200deg);
+}
+.coin > span {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+.coin-edge {
+  background: #0838a8;
+}
+.coin-face {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(140deg, #3d8bff, #0052ff);
+  color: #fff;
+  box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.25);
+  backface-visibility: hidden;
+}
+.coin-back {
+  background: linear-gradient(140deg, #0f2347, #071430);
+  transform: rotateY(180deg) translateZ(4px);
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .coin {
+      transition: none;
+      animation: coin-flip linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 50%;
+    }
+  }
+}
+@keyframes coin-flip {
+  from {
+    transform: rotateY(-200deg);
+  }
+  to {
+    transform: rotateY(-20deg);
+  }
+}
+
+/* ---------- Pie: el wordmark con volumen ---------- */
+
+.wm3d-stage {
+  perspective: 900px;
+  perspective-origin: 50% 0%;
+}
+.wm3d {
+  position: relative;
+  transform-style: preserve-3d;
+  transform-origin: 50% 100%;
+  transform: translateY(12%) rotateX(18deg);
+}
+/* Colores sólidos (no transparencias): las capas se pisan sin sumar brillo */
+.wm3d-layer {
+  position: absolute;
+  inset: 0;
+  color: color-mix(in oklab, var(--navy-950) 95.5%, rgb(var(--fg-rgb)));
+}
+.wm3d-front {
+  position: relative;
+  display: block;
+  color: color-mix(in oklab, var(--navy-950) 88%, rgb(var(--fg-rgb)));
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .wm3d {
+      animation: wm3d-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+@keyframes wm3d-rise {
+  from {
+    transform: translateY(24%) rotateX(76deg);
+  }
+  to {
+    transform: translateY(12%) rotateX(14deg);
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .scn-anim,
+  .scn-bob,
+  .web-press,
+  .hw-hover,
+  .ia-core,
+  .ia-spin,
+  .ia-counter {
+    animation: none !important;
+  }
+  .mk-drop,
+  .sw-dot,
+  .web-ripple,
+  .hw-ring {
+    display: none;
+  }
+  .coin {
+    transform: rotateY(-20deg) !important;
+  }
+}

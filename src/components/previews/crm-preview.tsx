@@ -7,8 +7,6 @@ import { PreviewShell, usePreviewLoop } from "./preview-shell";
 
 type Role = "Administrador" | "Supervisor" | "Ventas" | "Soporte";
 const ROLES: Role[] = ["Administrador", "Supervisor", "Ventas", "Soporte"];
-// En pantallas angostas los cuatro roles entran en una sola fila con la etiqueta corta
-const SHORT: Record<Role, string> = { Administrador: "Admin", Supervisor: "Supervisor", Ventas: "Ventas", Soporte: "Soporte" };
 
 const PERMISSIONS: { label: string; roles: Role[] }[] = [
   { label: "Ver todo", roles: ["Administrador", "Supervisor"] },
@@ -66,7 +64,7 @@ export function CrmPreview() {
         <div
           role="group"
           aria-label="Rol"
-          className="flex flex-wrap gap-1 rounded-xl border border-line bg-navy-900 p-1 sm:grid sm:grid-cols-4"
+          className="grid grid-cols-2 gap-1 rounded-xl border border-line bg-navy-900 p-1 sm:grid-cols-4"
         >
           {ROLES.map((r) => (
             <button
@@ -88,13 +86,13 @@ export function CrmPreview() {
                   transition={{ type: "spring", duration: 0.4, bounce: 0.15 }}
                 />
               )}
-              <span className="relative sm:hidden">{SHORT[r]}</span>
-              <span className="relative hidden sm:inline">{r}</span>
+              {/* En pantallas angostas, dos por fila (cuatro en una fila se cortaban y "Soporte" quedaba sola) */}
+              <span className="relative">{r}</span>
             </button>
           ))}
         </div>
 
-        <ul className="mt-3 flex flex-wrap gap-1.5 stack-sm:mt-2.5" aria-label="Permisos del rol">
+        <ul className="mt-3 flex flex-wrap gap-1.5 max-lg:mt-2.5" aria-label="Permisos del rol">
           {PERMISSIONS.map((p) => {
             const on = p.roles.includes(role);
             return (
@@ -116,14 +114,14 @@ export function CrmPreview() {
           })}
         </ul>
 
-        <div className="mt-4 overflow-hidden rounded-xl border border-line stack-sm:mt-2.5">
+        <div className="mt-4 overflow-hidden rounded-xl border border-line max-lg:mt-2.5">
           <div className="grid grid-cols-[1fr_auto] gap-3 border-b border-line bg-navy-900 px-3 py-2 text-[10px] uppercase tracking-[0.16em] text-ink-faint sm:grid-cols-[1fr_auto_auto]">
             <span>Cliente</span>
             <span className="hidden sm:block">Asignado</span>
             <span>Etapa</span>
           </div>
-          {/* En el apilado de celulares, tres filas fijas: la tarjeta no cambia de alto al cambiar de rol */}
-          <ul className="relative min-h-[188px] stack-sm:h-[6.9rem] stack-sm:min-h-0 stack-sm:overflow-hidden">
+          {/* En celulares, tres filas fijas: la tarjeta no cambia de alto al cambiar de rol */}
+          <ul className="relative min-h-[188px] max-lg:h-[6.9rem] max-lg:min-h-0 max-lg:overflow-hidden">
             <AnimatePresence mode="popLayout" initial={false}>
               {rows.map((r) => {
                 const ChannelIcon = CHANNEL[r.channel];
@@ -135,7 +133,7 @@ export function CrmPreview() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-                    className="grid grid-cols-[1fr_auto] items-center gap-3 border-b border-line px-3 py-2.5 last:border-b-0 sm:grid-cols-[1fr_auto_auto] stack-sm:py-2"
+                    className="grid grid-cols-[1fr_auto] items-center gap-3 border-b border-line px-3 py-2.5 last:border-b-0 sm:grid-cols-[1fr_auto_auto] max-lg:py-2"
                   >
                     <span className="flex min-w-0 items-center gap-2 text-[12.5px] text-ink">
                       <ChannelIcon size={15} className="shrink-0 text-ink-muted" aria-hidden="true" />

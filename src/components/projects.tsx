@@ -170,14 +170,17 @@ function FeaturedCase({ project, flip }: { project: Project; flip: boolean }) {
       className="grid items-center gap-10 outline-none lg:grid-cols-[1.12fr_0.88fr] lg:gap-16"
     >
       <div className={cn("relative [perspective:1600px]", flip && "lg:order-2")}>
-        {/* Mismo estilo en servidor y cliente; con reduced motion el CSS la deja derecha */}
+        {/* Mismo estilo en servidor y cliente; con reduced motion el CSS la deja derecha.
+            sd-tilt: en celulares con scroll ligado, el marco se endereza en el compositor (pisa el
+            estilo de Motion) y sin escala, que es lo que dejaba la portada borrosa */}
         <motion.div
           style={{ rotateX, scale, y: lift }}
-          className="relative origin-bottom overflow-hidden motion-reduce:!transform-none rounded-2xl border border-line-strong bg-navy-900 shadow-[0_50px_100px_-50px_rgb(var(--shade-rgb)/0.9)] light:shadow-[0_40px_80px_-50px_rgb(var(--shade-rgb)/0.4)]"
+          className="sd-tilt relative origin-bottom overflow-hidden motion-reduce:!transform-none rounded-2xl border border-line-strong bg-navy-900 shadow-[0_50px_100px_-50px_rgb(var(--shade-rgb)/0.9)] light:shadow-[0_40px_80px_-50px_rgb(var(--shade-rgb)/0.4)]"
         >
           <div className="relative aspect-video">
-            {/* sd-parallax: en celulares con scroll ligado, la imagen se desliza dentro del marco */}
-            <div className="sd-parallax absolute inset-0">
+            {/* sd-parallax: en celulares con scroll ligado, la imagen (más alta que el marco) se
+                desliza adentro, solo con translate */}
+            <div className="sd-parallax absolute inset-0 max-lg:inset-y-[-8%]">
               <Image src={coverOf(project)} alt={altOf(project)} fill sizes="(min-width: 1024px) 640px, 100vw" className="object-cover" />
             </div>
           </div>
@@ -251,7 +254,7 @@ function ProjectIndex({
   };
 
   return (
-    <div id="proyectos-lista" className="mt-24 md:mt-36">
+    <div id="proyectos-lista" className="mt-24 [perspective:1400px] md:mt-36">
       <Reveal className="grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
         <div>
           <h3 className="font-display text-[1.9rem] font-semibold leading-[1.05] tracking-[-0.035em] text-ink md:text-[2.6rem]">
@@ -410,7 +413,7 @@ function ProjectIndex({
       </div>
 
       {/* Cierre: el siguiente paso */}
-      <Reveal className="mt-14 md:mt-16">
+      <Reveal className="sd-3d mt-14 md:mt-16">
         <div className="flex flex-col gap-6 rounded-2xl border border-line bg-navy-850 px-6 py-8 md:flex-row md:items-center md:justify-between md:px-10 md:py-10">
           <div>
             <p className="font-display text-[1.7rem] font-semibold leading-[1.1] tracking-[-0.03em] text-ink md:text-[2.2rem]">
@@ -459,8 +462,8 @@ export function Projects() {
 
   return (
     <section id="proyectos" aria-label="Proyectos realizados" className="relative border-t border-line">
-      <div className="mx-auto max-w-[1200px] px-4 py-24 md:px-6 md:py-36">
-        <Reveal>
+      <div className="mx-auto max-w-[1200px] px-4 py-24 [perspective:1600px] md:px-6 md:py-36">
+        <Reveal className="sd-3d">
           <PortfolioGallery
             title={`Más de ${DELIVERED} proyectos entregados.`}
             description="Webs que venden, CRM a medida, sistemas de reservas y catálogos para clientes de motos, baterías, industria, salud, gastronomía y más."

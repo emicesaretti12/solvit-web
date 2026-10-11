@@ -8,6 +8,7 @@
   vuelve a armar) sin re-renderizar React: la escena amortigua cada cuadro hacia esa pose.
 
   - three.js se carga recién en el cliente (next/dynamic, ssr: false)
+  - en celulares el hero queda fijado mientras la S se abre y la cámara la atraviesa
   - fuera de las zonas donde se ve, el render se detiene
   - sin WebGL queda el isotipo en SVG, ubicado con la misma pose
   - con reduced motion no hay zambullida ni apertura: solo cambios de lugar y de luz
@@ -18,7 +19,7 @@ import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as R
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LogoMark } from "@/components/logo";
-import { CanvasBoundary } from "./canvas-boundary";
+import { SafeBoundary } from "@/components/safe-boundary";
 import { isotypeHeightPx, restPose, stageSignal, type DragState, type IsoPose } from "./pose";
 import { POSES, type PoseDef, type PoseKey, type StagePose } from "./choreography";
 
@@ -151,7 +152,14 @@ export function Stage() {
       const el = document.getElementById(slotId);
       if (!el || !el.offsetHeight) return pose;
       const rect = el.getBoundingClientRect();
-      const top = rect.top + window.scrollY;
+      let top = rect.top + window.scrollY;
+      // Si el hueco vive en un panel que se fija (el hero en celulares), su lugar en la pantalla
+      // es el del panel sin desplazar, que arranca donde arranca su sección: así la medida da
+      // igual aunque la página se recargue con el panel ya fijado
+      const frame = el.closest<HTMLElement>("[data-stage-frame]");
+      if (frame?.parentElement) {
+        top = rect.top - frame.getBoundingClientRect().top + frame.parentElement.getBoundingClientRect().top + window.scrollY;
+      }
       // La S abierta ocupa más alto: ~0,47 unidades extra por cada punto de apertura
       const extent = 1 + 0.47 * pose.spread;
       const fit = (0.92 * rect.height) / (isotypeHeightPx(window.innerWidth, vh) * extent);
@@ -242,11 +250,14 @@ export function Stage() {
 
   return (
     // Alto estable (100lvh): al aparecer o esconderse la barra del navegador el canvas no se
-    // redimensiona y la S no salta
+    // redimensiona y la S no salta. En celulares la S solo vive en el hero, que queda fijado
+    // mientras dura su recorrido: el texto no se mueve y la S nunca se desfasa del contenido.
+    // Con reduced motion el hero no se fija: el escenario va al principio de la página y la S
+    // sube con el texto como una imagen
     <div
       ref={layer}
       aria-hidden="true"
-      className="pointer-events-none fixed inset-x-0 top-0 z-0 h-[100lvh]"
+      className="pointer-events-none fixed inset-x-0 top-0 z-0 h-[100lvh] max-lg:motion-reduce:absolute"
       style={{ opacity: 0 }}
     >
       {/* Póster: el isotipo plano mientras carga WebGL (o si no hay) */}
@@ -259,9 +270,10 @@ export function Stage() {
       </div>
       {gl && (
         <div className={`absolute inset-0 transition-opacity duration-700 ease-[var(--ease-out)] ${ready ? "opacity-100" : "opacity-0"}`}>
-          <CanvasBoundary>
+          {/* Si el canvas falla al crearse (poca memoria, límite de contextos), queda el póster */}
+          <SafeBoundary>
             <Scene pose={pose} drag={drag} pointer={pointer} reduce={reduce} active={active} onReady={() => setReady(true)} />
-          </CanvasBoundary>
+          </SafeBoundary>
         </div>
       )}
     </div>

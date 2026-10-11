@@ -25,8 +25,8 @@ export function usePreviewLoop(ref: RefObject<HTMLElement | null>) {
 /*
   Marco común de las vistas vivas: interfaces reales en miniatura, con datos de ejemplo
   rotulados como tales (nunca capturas falsas armadas con divs).
-  En el apilado de celulares (stack-sm) la tarjeta tiene alto máximo: el contenido se achica
-  y, si aun así no entra, se recorta abajo; la cabecera con la pausa siempre queda a la vista.
+  En celulares el contenido va más compacto (max-lg); la cabecera con la pausa siempre queda a
+  la vista.
 */
 export function PreviewShell({
   title,
@@ -79,9 +79,15 @@ export function PreviewShell({
           </button>
         )}
       </div>
-      <div className="relative min-h-0 flex-1 p-4 stack-sm:p-3">{children}</div>
+      <div className="relative min-h-0 flex-1 p-4 max-lg:p-3">{children}</div>
     </div>
   );
+}
+
+/* Lugar de una vista mientras carga, o si no puede cargar: reaviz falla con algunos idiomas del
+   navegador y, sin el SafeBoundary de cada vista, eso desmontaría la página entera */
+export function PreviewPlaceholder() {
+  return <div className="h-[300px] rounded-[1.25rem] border border-line bg-navy-900/50" />;
 }
 
 export function LiveBadge({ label = "En vivo", paused = false }: { label?: string; paused?: boolean }) {

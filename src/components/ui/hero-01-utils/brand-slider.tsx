@@ -5,6 +5,7 @@
   imágenes (image / lightimg para el tema claro, como el original) o trazados de simple-icons
   (path), que toman el color del texto y funcionan en los dos temas.
 */
+import type { CSSProperties } from "react";
 
 export interface BrandList {
   name: string;
@@ -42,9 +43,14 @@ export default function BrandSlider({ brandList }: { brandList: BrandList[] }) {
           <p id="plataformas-titulo" className="text-sm text-ink-muted">
             Trabajamos con
           </p>
-          <ul className="flex flex-wrap items-center gap-x-8 gap-y-4 md:gap-x-12">
-            {brandList.map((brand) => (
-              <li key={brand.name} className="flex items-center text-ink-faint transition-colors duration-200 hover:text-ink">
+          {/* sd-flip: en celulares con scroll ligado, cada logo gira de canto a frente, de a uno */}
+          <ul className="flex flex-wrap items-center gap-x-8 gap-y-4 [perspective:600px] md:gap-x-12">
+            {brandList.map((brand, i) => (
+              <li
+                key={brand.name}
+                style={{ "--n": i } as CSSProperties}
+                className="sd-flip flex items-center text-ink-faint transition-colors duration-200 hover:text-ink"
+              >
                 <Brand brand={brand} />
               </li>
             ))}

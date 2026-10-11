@@ -120,7 +120,7 @@ const AreaChartCard: React.FC<AreaChartCardProps> = ({
       }
     >
       <div className="flex items-baseline justify-between gap-4">
-        <h3 className="text-xl font-semibold tracking-tight md:text-2xl">{title}</h3>
+        <h3 className="text-lg font-semibold tracking-tight sm:text-xl md:text-2xl">{title}</h3>
         {caption && (
           <span className="shrink-0 rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground">
             {caption}
@@ -221,16 +221,15 @@ const AreaChartCard: React.FC<AreaChartCardProps> = ({
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.06, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-              className="flex w-full items-center justify-between gap-3 py-2.5 md:flex-col md:items-start md:py-4"
+              className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 py-2.5 md:flex md:flex-col md:items-start md:py-4"
             >
-              <span className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
-                <metric.Icon size={18} weight="light" aria-hidden="true" className="shrink-0 text-blue-300" />
-                <span className="truncate" title={metric.label}>
-                  {metric.label}
-                </span>
+              {/* En celulares el nombre puede ocupar dos líneas; el valor nunca se parte */}
+              <span className="flex min-w-0 items-start gap-2 text-sm leading-snug text-muted-foreground">
+                <metric.Icon size={18} weight="light" aria-hidden="true" className="mt-px shrink-0 text-blue-300" />
+                <span>{metric.label}</span>
               </span>
-              <span className="flex items-center gap-3">
-                <span className="text-lg font-semibold text-foreground md:text-2xl">{metric.value}</span>
+              <span className="flex items-center gap-3 whitespace-nowrap">
+                <span className="tabular text-lg font-semibold text-foreground md:text-2xl">{metric.value}</span>
                 <TrendBadge trend={metric.trend} good={metric.trendIsGood} />
               </span>
             </motion.li>

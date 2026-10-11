@@ -2,18 +2,6 @@
 @import "tw-animate-css";
 
 /*
-  Secciones que se fijan y apilan con el scroll (servicios): solo con pantalla ancha y alta,
-  donde cada tarjeta entra completa, y sin reduced motion. Misma consulta que usa GSAP.
-*/
-@custom-variant stack (@media (min-width: 1024px) and (min-height: 760px) and (prefers-reduced-motion: no-preference));
-
-/*
-  La misma idea en celulares y tablets (versiones compactas de cada sección): pantalla de al
-  menos 700px de alto y sin reduced motion. Misma consulta que STACK_SM_QUERY en lib/motion.ts.
-*/
-@custom-variant stack-sm (@media (max-width: 1023.98px) and (min-height: 700px) and (prefers-reduced-motion: no-preference));
-
-/*
   SEN Software · tokens de marca (brand board)
   Fondo medianoche casi negro, azul eléctrico del isotipo solo como acento (logo, CTA, líneas, luz),
   blanco para la tipografía y grises fríos para lo secundario. Nada de campos azules grandes.
@@ -248,7 +236,13 @@ button,
   -webkit-user-select: none;
 }
 
-/* Grano sutil, fijo y sin eventos para no repintar al hacer scroll */
+/* Grano sutil, fijo y sin eventos para no repintar al hacer scroll. Solo en escritorio: en un
+   teléfono casi no se ve y es una capa de pantalla completa más para el compositor */
+@media (max-width: 1023.98px) {
+  .grain::after {
+    content: none !important;
+  }
+}
 .grain::after {
   content: "";
   position: fixed;
@@ -651,10 +645,40 @@ html.lenis body {
       animation-timeline: view();
       animation-range: entry 0% cover 30%;
     }
+    /* Bloques que se paran en 3D (tarjetas, principios): el padre pone la perspectiva */
+    .sd-rise.sd-3d {
+      transform-origin: 50% 100%;
+      animation-name: sd-rise-3d;
+      animation-range: entry 0% cover 34%;
+    }
+    /* Titulares (MaskWords): cada palabra se para sobre su base, de a una */
+    .mw {
+      view-timeline: --mw block;
+    }
+    .mw-mask {
+      perspective: 520px;
+    }
+    .mw-word {
+      transform-origin: 50% 100%;
+      animation: mw-flip linear both;
+      animation-timeline: --mw;
+      animation-range: cover calc(5% + var(--n) * 2.4%) cover calc(19% + var(--n) * 2.4%);
+    }
+    /* Logos de "Trabajamos con": giran de canto a frente, de a uno */
+    .sd-flip {
+      animation: sd-flip linear both;
+      animation-timeline: view();
+      animation-range: entry calc(20% + var(--n) * 12%) cover calc(28% + var(--n) * 6%);
+    }
     .sd-parallax {
       animation: sd-parallax linear both;
       animation-timeline: view();
       animation-range: cover 0% cover 100%;
+    }
+    .sd-tilt {
+      animation: sd-tilt linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 42%;
     }
   }
 }
@@ -668,12 +692,56 @@ html.lenis body {
     opacity: 1;
   }
 }
-@keyframes sd-parallax {
+@keyframes sd-rise-3d {
   from {
-    transform: translateY(-7%) scale(1.16);
+    transform: translateY(72px) rotateX(28deg);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
   }
   to {
-    transform: translateY(7%) scale(1.16);
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes mw-flip {
+  from {
+    transform: translateY(35%) rotateX(-96deg);
+    opacity: 0;
+  }
+  45% {
+    opacity: 1;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes sd-flip {
+  from {
+    transform: rotateY(-85deg) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes sd-parallax {
+  from {
+    transform: translateY(-6%);
+  }
+  to {
+    transform: translateY(6%);
+  }
+}
+@keyframes sd-tilt {
+  from {
+    transform: translateY(48px) rotateX(20deg);
+  }
+  to {
+    transform: none;
   }
 }
 @keyframes step-card-in {

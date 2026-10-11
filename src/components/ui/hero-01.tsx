@@ -4,7 +4,8 @@
   Hero 01 · Agency Hero Section (ShadcnSpace, 21st.dev), adaptado a SEN:
   - misma composición que el original (Header + HeroSection + BrandSlider); el <main> lo arma
     este componente y el resto de las secciones llegan como children, después del slider
-  - detrás de todo va el escenario 3D fijo (Stage) con el isotipo, que recorre la página
+  - detrás de todo va el escenario 3D fijo (Stage) con el isotipo: en escritorio recorre la
+    página; en celulares vive en el hero, que queda fijado mientras la S se abre y se atraviesa
   - componente de cliente: los logos y la navegación se arman acá
 */
 import type { ReactNode } from "react";
@@ -18,6 +19,7 @@ import { Stage } from "@/components/three/stage";
 export default function AgencyHeroSection({ children }: { children?: ReactNode }) {
   // Navegación en el orden de la página
   const navigationData: NavigationSection[] = [
+    { title: "Servicios", href: "#servicios" },
     { title: "Cómo funciona", href: "#como-funciona" },
     { title: "Proyectos", href: "#proyectos" },
     { title: "Nosotros", href: "#nosotros" },

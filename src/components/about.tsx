@@ -9,9 +9,10 @@ import { Wordmark } from "./logo";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-// Quiénes somos, palabra por palabra
+// Quiénes somos, palabra por palabra (los pilares del brand board: software, hardware, IA,
+// marketing y crecimiento)
 const MANIFESTO =
-  "es un equipo de ingenieros y desarrolladores que se ocupa de todo el camino de la venta, del anuncio al cierre.";
+  "es un equipo de ingenieros y desarrolladores. Software, hardware, IA y marketing con un mismo objetivo: que tu negocio crezca.";
 
 const PRINCIPLES = [
   "Te hablamos en números de ventas.",
@@ -68,9 +69,9 @@ export function About() {
           ))}
         </p>
 
-        <ul className="mt-16 grid gap-8 md:mt-24 md:grid-cols-3 md:gap-12">
+        <ul className="mt-16 grid gap-8 [perspective:1100px] md:mt-24 md:grid-cols-3 md:gap-12">
           {PRINCIPLES.map((p, i) => (
-            <Reveal key={p} as="li" delay={i * 0.08} className="border-t border-line-strong pt-6">
+            <Reveal key={p} as="li" delay={i * 0.08} className="sd-3d border-t border-line-strong pt-6">
               <p className="text-lg leading-snug text-ink md:text-xl">{p}</p>
             </Reveal>
           ))}
