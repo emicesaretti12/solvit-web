@@ -1,6 +1,7 @@
 /*
   Escenas 3D en CSS: los objetos de los servicios (services-3d.tsx), el mazo de tarjetas de
-  celulares (services.tsx) y la moneda de "Venta cerrada" del recorrido.
+  celulares (services.tsx), la moneda de "Venta cerrada" del recorrido y las piezas 3D del pie
+  (footer-3d.tsx: el lockup del brand board y el wordmark con volumen).
 
   Reglas de la casa:
   - Solo transform y opacidad (las mueve el compositor del teléfono)
@@ -8,40 +9,95 @@
     (.scn-face) y los grupos 3D se ocultan con visibility
   - Cada loop (.scn-anim) arranca transparente o desde su pose de reposo y corre solo con la
     tarjeta a la vista (data-live); con reduced motion no hay loops ni armado
+  - Pensado primero para el tema claro (el principal): caras blancas con luz fría, cantos
+    azulados que se oscurecen hacia la base y sombras de contacto teñidas de azul. El oscuro
+    redefine los mismos roles en navy
 */
 
+/* Claro (el principal) */
 :root {
   --ease-scn: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-sine: cubic-bezier(0.37, 0, 0.63, 1);
-  --scn-top: #10233f;
-  --scn-front: #0a1a33;
-  --scn-left: #06122a;
-  --scn-edge: rgb(141 184 255 / 0.3);
+  /* Placas: cara de arriba (degradé de luz), canto de adelante y canto izquierdo (del claro de
+     arriba al oscuro de la base) */
+  --scn-top-a: #ffffff;
+  --scn-top-b: #eef3fb;
+  --scn-front-a: #e6edf9;
+  --scn-front-b: #c7d5ee;
+  --scn-left-a: #d3dff2;
+  --scn-left-b: #afc2e3;
+  /* Contorno de la cara y filo de luz en los bordes que miran a la cámara */
+  --scn-edge: rgb(31 107 255 / 0.16);
+  --scn-hi: rgb(255 255 255 / 0.95);
+  --scn-bar: #e8eef8;
+  --scn-ghost: rgb(31 76 160 / 0.06);
+  --scn-line: rgb(32 50 92 / 0.5);
+  --scn-faint: rgb(31 56 110 / 0.14);
+  --scn-pin: #a7b5cb;
+  --scn-hole: #dfe7f3;
+  /* Sombra de contacto: núcleo y borde suave, teñidos de azul (nada de gris sucio) */
+  --scn-shadow: rgb(38 88 196 / 0.13);
+  --scn-shadow-core: rgb(26 64 158 / 0.26);
+  /* Fondo de estudio detrás del objeto, para que las caras blancas se despeguen de la tarjeta */
+  --scn-backdrop: #edf2fa;
+  --scn-sheen: rgb(255 255 255 / 0.72);
+  --scn-chip-shadow: 0 6px 16px -8px rgb(38 70 140 / 0.38);
+  /* Consultas del embudo: las que se pierden, las que llegan lejos y (en azul) las ventas */
+  --scn-lost: #a5b6d4;
+  --scn-warm: #7fb0ff;
+  --hw-board-a: #fbfcfe;
+  --hw-board-b: #e8eff9;
+  --hw-board: #f2f6fc;
+  --hw-trace: rgb(31 107 255 / 0.5);
+  --hw-via: rgb(31 107 255 / 0.72);
+  --hw-cap: #d4def0;
+  --ia-bubble: #ffffff;
+  /* Wordmark del pie: frente blanco con luz de arriba y extrusión azulada, más oscura atrás */
+  --wm-front-a: #ffffff;
+  --wm-front-b: #edf2fa;
+  --wm-near: #d2ddee;
+  --wm-far: #a5b8d8;
+  --wm-acc-near: #1a5fe6;
+  --wm-acc-far: #0b3a9e;
+  --wm-floor: rgb(38 88 196 / 0.12);
+}
+
+:root[data-theme="dark"] {
+  --scn-top-a: #152c50;
+  --scn-top-b: #0d203d;
+  --scn-front-a: #0d213f;
+  --scn-front-b: #071530;
+  --scn-left-a: #091934;
+  --scn-left-b: #040d21;
+  --scn-edge: rgb(141 184 255 / 0.26);
+  --scn-hi: rgb(141 184 255 / 0.3);
   --scn-bar: #0c1d38;
   --scn-ghost: rgb(160 178 210 / 0.08);
   --scn-line: rgb(219 228 243 / 0.55);
   --scn-faint: rgb(160 178 210 / 0.22);
   --scn-pin: #9fb0c8;
   --scn-hole: #020815;
-  --scn-floor: rgb(0 4 12 / 0.6);
+  --scn-shadow: rgb(0 4 14 / 0.4);
+  --scn-shadow-core: rgb(0 3 10 / 0.7);
+  --scn-backdrop: rgb(12 29 56 / 0.75);
+  --scn-sheen: rgb(255 255 255 / 0.32);
+  --scn-chip-shadow: 0 8px 18px -8px rgb(0 0 0 / 0.6);
+  --scn-lost: #5d6d8c;
+  --scn-warm: #5f9bff;
+  --hw-board-a: #12284b;
+  --hw-board-b: #0a1c39;
   --hw-board: #0b1d3a;
-  --ia-layer: #05112a;
-}
-
-:root[data-theme="light"] {
-  --scn-top: #ffffff;
-  --scn-front: #dbe4f1;
-  --scn-left: #c5d2e6;
-  --scn-edge: rgb(31 107 255 / 0.24);
-  --scn-bar: #e9eef6;
-  --scn-ghost: rgb(11 18 34 / 0.05);
-  --scn-line: rgb(35 52 92 / 0.5);
-  --scn-faint: rgb(11 18 34 / 0.13);
-  --scn-pin: #8a97ab;
-  --scn-hole: #c9d3e2;
-  --scn-floor: rgb(40 56 92 / 0.2);
-  --hw-board: #e6edf7;
-  --ia-layer: #a9bbd6;
+  --hw-trace: rgb(61 139 255 / 0.6);
+  --hw-via: rgb(61 139 255 / 0.8);
+  --hw-cap: #b9c8de;
+  --ia-bubble: var(--navy-800);
+  --wm-front-a: #18325c;
+  --wm-front-b: #0c1d3a;
+  --wm-near: #0a1a35;
+  --wm-far: #030b1b;
+  --wm-acc-near: #0f4fd6;
+  --wm-acc-far: #06256e;
+  --wm-floor: rgb(0 0 0 / 0.45);
 }
 
 /* ---------- Escena y piezas ---------- */
@@ -52,15 +108,21 @@
   perspective: 1000px;
   perspective-origin: 50% 35%;
 }
-/* Sombra de contacto bajo el objeto (un degradé, sin desenfoque) */
+/* Sombra en el piso para los objetos que flotan (IA, embudo): un degradé, sin desenfoque */
 .scn-floor {
   left: 50%;
-  bottom: 7%;
+  bottom: 6%;
   width: 66%;
-  height: 20%;
+  height: 22%;
   margin-left: -33%;
   border-radius: 50%;
-  background: radial-gradient(closest-side, var(--scn-floor), transparent);
+  background: radial-gradient(closest-side, var(--scn-shadow-core), var(--scn-shadow) 45%, transparent);
+}
+/* La mirada hacia el puntero (escritorio): un giro extra que comparte la perspectiva */
+.scn-look {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
 }
 .scn-rig {
   position: absolute;
@@ -104,38 +166,90 @@
   position: absolute;
   transition: opacity 0.6s var(--ease-scn) var(--d, 0s);
 }
+/* Cara de arriba: luz desde adelante a la derecha, contorno azul muy suave y un filo claro en
+   los dos bordes que miran a la cámara (el chaflán que agarra la luz) */
 .scn-top {
   inset: 0;
   border-radius: 3px;
-  background: var(--scn-top);
-  box-shadow: inset 0 0 0 1px var(--scn-edge);
+  background: linear-gradient(150deg, var(--scn-top-a) 25%, var(--scn-top-b));
+  box-shadow:
+    inset 1px -1px 0 var(--scn-hi),
+    inset 0 0 0 1px var(--scn-edge);
 }
 .scn-top > svg {
   display: block;
   width: 100%;
   height: 100%;
 }
-/* Cantos: el de adelante cuelga del borde de abajo, el de la izquierda del borde izquierdo */
+/* Cantos: el de adelante cuelga del borde de abajo, el de la izquierda del borde izquierdo. Con
+   el giro, el borde local de arriba del canto de adelante queda en la base (y el izquierdo del
+   canto izquierdo, arriba): los degradés van de la base oscura al filo claro */
 .scn-front {
   left: 0;
   top: 100%;
   width: 100%;
   transform-origin: 50% 0;
   transform: rotateX(90deg);
-  background: var(--scn-front);
+  background: linear-gradient(to bottom, var(--scn-front-b), var(--scn-front-a));
+  box-shadow: inset 0 -1px 0 var(--scn-hi);
 }
 .scn-left {
   top: 0;
   height: 100%;
   transform-origin: 100% 50%;
   transform: rotateY(90deg);
-  background: var(--scn-left);
+  background: linear-gradient(to left, var(--scn-left-b), var(--scn-left-a));
+  box-shadow: inset 1px 0 0 var(--scn-hi);
 }
 .scn-slab-dark > .scn-front {
-  background: #050b17;
+  background: linear-gradient(to bottom, #02060e, #0b1629);
+  box-shadow: inset 0 -1px 0 rgb(141 184 255 / 0.3);
 }
 .scn-slab-dark > .scn-left {
-  background: #03070f;
+  background: linear-gradient(to left, #01040a, #07101f);
+  box-shadow: inset 1px 0 0 rgb(141 184 255 / 0.2);
+}
+/* Placas azules (portada y botón del navegador): el canto también es azul */
+.scn-slab-blue > .scn-front {
+  background: linear-gradient(to bottom, #0634a0, #1556f0);
+  box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.35);
+}
+.scn-slab-blue > .scn-left {
+  background: linear-gradient(to left, #04297f, #0d47c9);
+  box-shadow: inset 1px 0 0 rgb(255 255 255 / 0.25);
+}
+/* Sombra de contacto en el plano de la mesa: el núcleo bajo la placa y un borde que se desvanece
+   (sombra estática: se pinta una vez y el compositor solo la mueve) */
+.scn-shadow {
+  border-radius: 12px;
+  background: var(--scn-shadow-core);
+  box-shadow: 0 0 26px 8px var(--scn-shadow-core);
+  transform: translateZ(-1px);
+}
+/* Brillo especular: una franja de luz que cruza la cara con el scroll (o una vez al armarse,
+   sin scroll ligado). Recortada por su propio contenedor: la cara puede tener piezas que salen */
+.scn-sheen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.scn-sheen::before {
+  content: "";
+  position: absolute;
+  top: -30%;
+  bottom: -30%;
+  left: 0;
+  width: 50%;
+  background: linear-gradient(100deg, transparent 12%, var(--scn-sheen) 50%, transparent 88%);
+  transform: translateX(-110%);
+}
+/* Cara que mira a la cámara desde el espacio isométrico (deshace su giro). --bz es la altura y
+   --bx/--by el anclaje de la cara sobre su punto */
+.scn-bill {
+  transform-origin: 0 0;
+  transform: translateZ(var(--bz, 0px)) rotateZ(40deg) rotateX(-56deg) translate(var(--bx, -50%), var(--by, -50%));
 }
 /* Etiqueta que mira siempre a la cámara (deshace el giro del espacio isométrico) */
 .scn-tag {
@@ -147,21 +261,19 @@
   font-size: 11px;
   line-height: 1;
   color: var(--ink-muted);
+  box-shadow: var(--scn-chip-shadow);
 }
 
 /* ---------- Web ---------- */
 
-.web-window {
-  background: var(--scn-top);
-}
 .web-hero {
   background: linear-gradient(120deg, #0052ff, #1fdcff);
-  box-shadow: none;
+  box-shadow: inset 1px -1px 0 rgb(255 255 255 / 0.4);
 }
 .web-cta {
   border-radius: 8px;
-  background: #1f6bff;
-  box-shadow: none;
+  background: linear-gradient(160deg, #3d8bff, #1f6bff 55%, #1556f0);
+  box-shadow: inset 1px -1px 0 rgb(255 255 255 / 0.35);
 }
 .web-ripple {
   position: absolute;
@@ -176,6 +288,55 @@
 }
 .web-press {
   animation: web-press 3.4s var(--ease-scn) infinite;
+}
+/* Cursor: el grupo viaja en el espacio del navegador; la flecha mira a la cámara con la punta
+   en el punto. Mismo ciclo que el botón: llega, hunde el botón al 70 % y se va */
+.web-cursor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-style: preserve-3d;
+  transform: translate3d(98px, 112px, 112px);
+  animation: web-cursor 3.4s var(--ease-scn) infinite;
+}
+.web-cursor-face {
+  left: 0;
+  top: 0;
+  width: 15px;
+  height: 21px;
+  --bx: -1px;
+  --by: -1px;
+}
+.web-cursor-face > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: 1px 1px;
+}
+.web-click {
+  animation: web-click 3.4s var(--ease-scn) infinite;
+}
+.web-lead {
+  white-space: nowrap;
+}
+.web-lead-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--navy-850);
+  padding: 4px 8px 4px 5px;
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ink);
+  box-shadow: var(--scn-chip-shadow);
+  opacity: 0;
+  animation: web-lead 3.4s var(--ease-scn) infinite;
+}
+.web-lead-chip > svg {
+  color: var(--blue-500);
 }
 @keyframes scn-bob {
   to {
@@ -207,6 +368,55 @@
   100% {
     transform: scale(1.6, 2.4);
     opacity: 0;
+  }
+}
+@keyframes web-cursor {
+  0%,
+  10% {
+    transform: translate3d(156px, 150px, 126px);
+  }
+  44%,
+  63% {
+    transform: translate3d(98px, 112px, 112px);
+  }
+  70% {
+    transform: translate3d(98px, 112px, 98px);
+  }
+  80% {
+    transform: translate3d(98px, 112px, 112px);
+  }
+  100% {
+    transform: translate3d(156px, 150px, 126px);
+  }
+}
+@keyframes web-click {
+  0%,
+  64%,
+  80%,
+  100% {
+    transform: scale(1);
+  }
+  70% {
+    transform: scale(0.86);
+  }
+}
+@keyframes web-lead {
+  0%,
+  72% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.92);
+  }
+  78% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  92% {
+    opacity: 1;
+    transform: translateY(-8px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px);
   }
 }
 
@@ -257,20 +467,56 @@
     opacity: 1;
   }
 }
-/* Riel por la esquina de adelante: se para sobre el plano con rotateX */
+/* Luces del canto de cada módulo (el canto queda dado vuelta con el giro: van centradas) */
+.sw-led {
+  position: absolute;
+  top: 5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--scn-faint);
+}
+.sw-led-on {
+  background: #3d8bff;
+}
+.sw-blink {
+  opacity: 0.3;
+  animation: sw-blink 1.2s steps(1, end) infinite;
+}
+@keyframes sw-blink {
+  0% {
+    opacity: 1;
+  }
+  22% {
+    opacity: 0.3;
+  }
+}
+/* Cables: se paran sobre la mesa (rotateX) un poco por delante de los módulos; el degradé va de
+   la base, más azul, hacia arriba */
 .sw-rail {
-  left: -9px;
-  top: 112px;
+  top: 111px;
   width: 2px;
-  height: 82px;
+  height: 86px;
   transform-origin: 50% 0;
   transform: rotateX(90deg);
-  background: linear-gradient(to bottom, color-mix(in oklab, var(--blue-400) 55%, transparent), transparent);
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--blue-400) 60%, transparent),
+    color-mix(in oklab, var(--blue-400) 12%, transparent)
+  );
+}
+/* Ficha: une el cable con el canto de cada módulo, a media altura */
+.sw-port {
+  top: 104px;
+  width: 6px;
+  height: 7px;
+  border-radius: 1.5px;
+  background: color-mix(in oklab, var(--blue-400) 70%, transparent);
+  transform: translateZ(var(--pz));
 }
 .sw-dot {
   position: absolute;
-  left: -11px;
-  top: 109px;
+  top: 108px;
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -278,17 +524,35 @@
   opacity: 0;
   animation: sw-dot 2.4s var(--ease-sine) infinite;
 }
+.sw-dot-down {
+  background: #0052ff;
+  animation-name: sw-dot-down;
+}
 @keyframes sw-dot {
   0% {
-    transform: translateZ(6px) rotateZ(40deg) rotateX(-56deg);
+    transform: translateZ(4px) rotateZ(40deg) rotateX(-56deg);
     opacity: 0;
   }
-  18%,
-  80% {
+  15%,
+  82% {
     opacity: 1;
   }
   100% {
-    transform: translateZ(86px) rotateZ(40deg) rotateX(-56deg);
+    transform: translateZ(84px) rotateZ(40deg) rotateX(-56deg);
+    opacity: 0;
+  }
+}
+@keyframes sw-dot-down {
+  0% {
+    transform: translateZ(84px) rotateZ(40deg) rotateX(-56deg);
+    opacity: 0;
+  }
+  15%,
+  82% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateZ(4px) rotateZ(40deg) rotateX(-56deg);
     opacity: 0;
   }
 }
@@ -342,11 +606,12 @@
   white-space: nowrap;
   border-radius: 14px 14px 14px 4px;
   border: 1px solid var(--line-strong);
-  background: var(--navy-800);
+  background: var(--ia-bubble);
   padding: 6px 9px;
   font-size: 11.5px;
   line-height: 1;
   color: var(--ink);
+  box-shadow: var(--scn-chip-shadow);
   transform: translate(-50%, -50%);
   transition:
     transform 0.8s var(--ease-scn) var(--d, 0s),
@@ -355,7 +620,7 @@
 .ia-bubble-agent {
   border-color: transparent;
   border-radius: 14px 14px 4px 14px;
-  background: #1f6bff;
+  background: linear-gradient(160deg, #3d8bff, #1f6bff);
   color: #fff;
 }
 .ia-core {
@@ -374,35 +639,102 @@
   transition: transform 1.2s var(--ease-scn) 0.1s;
 }
 .ia-layer,
-.ia-front {
+.ia-front,
+.ia-pulses {
   left: -46px;
   top: -46px;
   width: 92px;
   height: 92px;
   border-radius: 25px;
 }
-.ia-layer {
-  background: var(--ia-layer);
-}
 .ia-front {
   display: grid;
   place-items: center;
-  background: linear-gradient(160deg, #10264d, #061330);
-  box-shadow: inset 0 0 0 1px rgb(61 139 255 / 0.6);
+  background: linear-gradient(160deg, #15336a, #061330 70%);
+  box-shadow:
+    inset 0 0 0 1px rgb(61 139 255 / 0.6),
+    inset 1px -1px 0 1px rgb(141 184 255 / 0.18);
   transform: translateZ(1px);
+}
+/* Escucha: ondas que salen de atrás del ícono (hojas: la opacidad va en cada una) */
+.ia-pulses {
+  transform: translateZ(-20px);
+}
+.ia-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1.5px solid var(--blue-400);
+  opacity: 0;
+  animation: ia-pulse 2.8s cubic-bezier(0.25, 0.6, 0.35, 1) infinite;
+}
+@keyframes ia-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.75);
+    opacity: 0;
+  }
+}
+/* Responde: el aviso de que está escribiendo, adelante del ícono, en su esquina */
+.ia-typing {
+  left: 22px;
+  top: 30px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 7px;
+  border-radius: 10px 10px 10px 3px;
+  background: #1f6bff;
+  box-shadow: var(--scn-chip-shadow);
+  transform: translateZ(22px);
+}
+.ia-dot {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fff;
+  animation: ia-dot 1.1s var(--ease-sine) infinite;
+}
+@keyframes ia-dot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+  30% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
 }
 
 /* ---------- Hardware e IoT ---------- */
 
 .hw-board {
-  background: var(--hw-board);
+  background: linear-gradient(150deg, var(--hw-board-a), var(--hw-board-b));
+}
+/* Canto de la placa: un poco más azul que el resto (el laminado) */
+:root:not([data-theme="dark"]) .hw-slab > .scn-front {
+  background: linear-gradient(to bottom, #b4c8ea, #dde7f6);
+}
+:root:not([data-theme="dark"]) .hw-slab > .scn-left {
+  background: linear-gradient(to left, #a2b9e2, #cad8f0);
 }
 .hw-chip {
   display: grid;
   place-items: center;
   border-radius: 4px;
-  background: #08111f;
-  box-shadow: inset 0 0 0 1px rgb(141 184 255 / 0.22);
+  background: linear-gradient(150deg, #16294b, #070f1d 70%);
+  box-shadow:
+    inset 0 0 0 1px rgb(141 184 255 / 0.22),
+    inset 1px -1px 0 1px rgb(141 184 255 / 0.12);
 }
 .hw-pin1 {
   position: absolute;
@@ -414,11 +746,19 @@
   background: rgb(160 178 210 / 0.6);
 }
 .hw-cap {
-  background: #c9d6ea;
+  background: var(--hw-cap);
+  box-shadow: inset 1px -1px 0 rgb(255 255 255 / 0.6);
+}
+.hw-cap-slab > .scn-front {
+  background: linear-gradient(to bottom, #8ea3c6, #b8c7df);
+  box-shadow: none;
+}
+.hw-cap-slab > .scn-left {
+  background: linear-gradient(to left, #7a90b7, #a1b4d3);
   box-shadow: none;
 }
 .hw-led {
-  background: #1a2b4a;
+  background: #13233f;
   box-shadow: none;
 }
 .hw-led-on {
@@ -447,6 +787,38 @@
 .hw-hover {
   animation: hw-hover 3.8s var(--ease-sine) infinite alternate;
 }
+/* Pulsos por las pistas: puntos sobre la cara de la placa que salen del chip (2D adentro de
+   la cara: cada recorrido es una serie de traslados en px del viewBox, que mide lo mismo) */
+.hw-pulse {
+  position: absolute;
+  left: -2.5px;
+  top: -2.5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #3d8bff;
+  box-shadow: 0 0 0 2px color-mix(in oklab, #3d8bff 22%, transparent);
+  opacity: 0;
+  animation: hw-p1 2s linear infinite;
+}
+/* Señal de la antena: arcos (el borde de arriba de un círculo) que se encienden de a uno */
+.hw-wave {
+  width: 34px;
+  height: 18px;
+}
+.hw-arc {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: calc(var(--r) * 2);
+  height: calc(var(--r) * 2);
+  margin: 0 0 calc(var(--r) * -1) calc(var(--r) * -1);
+  border: 1.6px solid transparent;
+  border-top-color: var(--blue-400);
+  border-radius: 50%;
+  opacity: 0.9;
+  animation: hw-arc 1.8s var(--ease-scn) infinite;
+}
 @keyframes hw-ring {
   0% {
     transform: scale(1);
@@ -473,14 +845,121 @@
     opacity: 0.2;
   }
 }
+@keyframes hw-arc {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  18% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  70% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}
+/* M120 64 H170 */
+@keyframes hw-p1 {
+  0% {
+    transform: translate(120px, 64px);
+    opacity: 0;
+  }
+  12%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(170px, 64px);
+    opacity: 0;
+  }
+}
+/* M64 62 H30 V44 H12 */
+@keyframes hw-p2 {
+  0% {
+    transform: translate(64px, 62px);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  46% {
+    transform: translate(30px, 62px);
+  }
+  70% {
+    transform: translate(30px, 44px);
+  }
+  92% {
+    transform: translate(12px, 44px);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(12px, 44px);
+    opacity: 0;
+  }
+}
+/* M100 94 V122 H114 */
+@keyframes hw-p3 {
+  0% {
+    transform: translate(100px, 94px);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  62% {
+    transform: translate(100px, 122px);
+  }
+  92% {
+    transform: translate(114px, 122px);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(114px, 122px);
+    opacity: 0;
+  }
+}
+/* M104 38 V26 H124 V12 */
+@keyframes hw-p4 {
+  0% {
+    transform: translate(104px, 38px);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  28% {
+    transform: translate(104px, 26px);
+  }
+  66% {
+    transform: translate(124px, 26px);
+  }
+  92% {
+    transform: translate(124px, 12px);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(124px, 12px);
+    opacity: 0;
+  }
+}
 
 /* ---------- Marketing ---------- */
 
-.scn-marketing .scn-rig {
-  left: calc(50% - 44px);
-}
+.scn-marketing .scn-rig,
 .scn-marketing .scn-overlay {
   left: calc(50% - 44px);
+}
+/* Sombra chica bajo la moneda de la venta (el embudo flota) */
+.scn-marketing .scn-floor {
+  left: calc(50% - 44px);
+  bottom: 0;
+  width: 44%;
+  height: 13%;
+  margin-left: -22%;
 }
 .mk-obj,
 .mk-drops {
@@ -495,11 +974,16 @@
   top: 0;
   border-radius: 50%;
   border: 1.5px solid color-mix(in oklab, var(--blue-400) 80%, transparent);
-  background: radial-gradient(closest-side, transparent 60%, color-mix(in oklab, var(--blue-400) 14%, transparent));
+  background: radial-gradient(closest-side, transparent 58%, color-mix(in oklab, var(--blue-400) 14%, transparent));
   transform: translateY(var(--y)) rotateX(90deg);
   transition:
     transform 1s var(--ease-scn) var(--d, 0s),
     opacity 0.6s var(--ease-scn) var(--d, 0s);
+}
+/* La boca del embudo: más marcada, donde entra todo el tráfico */
+.mk-ring-top {
+  border-width: 2px;
+  background: radial-gradient(closest-side, transparent 48%, color-mix(in oklab, var(--blue-400) 20%, transparent));
 }
 /* Arista: del borde del anillo de arriba (radio 82, y -50) al de abajo (radio 24, y 52) */
 .mk-wall {
@@ -511,6 +995,8 @@
   opacity: 0.45;
   transform: rotateY(var(--a)) translateX(53px) rotateZ(29.6deg);
 }
+/* Consultas: caen hasta su etapa (64 %) y salen por la pared, apagándose. Las ventas siguen
+   hasta la moneda */
 .mk-drop {
   position: absolute;
   left: -3px;
@@ -518,28 +1004,53 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--ink-faint);
+  background: var(--scn-lost);
   opacity: 0;
-  animation: mk-drop 2.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation: mk-drop 2.8s var(--ease-sine) infinite;
+}
+.mk-drop-warm {
+  background: var(--scn-warm);
 }
 .mk-drop-win {
-  background: #3d8bff;
+  background: #1f6bff;
+  animation-name: mk-win;
 }
 @keyframes mk-drop {
   0% {
-    transform: translate3d(var(--x0), -88px, var(--z0));
+    transform: translate3d(var(--x0), -88px, var(--z0)) scale(var(--s, 1));
     opacity: 0;
   }
-  14%,
-  80% {
+  12% {
+    opacity: 1;
+  }
+  62% {
+    transform: translate3d(var(--x1), var(--y1), var(--z1)) scale(var(--s, 1));
     opacity: 1;
   }
   100% {
-    transform: translate3d(var(--x1), var(--y1), var(--z1));
+    transform: translate3d(var(--x2), var(--y2), var(--z2)) scale(var(--s, 1));
     opacity: 0;
   }
 }
-/* La venta: una moneda que mira a la cámara al final del embudo */
+@keyframes mk-win {
+  0% {
+    transform: translate3d(var(--x0), -88px, var(--z0)) scale(var(--s, 1));
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  88% {
+    transform: translate3d(0px, 76px, 0px) scale(var(--s, 1));
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0px, 86px, 0px) scale(0.4);
+    opacity: 0;
+  }
+}
+/* La venta: una moneda que mira a la cámara al final del embudo; late (y suelta una onda)
+   cada vez que llega una venta */
 .mk-sale {
   left: -15px;
   top: -15px;
@@ -548,23 +1059,49 @@
   transform: translateY(86px) rotateX(20deg);
 }
 .mk-sale-coin {
+  position: relative;
   display: grid;
   place-items: center;
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: #1f6bff;
+  background: linear-gradient(140deg, #3d8bff, #0052ff);
   color: #fff;
-  animation: mk-coin 3.2s var(--ease-scn) infinite;
+  box-shadow:
+    inset 0 0 0 2px rgb(255 255 255 / 0.22),
+    var(--scn-chip-shadow);
+  animation: mk-coin 1.6s var(--ease-scn) infinite;
+}
+.mk-spark {
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 1.5px solid var(--blue-400);
+  opacity: 0;
+  animation: mk-spark 1.6s var(--ease-scn) infinite;
 }
 @keyframes mk-coin {
   0%,
-  86%,
+  50%,
   100% {
     transform: scale(1);
   }
-  92% {
+  58% {
     transform: scale(1.18);
+  }
+}
+@keyframes mk-spark {
+  0%,
+  50% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  54% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.3);
+    opacity: 0;
   }
 }
 .mk-labels {
@@ -601,30 +1138,53 @@
   animation-play-state: running;
 }
 
-/* Sin armar: cada pieza en su punto de partida y las caras transparentes */
+/* Sin armar (o repitiendo el armado al tocar): cada pieza en su punto de partida y las caras
+   transparentes */
 @media (prefers-reduced-motion: no-preference) {
-  .js .svc-card[data-on="false"] .scn-part {
+  .js .svc-card[data-on="false"] .scn-part,
+  .svc-card[data-replay] .scn-part {
     transform: translateZ(var(--from, var(--z, 0px)));
   }
-  .js .svc-card[data-on="false"] .scn-face {
+  .js .svc-card[data-on="false"] .scn-face,
+  .svc-card[data-replay] .scn-face {
     opacity: 0;
   }
-  .js .svc-card[data-on="false"] .mk-drops {
+  .js .svc-card[data-on="false"] .mk-drops,
+  .svc-card[data-replay] .mk-drops {
     visibility: hidden;
   }
-  .js .svc-card[data-on="false"] .ia-core-pos {
+  .js .svc-card[data-on="false"] .ia-core-pos,
+  .svc-card[data-replay] .ia-core-pos {
     transform: rotateY(-120deg) scale(0.72);
   }
-  .js .svc-card[data-on="false"] .ia-bubble {
+  .js .svc-card[data-on="false"] .ia-bubble,
+  .svc-card[data-replay] .ia-bubble {
     transform: translate(-50%, -50%) scale(0.6);
   }
-  .js .svc-card[data-on="false"] .mk-ring {
+  .js .svc-card[data-on="false"] .mk-ring,
+  .svc-card[data-replay] .mk-ring {
     transform: translateY(calc(var(--y) - 64px)) rotateX(90deg);
+  }
+  /* Sin scroll ligado, el brillo cruza una vez cuando el objeto termina de armarse */
+  .js .svc-card[data-on="true"]:not([data-replay]) .scn-sheen::before {
+    transform: translateX(210%);
+    transition: transform 1.5s var(--ease-sine) 0.75s;
+  }
+  /* La repetición salta al punto de partida sin transición; al soltarla, corre el armado */
+  .svc-card[data-replay] .svc-stage *,
+  .svc-card[data-replay] .svc-stage *::before {
+    transition: none !important;
   }
 }
 
 /* ---------- Tarjetas y mazo ---------- */
 
+/* Elevación suave en el claro (en el oscuro la sombra se funde con el fondo) */
+.svc-card {
+  box-shadow:
+    0 1px 2px rgb(var(--shade-rgb) / 0.05),
+    0 22px 44px -28px rgb(var(--shade-rgb) / 0.35);
+}
 .svc-card::after {
   content: "";
   position: absolute;
@@ -635,8 +1195,10 @@
   opacity: 0;
   pointer-events: none;
 }
+/* Fondo de estudio: el objeto se apoya en un tono apenas más frío que la tarjeta */
 .svc-stage {
   --fit: 0.88;
+  background: linear-gradient(to bottom, var(--scn-backdrop), transparent);
 }
 @media (min-width: 375px) {
   .svc-stage {
@@ -661,6 +1223,8 @@
   .svc-card {
     transition: border-color 0.3s var(--ease-scn);
   }
+}
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
   .svc-card:hover {
     border-color: var(--line-strong);
   }
@@ -690,8 +1254,9 @@
 }
 
 /* Con animaciones ligadas al scroll: la tarjeta tapada se inclina hacia atrás, se achica y se
-   apaga; el objeto de cada tarjeta gira desde que llega hasta que queda tapado. En escritorio (y
-   celulares bajos) cada objeto gira mientras cruza la pantalla */
+   apaga; el objeto de cada tarjeta gira y su brillo cruza las caras desde que llega hasta que
+   queda tapado. En escritorio (y celulares bajos) cada objeto gira mientras cruza la pantalla.
+   El brillo deja su transición de respaldo (pisaría a la animación mientras dura) */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) and (max-width: 1023.98px) and (min-height: 640px) {
     .svc-deck {
@@ -712,12 +1277,27 @@
       animation-timeline: --svc-deck;
       animation-range: var(--t0) var(--t1);
     }
+    .svc-card .scn-sheen::before {
+      transition: none !important;
+      animation: scn-sheen linear both;
+      animation-timeline: --svc-deck;
+      animation-range: var(--t0) var(--t1);
+    }
   }
   @media (prefers-reduced-motion: no-preference) and (min-width: 1024px), (prefers-reduced-motion: no-preference) and (max-height: 639.98px) {
+    .svc-stage {
+      view-timeline: --svc-stage block;
+    }
     .svc-card .scn-rig {
       animation: var(--turn, scn-turn) linear both;
-      animation-timeline: view();
+      animation-timeline: --svc-stage;
       animation-range: cover 0% cover 100%;
+    }
+    .svc-card .scn-sheen::before {
+      transition: none !important;
+      animation: scn-sheen linear both;
+      animation-timeline: --svc-stage;
+      animation-range: cover 15% cover 85%;
     }
   }
 }
@@ -748,6 +1328,17 @@
   }
   to {
     transform: scale(var(--fit, 1)) rotateY(22deg);
+  }
+}
+/* La franja cruza en el tramo del medio (quieta afuera de la cara al principio y al final) */
+@keyframes scn-sheen {
+  0%,
+  30% {
+    transform: translateX(-110%);
+  }
+  70%,
+  100% {
+    transform: translateX(210%);
   }
 }
 
@@ -803,6 +1394,49 @@
   }
 }
 
+/* ---------- Pie: el lockup del brand board ---------- */
+
+/* El ícono de app con espesor: capas detrás del frente (el borde azul es la más cercana). En
+   reposo queda girado hacia los pilares, mostrando el canto. La perspectiva sale del centro del
+   ícono, así el giro decide qué canto se ve */
+.ft-lockup {
+  perspective: 640px;
+  perspective-origin: 2rem 50%;
+}
+.ft-icon {
+  position: relative;
+  display: block;
+  flex: none;
+  width: 4rem;
+  transform-style: preserve-3d;
+  transform: rotateX(-10deg) rotateY(22deg);
+  transition: transform 1.2s var(--ease-scn) 0.05s;
+}
+.ft-icon-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: 28%;
+}
+.ft-icon-face {
+  position: relative;
+}
+.ft-icon > * {
+  transition: opacity 0.5s var(--ease-scn) 0.05s;
+}
+.ft-rule {
+  transition: transform 0.9s var(--ease-scn) 0.25s;
+}
+/* Los pilares caen de a uno, como paletas de un cartel (la perspectiva la pone la lista) */
+.ft-pillars {
+  perspective: 320px;
+}
+.ft-pillars > li {
+  transform-origin: 50% 0;
+  transition:
+    transform 0.8s var(--ease-scn) calc(0.3s + var(--n) * 0.07s),
+    opacity 0.5s var(--ease-scn) calc(0.3s + var(--n) * 0.07s);
+}
+
 /* ---------- Pie: el wordmark con volumen ---------- */
 
 .wm3d-stage {
@@ -813,34 +1447,169 @@
   position: relative;
   transform-style: preserve-3d;
   transform-origin: 50% 100%;
-  transform: translateY(12%) rotateX(18deg);
+  transform: translateY(10%) rotateX(14deg);
+  transition: transform 1.6s var(--ease-scn);
 }
-/* Colores sólidos (no transparencias): las capas se pisan sin sumar brillo */
+/* La extrusión: la profundidad acompaña al tamaño (alrededor del 12 % del alto de la letra) */
 .wm3d-layer {
   position: absolute;
   inset: 0;
-  color: color-mix(in oklab, var(--navy-950) 95.5%, rgb(var(--fg-rgb)));
+  transform: translateZ(calc(var(--k) * -1 * min(4px, 0.34vw)));
+}
+.wm3d-acc {
+  fill: var(--wm-acc);
 }
 .wm3d-front {
   position: relative;
   display: block;
-  color: color-mix(in oklab, var(--navy-950) 88%, rgb(var(--fg-rgb)));
+  transform: none;
 }
+.wm3d-front path {
+  fill: url(#wm3d-face);
+}
+/* Piso: una sombra baja detrás de la base, que se asienta cuando la palabra se para */
+.wm3d-floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 38%;
+  background: radial-gradient(50% 100% at 50% 100%, var(--wm-floor), transparent);
+  transform-origin: 50% 100%;
+  transition:
+    transform 1.6s var(--ease-scn),
+    opacity 1.2s var(--ease-scn);
+}
+
+/* Sin scroll ligado: las poses de partida esperan a data-shown y se arman con transiciones */
+@media (prefers-reduced-motion: no-preference) {
+  .js .ft-lockup[data-shown="false"] .ft-icon {
+    transform: rotateX(70deg) rotateY(-30deg) translateZ(-30px) scale(0.85);
+  }
+  .js .ft-lockup[data-shown="false"] .ft-icon > * {
+    opacity: 0;
+  }
+  .js .ft-lockup[data-shown="false"] .ft-rule {
+    transform: scaleY(0);
+  }
+  .js .ft-lockup[data-shown="false"] .ft-pillars > li {
+    transform: rotateX(-88deg);
+    opacity: 0;
+  }
+  .js .wm3d-stage[data-shown="false"] .wm3d {
+    transform: translateY(30%) rotateX(86deg);
+  }
+  .js .wm3d-stage[data-shown="false"] .wm3d-floor {
+    transform: scaleY(0.3);
+    opacity: 0.2;
+  }
+}
+
+/* Con scroll ligado: todo al ritmo del dedo, sobre la línea de tiempo de su bloque */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
+    .ft-lockup {
+      view-timeline: --ft-lockup block;
+    }
+    .ft-icon,
+    .ft-icon > *,
+    .ft-rule,
+    .ft-pillars > li {
+      transition: none;
+    }
+    .ft-icon {
+      animation: ft-icon linear both;
+      animation-timeline: --ft-lockup;
+      animation-range: entry 0% cover 30%;
+    }
+    .ft-icon > * {
+      animation: ft-fade linear both;
+      animation-timeline: --ft-lockup;
+      animation-range: entry 0% entry 70%;
+    }
+    .ft-rule {
+      animation: ft-rule linear both;
+      animation-timeline: --ft-lockup;
+      animation-range: entry 40% cover 30%;
+    }
+    .ft-pillars > li {
+      animation: ft-pillar linear both;
+      animation-timeline: --ft-lockup;
+      animation-range: cover calc(6% + var(--n) * 3.5%) cover calc(22% + var(--n) * 3.5%);
+    }
+    .wm3d-stage {
+      view-timeline: --wm3d block;
+    }
+    .wm3d,
+    .wm3d-floor {
+      transition: none;
+    }
     .wm3d {
       animation: wm3d-rise linear both;
-      animation-timeline: view();
+      animation-timeline: --wm3d;
       animation-range: entry 0% entry 100%;
+    }
+    .wm3d-floor {
+      animation: wm3d-floor linear both;
+      animation-timeline: --wm3d;
+      animation-range: entry 30% entry 100%;
     }
   }
 }
-@keyframes wm3d-rise {
+@keyframes ft-icon {
   from {
-    transform: translateY(24%) rotateX(76deg);
+    transform: rotateX(70deg) rotateY(-30deg) translateZ(-30px) scale(0.85);
   }
   to {
-    transform: translateY(12%) rotateX(14deg);
+    transform: rotateX(-10deg) rotateY(22deg);
+  }
+}
+@keyframes ft-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes ft-rule {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes ft-pillar {
+  from {
+    transform: rotateX(-88deg);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+/* Se para desde el piso: rápido al principio y asentándose al final (el scroll es lineal) */
+@keyframes wm3d-rise {
+  from {
+    transform: translateY(30%) rotateX(86deg);
+  }
+  55% {
+    transform: translateY(14%) rotateX(32deg);
+  }
+  to {
+    transform: translateY(10%) rotateX(14deg);
+  }
+}
+@keyframes wm3d-floor {
+  from {
+    transform: scaleY(0.3);
+    opacity: 0.2;
+  }
+  to {
+    transform: none;
+    opacity: 1;
   }
 }
 
@@ -857,9 +1626,12 @@
     animation: none !important;
   }
   .mk-drop,
+  .mk-spark,
   .sw-dot,
   .web-ripple,
-  .hw-ring {
+  .hw-ring,
+  .hw-pulse,
+  .ia-pulse {
     display: none;
   }
   .coin {

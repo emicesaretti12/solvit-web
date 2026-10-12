@@ -74,46 +74,50 @@ export function AgentPreview() {
         onTogglePause={() => setPaused((p) => !p)}
       >
         <div className="grid h-full gap-3 sm:grid-cols-[1.25fr_1fr] max-lg:flex max-lg:min-h-0 max-lg:flex-col">
-          <div className="flex min-h-[230px] flex-col justify-end gap-2 rounded-xl border border-line bg-navy-900/80 p-3 max-lg:min-h-[200px]">
-            <AnimatePresence initial={false}>
-              {MESSAGES.slice(0, shown).map((m, i) => (
-                <motion.div
-                  key={`${i}-${m.from}`}
-                  initial={{ opacity: 0, y: 10, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-                  className={`max-w-[88%] rounded-2xl px-3 py-2 text-[12.5px] leading-snug ${
-                    m.from === "cliente"
-                      ? "self-start rounded-bl-md bg-navy-700 text-ink"
-                      : "self-end rounded-br-md bg-blue-500 text-white"
-                  }`}
-                >
-                  {m.text}
-                </motion.div>
-              ))}
-              {typing && (
-                <motion.div
-                  key="typing"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex gap-1 self-end rounded-2xl rounded-br-md bg-blue-500/20 px-3 py-2.5"
-                >
-                  {[0, 1, 2].map((d) => (
-                    <span
-                      key={d}
-                      className="size-1.5 animate-bounce rounded-full bg-blue-300"
-                      style={{ animationDelay: `${d * 120}ms` }}
-                    />
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+          {/* Alto trabado: el chat crece hacia arriba adentro de su caja (los mensajes viejos se
+              van por arriba, con un fundido), así la vista nunca cambia de tamaño en el loop */}
+          <div className="h-[252px] shrink-0 rounded-xl border border-line bg-navy-900/80 p-3 light:bg-navy-850 max-lg:h-[236px]">
+            <div className="flex h-full flex-col justify-end gap-2 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,#000_24px)]">
+              <AnimatePresence initial={false}>
+                {MESSAGES.slice(0, shown).map((m, i) => (
+                  <motion.div
+                    key={`${i}-${m.from}`}
+                    initial={{ opacity: 0, transform: "translateY(10px) scale(0.97)" }}
+                    animate={{ opacity: 1, transform: "translateY(0px) scale(1)" }}
+                    transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+                    className={`max-w-[88%] rounded-2xl px-3 py-2 text-[12.5px] leading-snug ${
+                      m.from === "cliente"
+                        ? "self-start rounded-bl-md bg-navy-700 text-ink light:bg-navy-800"
+                        : "self-end rounded-br-md bg-blue-500 text-white"
+                    }`}
+                  >
+                    {m.text}
+                  </motion.div>
+                ))}
+                {typing && (
+                  <motion.div
+                    key="typing"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex gap-1 self-end rounded-2xl rounded-br-md bg-blue-500/20 px-3 py-2.5"
+                  >
+                    {[0, 1, 2].map((d) => (
+                      <span
+                        key={d}
+                        className="size-1.5 animate-bounce rounded-full bg-blue-300"
+                        style={{ animationDelay: `${d * 120}ms` }}
+                      />
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* En celulares la ficha se resume en una línea (prioridad y asignación) */}
           <div
-            className={`hidden items-center justify-between gap-2 rounded-xl border px-3 py-2 text-[12px] transition-[opacity,border-color] duration-300 max-lg:flex ${
+            className={`hidden shrink-0 items-center justify-between gap-2 rounded-xl border px-3 py-2 text-[12px] transition-[opacity,border-color] duration-300 max-lg:flex ${
               assigned ? "border-blue-400/40 bg-blue-500/10 text-ink" : "border-line text-ink-muted"
             }`}
           >
@@ -122,7 +126,7 @@ export function AgentPreview() {
               Asignado a Asesor 1
             </span>
           </div>
-          <div className="flex flex-col gap-2 rounded-xl border border-line bg-navy-900/80 p-3 max-lg:hidden">
+          <div className="flex flex-col gap-2 rounded-xl border border-line bg-navy-900/80 p-3 light:bg-navy-850 max-lg:hidden">
             <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-ink-faint">
               <Sparkle size={12} className="text-blue-400" /> Ficha del cliente
             </p>

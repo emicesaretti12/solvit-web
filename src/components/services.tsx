@@ -7,21 +7,53 @@
 
   - Celulares (con al menos 640px de alto): un mazo. Cada tarjeta se queda pegada arriba y la
     siguiente sube y la tapa; la de abajo se inclina hacia atrás, se achica y se apaga. Donde el
-    navegador tiene animaciones ligadas al scroll, eso y el giro de cada objeto van al ritmo del
-    dedo y en el compositor (scenes.css); si no, el mazo se apila igual, sin inclinarse
-  - Escritorio: grilla con tamaños distintos; cada objeto gira apenas al cruzar la pantalla
+    navegador tiene animaciones ligadas al scroll, eso, el giro de cada objeto y el brillo que
+    cruza sus caras van al ritmo del dedo y en el compositor (scenes.css); si no, el mazo se
+    apila igual, sin inclinarse, y el brillo cruza una vez al armarse
+  - Tocar la tarjeta de arriba (con el dedo) vuelve a armar su objeto: la respuesta al toque,
+    con un golpe háptico donde existe
+  - Escritorio: grilla con tamaños distintos; cada objeto gira apenas al cruzar la pantalla. Con
+    mouse, la tarjeta se inclina hacia el puntero con un resorte y el objeto, adentro, gira un
+    poco más (paralaje en profundidad). Motion values y el transform completo como texto: no
+    pasa por React en cada cuadro
   - Solo la tarjeta de arriba del mazo (o las visibles, en la grilla) corre sus loops
-  - Con reduced motion: los objetos armados y quietos, sin mazo inclinado (lo resuelve el CSS: el
-    servidor no conoce la preferencia y el HTML tiene que coincidir al hidratar)
+  - Con reduced motion: los objetos armados y quietos, sin mazo inclinado ni inclinación con el
+    puntero (lo resuelve el CSS y los manejadores; el servidor no conoce la preferencia y el
+    HTML tiene que coincidir al hidratar)
 */
-import { useMotionValueEvent, useScroll } from "motion/react";
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import {
+  motion,
+  useMotionValue,
+  useMotionValueEvent,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "motion/react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import { MaskWords } from "@/components/mask-words";
 import { ServiceScene } from "@/components/services-3d";
-import { SERVICES, type ServiceKey } from "@/content/services";
+import { SERVICES, type Service, type ServiceKey } from "@/content/services";
+import { tap } from "@/lib/haptics";
 
 // Misma consulta que el mazo de scenes.css
 const DECK_QUERY = "(max-width: 1023.98px) and (min-height: 640px)";
+// La inclinación con el puntero: solo con mouse (o trackpad) y en la grilla de escritorio
+const TILT_QUERY = "(hover: hover) and (pointer: fine) and (min-width: 1024px)";
+const REDUCE_QUERY = "(prefers-reduced-motion: reduce)";
+
+// Las consultas se crean una vez y se leen en cada evento (el puntero se mueve seguido)
+const queries = new Map<string, MediaQueryList>();
+function matches(query: string) {
+  let mql = queries.get(query);
+  if (!mql) {
+    mql = window.matchMedia(query);
+    queries.set(query, mql);
+  }
+  return mql.matches;
+}
+
+// Resorte de la inclinación: sigue al puntero sin latigazo y vuelve solo al salir
+const SPRING = { stiffness: 210, damping: 22, mass: 0.7 };
 
 // Grilla de escritorio: web grande a la izquierda, el resto alrededor
 const SPAN: Record<ServiceKey, string> = {
@@ -37,7 +69,7 @@ const SEG = 100 / N;
 
 /* Tramos del mazo sobre la línea de tiempo de la lista (exit-crossing: de que su borde de arriba
    cruza el de la pantalla hasta que lo cruza el de abajo): la tarjeta i se inclina mientras la
-   tapa la siguiente; su objeto gira desde que llega hasta que queda tapado */
+   tapa la siguiente; su objeto gira (y su brillo cruza) desde que llega hasta que queda tapado */
 const deckVars = (i: number) =>
   ({
     "--i": i,
@@ -48,6 +80,94 @@ const deckVars = (i: number) =>
   }) as CSSProperties;
 
 const same = (a: number[], b: number[]) => a.length === b.length && a.every((v, i) => v === b[i]);
+
+function ServiceCard({ service: s, index: i, on, live }: { service: Service; index: number; on: boolean; live: boolean }) {
+  const card = useRef<HTMLElement>(null);
+  const pointer = useRef("mouse");
+
+  // Puntero sobre la tarjeta, de -0,5 a 0,5 en cada eje, con resorte. En reposo (0, 0) el
+  // transform es "none": igual en el servidor y en el cliente, y sin capa de más en el mazo
+  const px = useMotionValue(0);
+  const py = useMotionValue(0);
+  const sx = useSpring(px, SPRING);
+  const sy = useSpring(py, SPRING);
+  // La tarjeta grande se inclina menos (en una superficie grande el mismo ángulo marea)
+  const max = s.key === "web" ? 4.5 : 7;
+  const tilt = useTransform([sx, sy], ([x, y]: number[]) =>
+    x === 0 && y === 0
+      ? "none"
+      : `perspective(1200px) rotateX(${(-y * max).toFixed(2)}deg) rotateY(${(x * max).toFixed(2)}deg)`,
+  );
+  const look = useTransform([sx, sy], ([x, y]: number[]) =>
+    x === 0 && y === 0 ? "none" : `rotateX(${(-y * 12).toFixed(2)}deg) rotateY(${(x * 18).toFixed(2)}deg)`,
+  );
+
+  const onPointerMove = (e: PointerEvent<HTMLElement>) => {
+    if (e.pointerType !== "mouse" || !matches(TILT_QUERY) || matches(REDUCE_QUERY)) return;
+    // La caja del <li>: la de la tarjeta cambia con su propia inclinación
+    const box = e.currentTarget.parentElement?.getBoundingClientRect();
+    if (!box) return;
+    px.set(Math.min(0.5, Math.max(-0.5, (e.clientX - box.left) / box.width - 0.5)));
+    py.set(Math.min(0.5, Math.max(-0.5, (e.clientY - box.top) / box.height - 0.5)));
+  };
+  const onPointerLeave = () => {
+    px.set(0);
+    py.set(0);
+  };
+
+  // Con el dedo, tocar la tarjeta de arriba vuelve a armar su objeto: data-replay lleva cada
+  // pieza a su punto de partida sin transición; se fija ese estado (lectura de layout) y al
+  // soltarlo las transiciones del armado corren de nuevo, con sus retardos
+  const onClick = () => {
+    const el = card.current;
+    if (!el || pointer.current === "mouse" || !on || !live || matches(REDUCE_QUERY)) return;
+    tap();
+    el.setAttribute("data-replay", "");
+    el.getBoundingClientRect();
+    el.removeAttribute("data-replay");
+  };
+
+  return (
+    <li className={`svc-item svc-item-${s.key} ${SPAN[s.key]}`} style={deckVars(i)}>
+      <motion.article
+        ref={card}
+        aria-labelledby={`servicio-${s.key}`}
+        data-on={on}
+        data-live={live}
+        data-last={i === N - 1 || undefined}
+        onPointerDown={(e) => {
+          pointer.current = e.pointerType;
+        }}
+        onPointerMove={onPointerMove}
+        onPointerLeave={onPointerLeave}
+        onClick={onClick}
+        style={{ transform: tilt }}
+        className="svc-card relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-line bg-navy-850"
+      >
+        <div className="svc-stage relative h-[216px] shrink-0">
+          <ServiceScene kind={s.key} look={look} />
+        </div>
+        <div className="svc-body relative flex flex-1 flex-col px-5 pb-6 md:px-7 md:pb-8">
+          <h3
+            id={`servicio-${s.key}`}
+            className="font-display text-[1.75rem] font-bold leading-[1.02] tracking-[-0.035em] text-ink md:text-[2rem]"
+          >
+            {s.title}
+          </h3>
+          <p className="mt-2 text-base font-medium leading-snug text-ink">{s.lead}</p>
+          <p className="mt-2 max-w-[46ch] text-[15px] leading-relaxed text-ink-muted">{s.text}</p>
+          <ul aria-label={`Qué incluye ${s.title.toLowerCase()}`} className="mt-4 flex flex-wrap gap-1.5 lg:mt-auto lg:pt-5">
+            {s.deliverables.map((d) => (
+              <li key={d} className="rounded-full border border-line bg-navy-900/70 px-2.5 py-1 text-[12px] leading-none text-ink-muted">
+                {d}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </motion.article>
+    </li>
+  );
+}
 
 export function Services() {
   const deck = useRef<HTMLOListElement>(null);
@@ -60,7 +180,7 @@ export function Services() {
     const list = deck.current;
     if (!list) return;
     const vh = window.innerHeight;
-    const stacked = window.matchMedia(DECK_QUERY).matches;
+    const stacked = matches(DECK_QUERY);
     const arrived: number[] = [];
     const visible: number[] = [];
     let top = -1;
@@ -106,36 +226,7 @@ export function Services() {
         className="svc-deck mx-auto mt-10 max-w-[640px] px-4 md:mt-14 lg:grid lg:max-w-[1200px] lg:grid-cols-12 lg:gap-5 lg:px-6"
       >
         {SERVICES.map((s, i) => (
-          <li key={s.key} className={`svc-item svc-item-${s.key} ${SPAN[s.key]}`} style={deckVars(i)}>
-            <article
-              aria-labelledby={`servicio-${s.key}`}
-              data-on={on[i]}
-              data-live={live.includes(i)}
-              data-last={i === N - 1 || undefined}
-              className="svc-card relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-line bg-navy-850"
-            >
-              <div className="svc-stage relative h-[216px] shrink-0">
-                <ServiceScene kind={s.key} />
-              </div>
-              <div className="svc-body relative flex flex-1 flex-col px-5 pb-6 md:px-7 md:pb-8">
-                <h3
-                  id={`servicio-${s.key}`}
-                  className="font-display text-[1.75rem] font-bold leading-[1.02] tracking-[-0.035em] text-ink md:text-[2rem]"
-                >
-                  {s.title}
-                </h3>
-                <p className="mt-2 text-base font-medium leading-snug text-ink">{s.lead}</p>
-                <p className="mt-2 max-w-[46ch] text-[15px] leading-relaxed text-ink-muted">{s.text}</p>
-                <ul aria-label={`Qué incluye ${s.title.toLowerCase()}`} className="mt-4 flex flex-wrap gap-1.5 lg:mt-auto lg:pt-5">
-                  {s.deliverables.map((d) => (
-                    <li key={d} className="rounded-full border border-line bg-navy-900/70 px-2.5 py-1 text-[12px] leading-none text-ink-muted">
-                      {d}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </article>
-          </li>
+          <ServiceCard key={s.key} service={s} index={i} on={on[i]} live={live.includes(i)} />
         ))}
       </ol>
     </section>

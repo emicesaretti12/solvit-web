@@ -1,53 +1,44 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
-import type { CSSProperties } from "react";
+import { useRef, type CSSProperties } from "react";
+import { useRevealAttr } from "@/components/in-view";
 
 /*
-  Texto de un titular que entra palabra por palabra desde una máscara: cada palabra sube desde
-  debajo de su propia línea, en cascada. Va adentro del <h2> (que conserva id y estilos).
+  Texto de un titular que entra palabra por palabra: cada palabra se para en 3D sobre su base
+  desde debajo de su propia línea (gira desde acostada hacia atrás), en cascada. Va adentro del
+  <h2> (que conserva id y estilos).
+  - Solo CSS (globals.css, .mw-*): el observer compartido marca data-in y cada palabra hace su
+    transición con un retardo según su orden (--n). Sin JS por cuadro ni re-render
   - El lector de pantalla lee la frase entera (sr-only); las palabras animadas son decorativas
-  - Mismo estado inicial en servidor y cliente; con reduced motion aparece sin moverse
+  - Mismo HTML en servidor y cliente; sin JavaScript o con reduced motion aparece quieto
   - El relleno de cada máscara (compensado con margen negativo) deja lugar a los descendentes
     y a los acentos y colas que sobresalen de la caja por el tracking negativo
-  - En celulares con animaciones ligadas al scroll (globals.css, .mw-*), cada palabra se para en
-    3D al ritmo del dedo: gira desde acostada sobre su base, de a una (pisa el estilo de Motion)
+  - En celulares con animaciones ligadas al scroll, cada palabra se para al ritmo del dedo
 */
-const EASE = [0.23, 1, 0.32, 1] as const;
-
 export function MaskWords({ text, delay = 0 }: { text: string; delay?: number }) {
-  const reduce = useReducedMotion();
+  const ref = useRef<HTMLSpanElement>(null);
+  useRevealAttr(ref, "-18%");
   const words = text.split(" ");
   return (
     <>
       <span className="sr-only">{text}</span>
-      <motion.span
+      <span
+        ref={ref}
         aria-hidden="true"
         className="mw block"
-        initial="hidden"
-        whileInView="shown"
-        viewport={{ once: true, amount: 0.6 }}
-        transition={{ staggerChildren: reduce ? 0 : 0.045, delayChildren: reduce ? 0 : delay }}
+        style={delay ? ({ "--mw-delay": `${delay}s` } as CSSProperties) : undefined}
       >
         {words.map((word, i) => (
           <span key={i}>
             <span className="mw-mask -mx-[0.08em] -mb-[0.14em] inline-block overflow-hidden px-[0.08em] pb-[0.14em] align-top">
-              <motion.span
-                className="mw-word inline-block motion-reduce:!transform-none"
-                style={{ "--n": i } as CSSProperties}
-                variants={{
-                  hidden: { transform: "translateY(110%)" },
-                  shown: { transform: "translateY(0%)" },
-                }}
-                transition={reduce ? { duration: 0 } : { duration: 0.85, ease: EASE }}
-              >
+              <span className="mw-word inline-block" style={{ "--n": i } as CSSProperties}>
                 {word}
-              </motion.span>
+              </span>
             </span>
             {i < words.length - 1 && " "}
           </span>
         ))}
-      </motion.span>
+      </span>
     </>
   );
 }
