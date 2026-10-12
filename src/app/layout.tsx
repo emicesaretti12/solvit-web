@@ -1,11 +1,19 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Geist, Geist_Mono, Krona_One } from "next/font/google";
-import type { CSSProperties } from "react";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { Toaster } from "@/components/toaster";
-import { THEME_SCRIPT } from "@/lib/theme-config";
+import { DEFAULT_THEME, THEME_COLOR, THEME_SCRIPT, ZOOM_GUARD_SCRIPT } from "@/lib/theme-config";
 import "./globals.css";
 import "./scenes.css";
+import "./native.css";
+
+/*
+  Documento raíz. El tema claro es el principal: el HTML sale con data-theme="light" y el
+  script de <head> pasa a oscuro antes de pintar solo si quedó guardado (src/lib/theme.ts).
+  Se comporta como una app: sin zoom (viewport + ZOOM_GUARD_SCRIPT), instalable (manifest.ts,
+  apple-icon.tsx y appleWebApp) y con la barra del navegador del color del tema elegido.
+  native.css lleva la capa de plataforma (toque, scroll, áreas seguras, cambio de tema).
+*/
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +43,20 @@ export const metadata: Metadata = {
   title: "SEN Software · Ingeniería y desarrollo de software",
   description:
     "Desarrollo web, software a medida, agentes de IA, hardware e IoT y marketing digital: un solo equipo de ingeniería para que tu negocio venda más.",
+  applicationName: "SEN Software",
+  // App en la pantalla de inicio de iOS: ventana propia, barra de estado clara (el tema
+  // principal) y nombre corto bajo el ícono
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "SEN",
+  },
+  // Sin enlaces automáticos en números o direcciones: los que se tocan son los que pusimos
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false,
+  },
   openGraph: {
     title: "SEN Software · Ingeniería y desarrollo de software",
     description:
@@ -46,32 +68,32 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#031024",
-  colorScheme: "dark light",
+  // Del tema claro; el script del layout y setTheme la cambian si el elegido es el oscuro
+  themeColor: THEME_COLOR[DEFAULT_THEME],
+  colorScheme: DEFAULT_THEME,
   width: "device-width",
   initialScale: 1,
+  // Sin zoom, como una app (iOS Safari lo ignora para el pellizco: ver ZOOM_GUARD_SCRIPT)
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
   interactiveWidget: "resizes-content",
 };
-
-// Toasts con los colores de marca (variables propias de Sonner)
-const toasterStyle = {
-  "--normal-bg": "var(--navy-850)",
-  "--normal-border": "var(--line-strong)",
-  "--normal-text": "var(--ink)",
-} as CSSProperties;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="es"
-      data-theme="dark"
+      data-theme={DEFAULT_THEME}
+      // Next pone el scroll instantáneo al navegar entre páginas aunque el html tenga
+      // scroll-behavior: smooth (las anclas se deslizan sin Lenis, ver native.css)
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable} ${krona.variable} h-full antialiased`}
     >
       <head>
-        {/* Fija el tema guardado antes del primer pintado (sin parpadeo); ver src/lib/theme.ts */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        {/* Antes del primer pintado: el tema guardado (sin parpadeo) y el bloqueo del pellizco */}
+        <script dangerouslySetInnerHTML={{ __html: `${THEME_SCRIPT};${ZOOM_GUARD_SCRIPT}` }} />
       </head>
       <body className="grain flex min-h-full flex-col">
         <a
@@ -82,7 +104,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </a>
         <SmoothScroll />
         {children}
-        <Toaster position="bottom-right" containerAriaLabel="Notificaciones" style={toasterStyle} />
+        <Toaster />
       </body>
     </html>
   );

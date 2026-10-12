@@ -22,7 +22,8 @@ export type IsoPose = {
 
 export const restPose = (): IsoPose => ({ spread: 0, turn: 0, tilt: 0, x: 0, y: 0, z: 0, scale: 1, focus: -1 });
 
-export type DragState = { active: boolean; dx: number; dy: number; vx: number; vy: number };
+/** Arrastre del isotipo (px y px/s); `taps` cuenta los toques cortos (la S responde con un pulso) */
+export type DragState = { active: boolean; dx: number; dy: number; vx: number; vy: number; taps: number };
 
 // Encuadre: la S mide 3,2 unidades de alto; la cámara se aleja hasta que entra con margen
 export const FOV = 28;

@@ -15,7 +15,10 @@
     mueve mientras tanto, la S nunca pasa por encima del texto ni se desfasa del contenido. Con
     reduced motion no se fija: la S queda en su lugar y se apaga.
   - Sobre el isotipo hay una superficie para girarlo con el dedo o el mouse: en touch solo
-    toma el arrastre horizontal, el vertical sigue siendo scroll.
+    toma el arrastre horizontal, el vertical sigue siendo scroll. Un toque corto hace respirar
+    a la S (las cintas se abren y vuelven) y manda una onda por sus partículas.
+  - Al cargar, las partículas llegan desde una nube y arman la S; la pieza sólida aparece encima
+    con un barrido (todo en el escenario WebGL, ver src/components/three).
 */
 import { ArrowDown } from "@phosphor-icons/react";
 import { motion, useScroll, useTransform } from "motion/react";
@@ -72,6 +75,8 @@ export default function HeroSection() {
           mientras se va el texto, llega al centro, se abre y la cámara la atraviesa antes de que
           el hero se suelte (42 % < 43 %) */}
       <StageMark pose="hero" slot="hero-slot" className="absolute left-0 top-0" />
+      {/* Escritorio: mientras el texto se va, la S gira de frente y se abre en sus tres cintas */}
+      <StageMark pose="unfold" className="absolute left-0 top-[17%] max-lg:hidden" />
       <StageMark pose="rise" slot="hero-slot" className="absolute left-0 top-[13%] lg:hidden" />
       <StageMark pose="center" className="absolute left-0 top-[26%] lg:hidden" />
       <StageMark pose="plunge" className="absolute left-0 top-[36%] lg:top-[38%]" />

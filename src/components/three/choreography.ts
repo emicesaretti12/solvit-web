@@ -12,6 +12,9 @@
     para el isotipo (un elemento con ese id), así nunca tapa texto aunque la pantalla sea baja.
     El hero queda fijado mientras dura su recorrido (rise, center, plunge y dive solo existen
     ahí): la S sale de su hueco recién cuando el texto ya se fue
+  - unfold solo existe en escritorio (su marca está oculta en celulares)
+  - La profundidad también mueve las partículas: z > 0 las vuelve un flujo hacia la cámara
+    (zambullida) y z < 0 las dispersa (la S llega desde el fondo y se vuelve a juntar)
 */
 export type StagePose = {
   x: number;
@@ -50,6 +53,14 @@ export const POSES = {
   hero: {
     desktop: p({ x: 0.6, y: -0.02, scale: 0.98 }),
     mobile: p({ x: 0.12, scale: 0.95 }),
+  },
+  // Escritorio: mientras el titular se va, la S gira hasta quedar casi de frente y se abre en
+  // sus tres cintas (vista explotada: las tres etapas de la venta); después la zambullida sigue
+  // el mismo giro. Se queda en su columna: el texto todavía se está yendo
+  unfold: {
+    desktop: p({ x: 0.54, y: -0.1, z: 0.04, scale: 0.86, spread: 0.42, turn: 0.22, tilt: 0.02 }),
+    mobile: p({ x: 0.12, scale: 0.95 }),
+    reducedHold: true,
   },
   // Celulares (hero fijado): la S gira y se abre un poco en su hueco mientras se va el texto
   rise: {

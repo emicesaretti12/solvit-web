@@ -8,6 +8,8 @@
   vuelve a armar) sin re-renderizar React: la escena amortigua cada cuadro hacia esa pose.
 
   - three.js se carga recién en el cliente (next/dynamic, ssr: false)
+  - al cargar, las partículas llegan desde una nube y arman la S; en la zambullida pasan al
+    costado de la cámara como un flujo de datos (todo en la GPU, ver particle-field.ts)
   - en celulares el hero queda fijado mientras la S se abre y la cámara la atraviesa
   - fuera de las zonas donde se ve, el render se detiene
   - sin WebGL queda el isotipo en SVG, ubicado con la misma pose
@@ -19,6 +21,7 @@ import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as R
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LogoMark } from "@/components/logo";
+import { tap as haptic } from "@/lib/haptics";
 import { SafeBoundary } from "@/components/safe-boundary";
 import { isotypeHeightPx, restPose, stageSignal, type DragState, type IsoPose } from "./pose";
 import { POSES, type PoseDef, type PoseKey, type StagePose } from "./choreography";
@@ -29,7 +32,7 @@ const Scene = dynamic(() => import("./isotype-scene"), { ssr: false });
 
 // Estado compartido (fuera de React): la pose objetivo, el arrastre y el puntero
 const pose = { current: restPose() as IsoPose };
-const drag = { current: { active: false, dx: 0, dy: 0, vx: 0, vy: 0 } as DragState };
+const drag = { current: { active: false, dx: 0, dy: 0, vx: 0, vy: 0, taps: 0 } as DragState };
 const pointer = { current: { x: 0, y: 0 } };
 
 const DESKTOP = "(min-width: 1024px)";
@@ -62,13 +65,22 @@ export function StageMark({
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-/** Superficie para girar el isotipo con el dedo o el mouse (el canvas no recibe eventos) */
+/** Superficie para girar el isotipo con el dedo o el mouse (el canvas no recibe eventos). Un
+ *  toque corto (sin arrastre) hace respirar a la S, con un golpe háptico donde hay vibración */
 export function useStageDrag() {
-  const start = useRef({ id: -1, x: 0, y: 0, lastX: 0, lastY: 0, lastT: 0 });
+  const start = useRef({ id: -1, x: 0, y: 0, lastX: 0, lastY: 0, lastT: 0, t0: 0 });
   const onPointerDown = (e: ReactPointerEvent<HTMLElement>) => {
     if (drag.current.active) return; // un solo dedo: los demás se ignoran
-    start.current = { id: e.pointerId, x: e.clientX, y: e.clientY, lastX: e.clientX, lastY: e.clientY, lastT: e.timeStamp };
-    drag.current = { active: true, dx: 0, dy: 0, vx: 0, vy: 0 };
+    start.current = {
+      id: e.pointerId,
+      x: e.clientX,
+      y: e.clientY,
+      lastX: e.clientX,
+      lastY: e.clientY,
+      lastT: e.timeStamp,
+      t0: e.timeStamp,
+    };
+    drag.current = { ...drag.current, active: true, dx: 0, dy: 0, vx: 0, vy: 0 };
     e.currentTarget.setPointerCapture(e.pointerId);
   };
   const onPointerMove = (e: ReactPointerEvent<HTMLElement>) => {
@@ -85,22 +97,28 @@ export function useStageDrag() {
     s.lastY = e.clientY;
     s.lastT = e.timeStamp;
   };
-  const onPointerUp = (e: ReactPointerEvent<HTMLElement>) => {
-    if (e.pointerId !== start.current.id) return;
+  const end = (e: ReactPointerEvent<HTMLElement>, released: boolean) => {
+    const s = start.current;
+    if (e.pointerId !== s.id) return;
     // Si el dedo estuvo quieto antes de soltar, no hay inercia que heredar
-    if (e.timeStamp - start.current.lastT > 80) {
+    if (e.timeStamp - s.lastT > 80) {
       drag.current.vx = 0;
       drag.current.vy = 0;
     }
+    // Toque: soltó rápido y casi sin moverse (un scroll cancela el puntero y no cuenta)
+    if (released && e.timeStamp - s.t0 < 320 && Math.hypot(e.clientX - s.x, e.clientY - s.y) < 8) {
+      drag.current.taps += 1;
+      haptic();
+    }
     drag.current.active = false;
-    start.current.id = -1;
+    s.id = -1;
   };
   return {
     onPointerDown,
     onPointerMove,
-    onPointerUp,
-    onPointerCancel: onPointerUp,
-    onLostPointerCapture: onPointerUp,
+    onPointerUp: (e: ReactPointerEvent<HTMLElement>) => end(e, true),
+    onPointerCancel: (e: ReactPointerEvent<HTMLElement>) => end(e, false),
+    onLostPointerCapture: (e: ReactPointerEvent<HTMLElement>) => end(e, false),
   };
 }
 
@@ -260,16 +278,19 @@ export function Stage() {
       className="pointer-events-none fixed inset-x-0 top-0 z-0 h-[100lvh] max-lg:motion-reduce:absolute"
       style={{ opacity: 0 }}
     >
-      {/* Póster: el isotipo plano mientras carga WebGL (o si no hay) */}
+      {/* Póster: el isotipo plano mientras carga WebGL (o si no hay). Con movimiento se va rápido:
+          la S 3D se arma con partículas en su lugar, como si el logo se deshiciera y se rearmara */}
       <div
-        className={`absolute inset-0 flex items-center justify-center transition-opacity duration-700 ease-[var(--ease-out)] ${ready ? "opacity-0" : "opacity-100"}`}
+        className={`absolute inset-0 flex items-center justify-center transition-opacity ease-[var(--ease-out)] ${ready ? "opacity-0 duration-300 motion-reduce:duration-700" : "opacity-100 duration-700"}`}
       >
         <div ref={poster} className="h-[62svh] max-h-[680px] will-change-transform">
           <LogoMark className="h-full w-auto" />
         </div>
       </div>
       {gl && (
-        <div className={`absolute inset-0 transition-opacity duration-700 ease-[var(--ease-out)] ${ready ? "opacity-100" : "opacity-0"}`}>
+        <div
+          className={`absolute inset-0 transition-opacity duration-300 ease-[var(--ease-out)] motion-reduce:duration-700 ${ready ? "opacity-100" : "opacity-0"}`}
+        >
           {/* Si el canvas falla al crearse (poca memoria, límite de contextos), queda el póster */}
           <SafeBoundary>
             <Scene pose={pose} drag={drag} pointer={pointer} reduce={reduce} active={active} onReady={() => setReady(true)} />
