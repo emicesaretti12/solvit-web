@@ -41,6 +41,7 @@ npm run lint
   tarjetas en celulares)
 - `src/components/sales-flow*.tsx` y `journey-mobile.tsx`: el recorrido de una consulta
 - `src/components/previews/`: vistas vivas de ejemplo (embudo, agente de IA, CRM)
+- `src/components/offscreen-pause.tsx`: pausa los loops de CSS de lo que no está a la vista
 - `src/components/projects.tsx` y `projects/`: proyectos (vitrina con el +10 en 3D, anillo de
   portadas en celulares, abanico en escritorio y laptops 3D de los casos destacados)
 - `src/components/ui/`: componentes base al estilo shadcn (hero-01, portfolio-gallery,

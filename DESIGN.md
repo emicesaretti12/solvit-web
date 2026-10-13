@@ -138,6 +138,9 @@ puro, campos grandes de azul saturado. La única luz de la página es la del obj
   y sin mazo inclinado.
 - **Moneda de venta:** en el recorrido de celulares, "Venta cerrada" gira una moneda con espesor
   (el check adelante, el isotipo atrás).
+- **Loops pausados fuera de pantalla:** las secciones, las tarjetas de los pasos y la fila de la
+  marquesina llevan `data-offscreen` mientras no se ven (`offscreen-pause.tsx`) y sus
+  animaciones infinitas se pausan; el canvas WebGL deja de dibujar cuando la S no se ve.
 - **Grano:** solo en escritorio (en un teléfono casi no se ve y es otra capa de pantalla
   completa para el compositor).
 

@@ -6,6 +6,7 @@ import { Projects } from "@/components/projects";
 import { About } from "@/components/about";
 import { Contact } from "@/components/contact";
 import { SiteFooter } from "@/components/site-footer";
+import { OffscreenPause } from "@/components/offscreen-pause";
 
 /*
   Una sola historia: el hero presenta la promesa con el isotipo en 3D, "Servicios" muestra lo que
@@ -28,6 +29,7 @@ export default function Home() {
         <Contact />
       </AgencyHeroSection>
       <SiteFooter />
+      <OffscreenPause />
     </>
   );
 }

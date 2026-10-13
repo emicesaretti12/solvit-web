@@ -483,6 +483,19 @@ html.lenis body {
 .flow-scan {
   animation: flow-spin 1.6s linear infinite;
 }
+
+/* Fuera de pantalla los loops de tiempo se pausan (la sección lleva data-offscreen, ver
+   offscreen-pause.tsx): no gastan batería ni cuadros del compositor mientras no se ven */
+[data-offscreen] .animate-marquee,
+[data-offscreen] .animate-marquee-reverse,
+[data-offscreen] .animate-float,
+[data-offscreen] .step-floor,
+[data-offscreen] .s3d-sway,
+[data-offscreen] .journey-dot,
+[data-offscreen] .flow-scan,
+[data-offscreen] .live-dot::after {
+  animation-play-state: paused;
+}
 @keyframes flow-pop {
   0% {
     transform: scale(1);

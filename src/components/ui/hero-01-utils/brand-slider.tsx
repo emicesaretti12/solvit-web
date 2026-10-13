@@ -9,9 +9,9 @@
   su nombre al lado: en el claro, la baldosa es blanca con borde fino y una sombra corta que la
   despega del fondo; en el oscuro, navy con el borde de luz arriba. Así se leen igual de bien
   en los dos temas sin usar los colores de cada marca (el único acento del sitio es el azul).
-  En celulares va todo en una sola fila compacta (es lo primero de la hoja que sube sobre el
-  hero): el rótulo a la izquierda y las cuatro baldosas a la derecha, con el nombre solo para
-  lectores de pantalla; desde sm, cada baldosa con su nombre al lado.
+  En celulares va todo en una sola fila compacta, justo después del hero: el rótulo a la
+  izquierda y las cuatro baldosas a la derecha, con el nombre solo para lectores de pantalla;
+  desde sm, cada baldosa con su nombre al lado.
 */
 import type { CSSProperties } from "react";
 
