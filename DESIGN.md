@@ -12,10 +12,10 @@ La web de un equipo de ingeniería que soluciona ventas con cinco servicios: des
 software a medida, agentes de IA, hardware e IoT y marketing digital. El isotipo de SEN, en 3D
 real (WebGL), abre el hero; en escritorio recorre la página (se abre en las tres etapas de una
 venta, cada cinta es una etapa, y se vuelve a armar como crecimiento). Cada servicio tiene su
-propio objeto 3D en CSS. El tema
-oscuro (por defecto) es un navy medianoche plano donde el azul eléctrico aparece solo como
-señal: el isotipo, el corte de la N, la acción principal y el estado activo. El tema claro es
-la versión clara del board: blanco frío, tipografía navy y el mismo azul.
+propio objeto 3D en CSS. El tema claro (por defecto) es la versión clara del board: blanco
+frío, tipografía navy y el azul eléctrico solo como señal (el isotipo, el corte de la N, la
+acción principal y el estado activo). El oscuro, un toque en el header, es un navy medianoche
+plano con el mismo azul. La vitrina de proyectos es navy en los dos temas.
 
 - **Density:** 3 (pocas cosas por pantalla, cada una con aire)
 - **Variance:** 7 (titular a la izquierda y objeto a la derecha; en celulares, objeto arriba)
@@ -76,9 +76,21 @@ puro, campos grandes de azul saturado. La única luz de la página es la del obj
   línea y sus entregables. En celulares son un mazo; en escritorio, una grilla con la de web
   grande (dos filas).
 - **Proyectos:** solo hechos confirmados; la cervecería automática aparece solo como proyecto.
+  Abren con una vitrina navy (igual en los dos temas: las portadas son oscuras y resaltan) con
+  el "+10" en 3D (capas en profundidad, como el wordmark del pie); en celulares, un anillo 3D de
+  portadas con scroll nativo y snap, con "3 / 10" y puntos; en escritorio, el abanico entero.
+  Los casos destacados van en una laptop 3D en CSS que se abre con el scroll.
+- **Hero en celulares:** la S arriba, entera y centrada en su hueco; abajo el titular, el
+  contacto, la prueba (más de 10 proyectos, con tres portadas) y los cinco servicios como
+  íconos de app que llevan a su tarjeta del mazo (scroll calculado: la tarjeta llega entera
+  arriba del mazo). En celulares bajos la frase cede su lugar a la S.
 - **Inputs:** etiqueta arriba, error abajo, 16px mínimo, foco azul.
-- **Tema:** botón en el header; el script del layout aplica la preferencia guardada antes
-  de pintar (sin parpadeo).
+- **Tema:** claro por defecto; botón en el header y en el menú. El cambio es un círculo que
+  crece desde el botón (View Transition). El script del layout aplica la preferencia guardada
+  antes de pintar (sin parpadeo).
+- **App nativa:** sin zoom (viewport y pellizco de iOS frenado), sin rebote ni pull-to-refresh,
+  instalable (manifest e íconos), menú como hoja inferior que se cierra arrastrando, golpe
+  háptico en los toques donde el teléfono lo permite.
 - **Carga:** esqueletos con la forma final; el isotipo en SVG mientras carga WebGL.
 
 ## 5. Layout Principles
@@ -96,10 +108,12 @@ puro, campos grandes de azul saturado. La única luz de la página es la del obj
   secciones dejan marcas `<StageMark pose="..."/>` y el director interpola la pose del isotipo
   entre la marca anterior y la siguiente según el scroll (poses en `choreography.ts`). El
   render se detiene cuando el objeto no se ve. three.js se carga solo en el cliente.
-  En escritorio la S recorre la página. En celulares el hero queda fijado (sticky) durante un
-  tramo de scroll: primero se va el texto, después la S gira en su hueco, llega al centro, se
-  abre y la cámara la atraviesa; recién ahí el hero se suelta. Nunca pasa por encima del
-  titular. Con reduced motion el hero no se fija y la S sube con la página.
+  En escritorio la S recorre la página. En celulares (vertical y con movimiento) el hero queda
+  fijado y el resto de la página sube encima como una hoja opaca con el borde redondeado: se va
+  el texto, la S crece en la zona libre, se abre en capas (una vista explotada que conserva la
+  silueta) y la cámara la atraviesa por encima de la hoja, justo antes de que la tape. Nunca
+  queda una pantalla vacía ni la S detrás de un texto (las poses `region` se ubican sobre la
+  hoja). Acostado o con reduced motion el hero no se fija y la S sube con la página.
 - **Titulares (celulares):** cada palabra se para en 3D sobre su base, de a una, al ritmo del
   dedo (MaskWords). Tarjetas grandes (galería, formulario, principios, cierre de proyectos) se
   paran desde inclinadas; los logos giran de canto a frente.

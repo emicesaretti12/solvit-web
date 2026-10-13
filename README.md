@@ -27,17 +27,22 @@ npm run lint
 
 - `src/app/page.tsx`: composición de la página (hero, servicios, cómo funciona, recorrido,
   proyectos, nosotros, contacto)
-- `src/app/globals.css`: tokens de marca (navy medianoche + azul eléctrico), temas y animaciones
-  ligadas al scroll de celulares
+- `src/app/globals.css`: tokens de marca (navy medianoche + azul eléctrico), temas (claro por
+  defecto), variantes `pin:`/`loose:` del hero de celulares y animaciones ligadas al scroll
+- `src/app/native.css`: capa de app nativa (sin zoom ni rebote, áreas seguras, cambio de tema
+  con View Transition); `manifest.ts`, `apple-icon.tsx` e `icons/`: app instalable
 - `src/app/scenes.css`: escenas 3D en CSS (objetos de los servicios, mazo de celulares y la
   moneda del recorrido)
-- `src/components/three/`: escenario WebGL con el isotipo (poses por sección en
-  `choreography.ts`)
+- `src/components/three/`: escenario WebGL con el isotipo y sus partículas (poses por sección en
+  `choreography.ts`; en celulares, la hoja que sube sobre el hero es `data-stage-cover`)
+- `src/components/ui/hero-01-utils/`: hero, header (menú como hoja inferior) y "Trabajamos con"
 - `src/components/services.tsx` y `services-3d.tsx`: los cinco servicios con sus objetos 3D
 - `src/components/how-it-works*.tsx`: los cuatro pasos de la venta (panel fijo en escritorio,
   tarjetas en celulares)
 - `src/components/sales-flow*.tsx` y `journey-mobile.tsx`: el recorrido de una consulta
 - `src/components/previews/`: vistas vivas de ejemplo (embudo, agente de IA, CRM)
+- `src/components/projects.tsx` y `projects/`: proyectos (vitrina con el +10 en 3D, anillo de
+  portadas en celulares, abanico en escritorio y laptops 3D de los casos destacados)
 - `src/components/ui/`: componentes base al estilo shadcn (hero-01, portfolio-gallery,
   area-chart-1, sheet, navigation-menu, button)
 - `src/content/`: servicios y proyectos

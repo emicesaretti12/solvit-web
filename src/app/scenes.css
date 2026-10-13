@@ -52,14 +52,16 @@
   --hw-via: rgb(31 107 255 / 0.72);
   --hw-cap: #d4def0;
   --ia-bubble: #ffffff;
-  /* Wordmark del pie: frente blanco con luz de arriba y extrusión azulada, más oscura atrás */
-  --wm-front-a: #ffffff;
-  --wm-front-b: #edf2fa;
-  --wm-near: #d2ddee;
-  --wm-far: #a5b8d8;
-  --wm-acc-near: #1a5fe6;
+  /* Wordmark del pie: el navy del wordmark del brand board con luz de arriba, y la extrusión
+     en el azul del isotipo (el canto iluminado), más oscura atrás. Sobre el fondo blanco se lee
+     como una pieza sólida, igual que el +10 de la vitrina */
+  --wm-front-a: #22355c;
+  --wm-front-b: #0b1222;
+  --wm-near: #2a74ff;
+  --wm-far: #0a2a72;
+  --wm-acc-near: #1f6bff;
   --wm-acc-far: #0b3a9e;
-  --wm-floor: rgb(38 88 196 / 0.12);
+  --wm-floor: rgb(31 80 196 / 0.2);
 }
 
 :root[data-theme="dark"] {
