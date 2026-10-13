@@ -109,12 +109,17 @@ puro, campos grandes de azul saturado. La única luz de la página es la del obj
   secciones dejan marcas `<StageMark pose="..."/>` y el director interpola la pose del isotipo
   entre la marca anterior y la siguiente según el scroll (poses en `choreography.ts`). El
   render se detiene cuando el objeto no se ve. three.js se carga solo en el cliente.
-  En escritorio la S recorre la página. En celulares (vertical y con movimiento) el hero queda
-  fijado un tramo corto (80svh) y el texto NUNCA se oculta: la S gira, se abre en capas (una
-  vista explotada que conserva la silueta), avanza y atraviesa la cámara con las partículas
-  como un flujo de datos, vuelve desde el fondo y se arma otra vez en su hueco justo cuando el
-  hero se suelta; después sube con él (marca lineal) y se apaga. El canvas no dibuja mientras la
-  S no se ve. Acostado o con reduced motion no hay tramo fijado y la S sube con el hero.
+  En escritorio la S recorre la página y el texto del hero sube con ella siempre nítido (nada
+  de fundidos ni escalas ligadas al scroll sobre el texto: lo dejaban lavado al lado de la S).
+  En celulares nada se fija: con el scroll común la S se abre en capas (una vista explotada que
+  conserva la silueta), avanza y atraviesa la cámara con las partículas como un flujo de datos,
+  y se apaga, mientras el texto sube por encima. La S queda en su lugar de la pantalla (apenas
+  sube): nunca persigue al texto con JS, porque con el scroll del dedo iría un cuadro atrás y se
+  vería temblar. El canvas no dibuja mientras la S no se ve. Con reduced motion no hay
+  transición: el escenario va al principio de la página y la S sube con el hero como una imagen.
+- **Render liviano en celulares:** densidad de píxeles hasta 1,35 (baja sola si el equipo no
+  llega a ~48 cuadros), ~1600 partículas y la laca sin clearcoat (la parte más cara del shader).
+  Cualquier efecto nuevo del escenario se mide en un celular antes de sumarlo.
 - **Titulares (celulares):** cada palabra se para en 3D sobre su base, de a una, al ritmo del
   dedo (MaskWords). Tarjetas grandes (galería, formulario, principios, cierre de proyectos) se
   paran desde inclinadas; los logos giran de canto a frente.

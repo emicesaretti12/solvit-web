@@ -2,8 +2,8 @@
 
 /*
   Isotipo de SEN en WebGL: las tres cintas de la S extruidas con bisel, material con laca
-  (clearcoat) y el degradé de marca en los vértices. Cada cinta es una pieza aparte, así el
-  scroll puede separarlas (atraer, atender, cerrar) y volver a armar la S.
+  (clearcoat en escritorio) y el degradé de marca en los vértices. Cada cinta es una pieza
+  aparte, así el scroll puede separarlas (atraer, atender, cerrar) y volver a armar la S.
 
   Sobre las cintas viven miles de partículas (particle-field.ts) que se mueven solo en la GPU:
   al cargar llegan desde una nube y arman la S, y la pieza sólida aparece sobre ellas con un
@@ -48,13 +48,14 @@ import { createShadowMaterial, projectShadow, type ShadowCaster } from "./backdr
 // comporta como en su primera versión: sin giro de entrada y con las cintas abriéndose juntas
 const MOBILE = typeof window !== "undefined" && window.matchMedia("(max-width: 1023.98px)").matches;
 
-// Presupuesto de partículas: ~2400 en celulares y ~7000 en escritorio; con pocos núcleos o poca
-// memoria, menos (el vertex shader corre una vez por partícula y por cuadro)
+// Presupuesto de partículas: ~1600 en celulares (la S es chica: alcanzan para leerse densas) y
+// ~7000 en escritorio; con pocos núcleos o poca memoria, menos (el vertex shader corre una vez
+// por partícula y por cuadro, y en la zambullida cada una cubre muchos píxeles)
 const PARTICLES = (() => {
   if (typeof navigator === "undefined") return 0;
   const nav = navigator as Navigator & { deviceMemory?: number };
   const modest = (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4;
-  return Math.round((MOBILE ? 2400 : 7000) * (modest ? 0.6 : 1));
+  return Math.round((MOBILE ? 1600 : 7000) * (modest ? 0.6 : 1));
 })();
 
 // Armado (segundos desde el primer cuadro): las partículas llegan en INTRO y la S sólida aparece
@@ -112,11 +113,14 @@ function Ribbon({
 }) {
   const { geometry, center, corners } = useRibbonGeometry(ribbon.points, ribbon.from, ribbon.to, ribbon.depth);
   const material = useMemo(() => {
+    // En celulares, sin la segunda capa de laca (clearcoat): es la parte más cara del shader, y
+    // cuando la S atraviesa la cámara cubre toda la pantalla. Con un poco menos de rugosidad la
+    // capa base conserva el brillo
     const m = new THREE.MeshPhysicalMaterial({
       vertexColors: true,
-      roughness: 0.3,
+      roughness: MOBILE ? 0.24 : 0.3,
       metalness: 0.06,
-      clearcoat: 1,
+      clearcoat: MOBILE ? 0 : 1,
       clearcoatRoughness: 0.1,
       envMapIntensity: 0.36,
       emissive: new THREE.Color("#1f6bff"),
@@ -470,8 +474,10 @@ function Fit() {
   return null;
 }
 
-// Si el equipo no llega (dos segundos seguidos por debajo de ~48 cuadros), baja la densidad de
+// Si el equipo no llega (dos mediciones seguidas por debajo de ~48 cuadros: dos segundos en
+// escritorio, uno en celulares, donde la transición del hero es corta), baja la densidad de
 // píxeles de a un cuarto hasta 1. Nunca la vuelve a subir: así no oscila
+const SAMPLE = MOBILE ? 0.5 : 1;
 function AdaptiveDpr({ enabled }: { enabled: boolean }) {
   const setDpr = useThree((state) => state.setDpr);
   const meter = useRef({ time: 0, frames: 0, slow: 0, dpr: 0 });
@@ -483,7 +489,7 @@ function AdaptiveDpr({ enabled }: { enabled: boolean }) {
     if (dt > 0.25) return;
     m.time += dt;
     m.frames += 1;
-    if (m.time < 1) return;
+    if (m.time < SAMPLE) return;
     const slow = m.time / m.frames > 1 / 48;
     m.time = 0;
     m.frames = 0;
@@ -522,7 +528,7 @@ export default function IsotypeScene({
 
   return (
     <Canvas
-      dpr={[1, MOBILE ? 1.5 : 1.75]}
+      dpr={[1, MOBILE ? 1.35 : 1.75]}
       frameloop={!active ? "never" : reduce ? "demand" : "always"}
       camera={{ fov: FOV, position: [0, 0, 9.5], near: 0.1, far: 60 }}
       gl={{ antialias: true, alpha: true, stencil: false, powerPreference: "high-performance" }}

@@ -178,20 +178,6 @@
 /* Selector de tema: claro u oscuro sin parpadeo (el script del layout fija data-theme) */
 @custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
 
-/* Hero de celulares. pin: celular o tablet en vertical y con movimiento, el hero queda fijado
-   un tramo corto mientras la S hace su transición 3D (el texto nunca se oculta). loose: acostado
-   o con reduced motion, el hero es una pantalla común. Las mismas consultas usan hero.tsx y
-   stage.tsx */
-@custom-variant pin (@media (max-width: 1023.98px) and (orientation: portrait) and (prefers-reduced-motion: no-preference));
-@custom-variant loose {
-  @media (max-width: 1023.98px) and (orientation: landscape) {
-    @slot;
-  }
-  @media (max-width: 1023.98px) and (prefers-reduced-motion: reduce) {
-    @slot;
-  }
-}
-
 html {
   scroll-padding-top: 6rem;
   -webkit-text-size-adjust: 100%;

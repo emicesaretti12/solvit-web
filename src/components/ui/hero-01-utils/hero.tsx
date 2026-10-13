@@ -8,14 +8,13 @@
 
   - El titular entra línea por línea con CSS (se pinta sin esperar a JavaScript); después de
     "ventas" aparece el corte azul de la N del wordmark.
-  - Escritorio: texto a la izquierda y la S a la derecha. Al bajar, el texto se aleja y la cámara
-    se zambulle entre las cintas (las poses las maneja el escenario según las marcas).
+  - Escritorio: texto a la izquierda y la S a la derecha. Al bajar, la S se abre y la cámara la
+    atraviesa (las poses las maneja el escenario según las marcas); el texto sube con la página,
+    siempre nítido.
   - Celulares: la S arriba, entera y centrada en su hueco (#hero-slot); abajo el titular, el
-    botón, la prueba y los íconos. En vertical y con movimiento el hero queda fijado un tramo
-    corto (sticky, sin JS) y el texto NUNCA se oculta: mientras tanto la S gira, se abre en capas,
-    atraviesa la cámara, vuelve desde el fondo y se arma otra vez en su hueco justo cuando el
-    hero se suelta; después sube con él. Acostado o con reduced motion, el hero es una pantalla
-    común y la S sube con él.
+    botón, la prueba y los íconos. Nada se fija ni se oculta: con el scroll común la S se abre en
+    capas, avanza y atraviesa la cámara mientras el texto sube por encima (la S queda en su lugar
+    de la pantalla, no persigue al texto). Con reduced motion la S queda quieta y se apaga.
   - Sobre el isotipo hay una superficie para girarlo con el dedo o el mouse: en touch solo toma
     el arrastre horizontal, el vertical sigue siendo scroll. Un toque corto hace respirar a la S
     (las cintas se abren y vuelven) y manda una onda por sus partículas.
@@ -24,8 +23,7 @@
 */
 import { Browsers, Code, Cpu, Megaphone, Sparkle, type Icon } from "@phosphor-icons/react";
 import Image from "next/image";
-import { motion, useMotionValue, useScroll, useTransform } from "motion/react";
-import { useRef, useSyncExternalStore, type CSSProperties, type MouseEvent } from "react";
+import type { CSSProperties, MouseEvent } from "react";
 import { CONTACT_LABEL, PrimaryCta } from "@/components/cta";
 import { HapticLink } from "@/components/nav/haptic-link";
 import { getLenis } from "@/components/smooth-scroll";
@@ -47,18 +45,6 @@ const TITLE: Record<ServiceKey, string> = Object.fromEntries(SERVICES.map((s) =>
   ServiceKey,
   string
 >;
-
-const DESKTOP_QUERY = "(min-width: 1024px)";
-const useMedia = (query: string) =>
-  useSyncExternalStore(
-    (onChange) => {
-      const list = window.matchMedia(query);
-      list.addEventListener("change", onChange);
-      return () => list.removeEventListener("change", onChange);
-    },
-    () => window.matchMedia(query).matches,
-    () => false,
-  );
 
 /* Prueba: tres portadas apiladas y el total de proyectos entregados */
 function Proof({ className = "" }: { className?: string }) {
@@ -145,49 +131,27 @@ function QuickServices() {
 }
 
 export default function HeroSection() {
-  const ref = useRef<HTMLElement>(null);
   const drag = useStageDrag();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  // Escritorio: el texto se aleja en profundidad mientras la cámara entra en la S. En celulares
-  // el texto queda quieto y siempre visible: sube con la página (en el arranque, scroll 0, los
-  // dos casos valen lo mismo y el HTML del servidor coincide)
-  const desktop = useMedia(DESKTOP_QUERY);
-  const opacityDesktop = useTransform(scrollYProgress, [0, 0.26], [1, 0]);
-  const scaleDesktop = useTransform(scrollYProgress, [0, 0.3], [1, 0.94]);
-  const yDesktop = useTransform(scrollYProgress, [0, 0.3], [0, 40]);
-  const one = useMotionValue(1);
-  const zero = useMotionValue(0);
-  const opacity = desktop ? opacityDesktop : one;
-  const scale = desktop ? scaleDesktop : one;
-  const y = desktop ? yDesktop : zero;
-  // Ya desvanecido, el bloque deja de recibir toques y foco (los botones no quedan invisibles pero activos)
-  const hide = (v: number) => (v < 0.02 ? "hidden" : "visible");
-  const visibility = useTransform(opacity, hide);
 
+  // El texto no se desvanece ni se escala con el scroll: sube con la página, siempre nítido (un
+  // fundido ligado al scroll lo dejaba lavado al lado de la S apenas se bajaba)
   return (
-    // Celulares fijados: un tramo de 180svh con el hero fijado arriba durante 80svh (el texto
-    // siempre a la vista); la transición de la S termina justo cuando el hero se suelta
-    <section ref={ref} id="hero" aria-labelledby="hero-titulo" className="relative pin:h-[180svh]">
+    <section id="hero" aria-labelledby="hero-titulo" className="relative">
       {/* Marcas del recorrido de la S (ver choreography.ts) */}
       <StageMark pose="hero" slot="hero-slot" className="absolute left-0 top-0" />
-      {/* Escritorio: mientras el texto se va, la S gira de frente y se abre en sus tres cintas */}
+      {/* Escritorio: la S gira de frente, se abre en sus tres cintas, avanza y atraviesa la cámara */}
       <StageMark pose="unfold" className="absolute left-0 top-[17%] max-lg:hidden" />
       <StageMark pose="plunge" className="absolute left-0 top-[38%] max-lg:hidden" />
       <StageMark pose="dive" className="absolute left-0 top-[72%] max-lg:hidden" />
-      {/* Celulares fijados: gira, se abre en capas, avanza, atraviesa la cámara, vuelve desde el
-          fondo y se arma en su hueco cuando el hero se suelta (80svh) */}
-      <StageMark pose="rise" slot="hero-slot" className="absolute left-0 top-[8svh] hidden pin:block" />
-      <StageMark pose="open" slot="hero-slot" className="absolute left-0 top-[24svh] hidden pin:block" />
-      <StageMark pose="plunge" slot="hero-slot" className="absolute left-0 top-[42svh] hidden pin:block" />
-      <StageMark pose="dive" slot="hero-slot" className="absolute left-0 top-[58svh] hidden pin:block" />
-      <StageMark pose="reform" slot="hero-slot" className="absolute left-0 top-[60svh] hidden pin:block" />
-      <StageMark pose="settle" slot="hero-slot" className="absolute left-0 top-[80svh] hidden pin:block" />
-      {/* Celulares: la S sube con el hero (marca lineal: la acompaña), gira, se abre y se apaga */}
-      <StageMark pose="leave" slot="hero-slot" linear className="absolute bottom-0 left-0 lg:hidden" />
+      {/* Celulares: con el scroll común (sin fijar nada), la S se abre en capas, avanza y atraviesa
+          la cámara mientras el texto sube */}
+      <StageMark pose="open" slot="hero-slot" className="absolute left-0 top-[16%] lg:hidden" />
+      <StageMark pose="plunge" slot="hero-slot" className="absolute left-0 top-[34%] lg:hidden" />
+      <StageMark pose="dive" slot="hero-slot" className="absolute left-0 top-[56%] lg:hidden" />
 
       <div
         data-stage-frame
-        className="relative flex min-h-[100svh] flex-col overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[calc(max(1rem,env(safe-area-inset-top))+4.25rem)] pin:sticky pin:top-0 pin:h-[100svh] lg:justify-center lg:pb-16 lg:pt-28"
+        className="relative flex min-h-[100svh] flex-col overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[calc(max(1rem,env(safe-area-inset-top))+4.25rem)] lg:justify-center lg:pb-16 lg:pt-28"
       >
         {/* Arrastre del isotipo en escritorio: la mitad derecha */}
         <div
@@ -205,12 +169,8 @@ export default function HeroSection() {
           className="min-h-[22svh] flex-1 cursor-grab touch-pan-y active:cursor-grabbing lg:hidden motion-reduce:pointer-events-none"
         />
 
-        {/* Mismo estilo en servidor y cliente; con reduced motion, el CSS anula el movimiento y queda el fundido */}
-        <motion.div
-          style={{ opacity, scale, y, visibility }}
-          className="pointer-events-none relative mx-auto w-full max-w-[1200px] origin-top-left px-4 md:px-6 motion-reduce:!transform-none"
-        >
-          <div className="pointer-events-auto max-w-[620px] lg:max-w-[min(54%,720px)]">
+        <div className="relative mx-auto w-full max-w-[1200px] px-4 md:px-6">
+          <div className="max-w-[620px] lg:max-w-[min(54%,720px)]">
             <p className="hero-fade mb-3 text-[13px] font-medium text-blue-300 [animation-delay:60ms] md:mb-5 md:text-sm">
               Ingeniería y desarrollo de software
             </p>
@@ -246,7 +206,7 @@ export default function HeroSection() {
 
             <QuickServices />
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
