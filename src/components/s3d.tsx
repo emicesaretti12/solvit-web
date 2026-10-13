@@ -7,14 +7,10 @@
   - focus 0, 1, 2: la cinta del paso se adelanta hacia la pantalla y se ilumina; las otras se
     apagan. focus -2 (crecer): la S armada, las tres encendidas
   - Al entrar en pantalla (play) las cintas llegan desde el fondo, giradas, y encajan en su
-    lugar de a una; después la S se balancea despacio (.loop: corre solo con su tarjeta a la
-    vista, data-live en un ancestro; ver in-view.ts)
-  - Una sombra en el piso la apoya: se achica cuando la S se abre (las cintas suben)
+    lugar de a una; después la S se balancea despacio
   - Donde el navegador tiene animaciones ligadas al scroll (animation-timeline: view()), las
     cintas encajan al ritmo del dedo y la S gira con el scroll y se acerca al pasar por el
     centro (en el compositor, sin JS); si no, entran con su transición
-  - Colores apagados y cantos con tokens (--s3d-*): en el tema claro se aclaran, en el oscuro
-    se hunden en el navy
   - Con reduced motion queda quieta en su pose final
 */
 import { useId, type CSSProperties } from "react";
@@ -41,76 +37,67 @@ export function S3D({ focus, play, className = "" }: { focus: number; play: bool
   const assembled = focus === -2;
   return (
     <div aria-hidden="true" className={`relative aspect-[515/787] [perspective:700px] ${className}`}>
-      {/* Sombra en el piso: una hoja aparte (la opacidad no toca a las cintas en 3D) */}
-      <span className="s3d-shadow" data-open={!assembled || undefined} />
       <div className="s3d-scroll absolute inset-0 [transform-style:preserve-3d]">
-        <div className="s3d-sway loop absolute inset-0 [transform-style:preserve-3d]">
-          {RIBBONS.map((r, i) => {
-            const focused = focus === i;
-            const dim = focus >= 0 && !focused;
-            // Pose: abierta con la cinta del paso adelante, o armada (crecer)
-            const rest = assembled
-              ? `translate3d(0, 0, ${r.z}px)`
-              : `translate3d(${OPEN[i]}) translateZ(${focused ? 46 : r.z}px) scale(${focused ? 1.06 : 1})`;
-            const order = assembled ? 2 - i : i;
-            const style = {
-              "--rest": rest,
-              "--from": FROM[i],
-              "--n": order,
-              "--o": play ? 1 : 0,
-              transform: play ? rest : FROM[i],
-              transitionDelay: play ? `${order * 0.14 + 0.1}s` : "0s",
-            } as CSSProperties;
-            // Apagada: tonos del tema (no transparencia, que dejaría ver las capas de atrás)
-            const from = focused ? "#2d7bff" : dim ? "var(--s3d-dim-from)" : r.from;
-            const to = focused ? "#8fe6ff" : dim ? "var(--s3d-dim-to)" : r.to;
-            return (
-              <div
-                key={i}
-                className="s3d-ribbon absolute inset-0 [transform-style:preserve-3d] motion-reduce:![transform:var(--rest)] motion-reduce:!transition-none"
-                style={style}
-              >
-                {/* De atrás hacia adelante: la cara del frente se pinta última. La aparición va en
-                    cada capa (la opacidad en la cinta entera la aplanaría) */}
-                {Array.from({ length: LAYERS }, (_, n) => {
-                  const k = LAYERS - 1 - n;
-                  const front = k === 0;
-                  const side =
-                    k === LAYERS - 1
-                      ? dim
-                        ? "var(--s3d-back-dim)"
-                        : "var(--s3d-back)"
-                      : dim
-                        ? "var(--s3d-side-dim)"
-                        : "var(--s3d-side)";
-                  return (
-                    <svg
-                      key={k}
-                      viewBox="0 0 515 787"
-                      className="s3d-layer absolute inset-0 size-full overflow-visible"
-                      style={{ transform: `translateZ(${-k * GAP}px)`, transitionDelay: style.transitionDelay }}
-                    >
-                      {front && (
-                        <defs>
-                          <linearGradient id={`${id}-${i}`} x1="0" y1="1" x2="1" y2="0">
-                            <stop offset="0" style={{ stopColor: from }} />
-                            <stop offset="1" style={{ stopColor: to }} />
-                          </linearGradient>
-                        </defs>
-                      )}
-                      <polygon
-                        points={r.points}
-                        style={front ? { fill: `url(#${id}-${i})` } : { fill: side }}
-                        stroke={front ? "rgba(255,255,255,0.35)" : "none"}
-                        strokeWidth={front ? 2 : 0}
-                      />
-                    </svg>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
+      <div className={`s3d-sway absolute inset-0 [transform-style:preserve-3d] ${play ? "" : "[animation-play-state:paused]"}`}>
+        {RIBBONS.map((r, i) => {
+          const focused = focus === i;
+          const dim = focus >= 0 && !focused;
+          // Pose: abierta con la cinta del paso adelante, o armada (crecer)
+          const rest = assembled
+            ? `translate3d(0, 0, ${r.z}px)`
+            : `translate3d(${OPEN[i]}) translateZ(${focused ? 46 : r.z}px) scale(${focused ? 1.06 : 1})`;
+          const order = assembled ? 2 - i : i;
+          const style = {
+            "--rest": rest,
+            "--from": FROM[i],
+            "--n": order,
+            "--o": play ? 1 : 0,
+            transform: play ? rest : FROM[i],
+            transitionDelay: play ? `${order * 0.14 + 0.1}s` : "0s",
+          } as CSSProperties;
+          // Apagada: colores más oscuros (no transparencia, que dejaría ver las capas de atrás)
+          const from = focused ? "#2d7bff" : dim ? "#0a2f8a" : r.from;
+          const to = focused ? "#8fe6ff" : dim ? "#1747b8" : r.to;
+          return (
+            <div
+              key={i}
+              className="s3d-ribbon absolute inset-0 [transform-style:preserve-3d] motion-reduce:![transform:var(--rest)] motion-reduce:!transition-none"
+              style={style}
+            >
+              {/* De atrás hacia adelante: la cara del frente se pinta última. La aparición va en
+                  cada capa (la opacidad en la cinta entera la aplanaría) */}
+              {Array.from({ length: LAYERS }, (_, n) => {
+                const k = LAYERS - 1 - n;
+                const front = k === 0;
+                const side = k === LAYERS - 1 ? (dim ? "#04123a" : "#061a52") : dim ? "#071f5c" : "#0a2f8a";
+                return (
+                  <svg
+                    key={k}
+                    viewBox="0 0 515 787"
+                    className="s3d-layer absolute inset-0 size-full overflow-visible"
+                    style={{ transform: `translateZ(${-k * GAP}px)`, transitionDelay: style.transitionDelay }}
+                  >
+                    {front && (
+                      <defs>
+                        <linearGradient id={`${id}-${i}`} x1="0" y1="1" x2="1" y2="0">
+                          <stop offset="0" stopColor={from} />
+                          <stop offset="1" stopColor={to} />
+                        </linearGradient>
+                      </defs>
+                    )}
+                    <polygon
+                      points={r.points}
+                      fill={front ? `url(#${id}-${i})` : side}
+                      stroke={front ? "rgba(255,255,255,0.35)" : "none"}
+                      strokeWidth={front ? 2 : 0}
+                    />
+                  </svg>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
       </div>
     </div>
   );

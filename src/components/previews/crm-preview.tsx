@@ -3,7 +3,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { Check, Globe, InstagramLogo, LockSimple, WhatsappLogo, type Icon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
-import { tap } from "@/lib/haptics";
 import { PreviewShell, usePreviewLoop } from "./preview-shell";
 
 type Role = "Administrador" | "Supervisor" | "Ventas" | "Soporte";
@@ -65,7 +64,7 @@ export function CrmPreview() {
         <div
           role="group"
           aria-label="Rol"
-          className="grid grid-cols-2 gap-1 rounded-xl border border-line bg-navy-900 p-1 light:bg-navy-800 sm:grid-cols-4"
+          className="grid grid-cols-2 gap-1 rounded-xl border border-line bg-navy-900 p-1 sm:grid-cols-4"
         >
           {ROLES.map((r) => (
             <button
@@ -73,18 +72,17 @@ export function CrmPreview() {
               type="button"
               aria-pressed={r === role}
               onClick={() => {
-                tap();
                 setPaused(true);
                 setRole(r);
               }}
-              className={`relative flex-auto rounded-lg px-2 py-1.5 text-[12px] font-medium transition-[color,scale] duration-150 ease-[var(--ease-out)] active:scale-[0.95] pointer-coarse:min-h-11 ${
+              className={`relative flex-auto rounded-lg px-2 py-1.5 text-[12px] font-medium transition-colors duration-150 active:scale-[0.97] pointer-coarse:min-h-11 ${
                 r === role ? "text-white" : "text-ink-muted hover:text-ink"
               }`}
             >
               {r === role && (
                 <motion.span
                   layoutId="crm-role"
-                  className="absolute inset-0 rounded-lg bg-blue-500 shadow-[inset_0_1px_0_rgb(255_255_255/0.2)]"
+                  className="absolute inset-0 rounded-lg bg-blue-500"
                   transition={{ type: "spring", duration: 0.4, bounce: 0.15 }}
                 />
               )}
@@ -117,14 +115,13 @@ export function CrmPreview() {
         </ul>
 
         <div className="mt-4 overflow-hidden rounded-xl border border-line max-lg:mt-2.5">
-          <div className="grid grid-cols-[1fr_auto] gap-3 border-b border-line bg-navy-900 px-3 py-2 text-[10px] uppercase tracking-[0.16em] text-ink-faint light:bg-navy-800 sm:grid-cols-[1fr_auto_auto]">
+          <div className="grid grid-cols-[1fr_auto] gap-3 border-b border-line bg-navy-900 px-3 py-2 text-[10px] uppercase tracking-[0.16em] text-ink-faint sm:grid-cols-[1fr_auto_auto]">
             <span>Cliente</span>
             <span className="hidden sm:block">Asignado</span>
             <span>Etapa</span>
           </div>
-          {/* Alto trabado: lugar para las cinco filas (tres en celulares, que se ven enteras); la
-              tarjeta no cambia de alto al cambiar de rol */}
-          <ul className="relative h-[210px] overflow-hidden max-lg:h-[114px]">
+          {/* En celulares, tres filas fijas: la tarjeta no cambia de alto al cambiar de rol */}
+          <ul className="relative min-h-[188px] max-lg:h-[6.9rem] max-lg:min-h-0 max-lg:overflow-hidden">
             <AnimatePresence mode="popLayout" initial={false}>
               {rows.map((r) => {
                 const ChannelIcon = CHANNEL[r.channel];
@@ -132,11 +129,11 @@ export function CrmPreview() {
                   <motion.li
                     key={r.id}
                     layout
-                    initial={{ opacity: 0, transform: "translateY(8px)" }}
-                    animate={{ opacity: 1, transform: "translateY(0px)" }}
-                    exit={{ opacity: 0, transform: "translateY(-6px)" }}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-                    className="grid h-[42px] grid-cols-[1fr_auto] items-center gap-3 border-b border-line px-3 last:border-b-0 sm:grid-cols-[1fr_auto_auto] max-lg:h-[38px]"
+                    className="grid grid-cols-[1fr_auto] items-center gap-3 border-b border-line px-3 py-2.5 last:border-b-0 sm:grid-cols-[1fr_auto_auto] max-lg:py-2"
                   >
                     <span className="flex min-w-0 items-center gap-2 text-[12.5px] text-ink">
                       <ChannelIcon size={15} className="shrink-0 text-ink-muted" aria-hidden="true" />

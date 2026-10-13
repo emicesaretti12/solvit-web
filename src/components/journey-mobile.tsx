@@ -4,25 +4,21 @@
   El recorrido de una consulta en celulares, en el scroll común (sin panel fijo): cinco
   bloques en vertical unidos por una línea por la que bajan las consultas. Cada bloque entra en
   3D (gira desde inclinado) y arma su escena:
-  - El nodo de cada etapa es una ficha con espesor (capas en profundidad) que se eleva del piso
-    cuando llega la consulta: se inclina, muestra su canto y deja su sombra abajo
   - Pauta, web y canales: los canales llegan girando desde el fondo, de a uno
   - El agente de IA filtra: un arco de luz gira alrededor del agente; las consultas se separan
     en "quiere comprar" (sigue) y "solo consultaba" (queda al costado, apagada)
   - El CRM ordena por área: ventas, postventa y service se reparten como cartas
-  - Venta cerrada: una moneda con espesor gira y muestra la venta
+  - Venta cerrada: el check rebota con una onda y una moneda con espesor gira y muestra la venta
   - Crecimiento: barras en 3D que crecen de a una
-  Todo es transform y opacidad (lo mueve el compositor del teléfono); con reduced motion
-  aparece directo, sin giros. Donde el navegador tiene animaciones ligadas al scroll
-  (animation-timeline: view()), los bloques, las fichas, los canales, las cartas y las barras se
-  arman al ritmo del dedo y la línea se llena con una punta de luz que sigue el scroll. Los
-  loops (las consultas que bajan, el arco del agente) corren solo con el recorrido a la vista.
+  Todo es transform y opacidad con transiciones CSS (lo mueve el compositor del teléfono);
+  con reduced motion aparece directo, sin giros. Donde el navegador tiene animaciones ligadas al
+  scroll (animation-timeline: view()), los bloques, los canales, las cartas y las barras se
+  arman al ritmo del dedo y la línea se llena con una punta de luz que sigue el scroll.
 */
 import { ChartLineUp, ChatsCircle, Check, CheckCircle, Globe, Handshake, Kanban, Sparkle, Wrench, type Icon } from "@phosphor-icons/react";
 import { useInView } from "motion/react";
 import { useRef, type CSSProperties, type ReactNode } from "react";
 import { siGoogleads, siInstagram, siMeta, siWhatsapp } from "simple-icons";
-import { useLiveAttr } from "./in-view";
 import { LogoMark } from "./logo";
 import { STAGES } from "./sales-flow-data";
 
@@ -57,9 +53,6 @@ const AREAS: { label: string; icon: Icon }[] = [
 // Alturas de las barras (relativas): una curva que sube, sin cifras inventadas
 const BARS = [0.28, 0.36, 0.33, 0.5, 0.62, 0.78, 1];
 
-// Capas del canto de la ficha (de la más profunda a la cara): solo transform, sin opacidad
-const TILE_DEPTH = [3, 2, 1];
-
 // --d: retardo de la transición al entrar; --n: orden (con scroll ligado, escalona el tramo)
 const d = (s: number, n = 0) => ({ "--d": `${s}s`, "--n": n }) as CSSProperties;
 
@@ -79,24 +72,16 @@ function Row({
   const stage = STAGES[index];
   return (
     <li ref={ref} data-shown={shown} className="relative grid grid-cols-[56px_minmax(0,1fr)] gap-4 [perspective:900px]">
-      {/* Nodo: una ficha con espesor que se eleva del piso cuando llega la consulta */}
+      {/* Nodo: un ícono de app que rebota al llegar la consulta */}
       <div className="relative z-10 flex justify-center pt-1">
-        <div className="jn">
-          <span aria-hidden="true" className="jn-shadow" />
-          <div className="jn-tile">
-            {TILE_DEPTH.map((z) => (
-              <span key={z} aria-hidden="true" className="jn-side" style={{ "--z": z } as CSSProperties} />
-            ))}
-            <div className="jn-face journey-node text-ink">
-              <span aria-hidden="true" className="journey-ring absolute inset-0 rounded-[inherit] border-2 border-blue-400" />
-              {scanner && (
-                <span aria-hidden="true" className="absolute -inset-2 rounded-full">
-                  <span className="flow-scan loop absolute inset-0 rounded-full [background:conic-gradient(from_0deg,transparent_0_62%,var(--blue-400)_100%)] [mask:radial-gradient(farthest-side,transparent_calc(100%-2px),#000_calc(100%-1.5px))]" />
-                </span>
-              )}
-              {icon}
-            </div>
-          </div>
+        <div className="journey-node relative grid size-14 place-items-center rounded-[18px] border border-line-strong bg-navy-850 text-ink">
+          <span aria-hidden="true" className="journey-ring absolute inset-0 rounded-[inherit] border-2 border-blue-400" />
+          {scanner && (
+            <span aria-hidden="true" className="absolute -inset-2 rounded-full">
+              <span className="flow-scan absolute inset-0 rounded-full [background:conic-gradient(from_0deg,transparent_0_62%,var(--blue-400)_100%)] [mask:radial-gradient(farthest-side,transparent_calc(100%-2px),#000_calc(100%-1.5px))]" />
+            </span>
+          )}
+          {icon}
         </div>
       </div>
       <div className="journey-row min-w-0 pb-10">
@@ -112,15 +97,13 @@ function Row({
 }
 
 export function JourneyMobile() {
-  const ref = useRef<HTMLDivElement>(null);
-  useLiveAttr(ref);
   return (
-    <div ref={ref} className="relative mx-auto max-w-[640px] px-4 pb-16 pt-10">
+    <div className="relative mx-auto max-w-[640px] px-4 pb-16 pt-10">
       {/* La línea que une las etapas, con consultas que bajan */}
       <div aria-hidden="true" className="absolute bottom-24 left-[44px] top-14 w-4 -translate-x-1/2 overflow-hidden">
         <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-line-strong" />
-        <span className="journey-dot loop" />
-        <span className="journey-dot loop [animation-delay:-2s]" />
+        <span className="journey-dot" />
+        <span className="journey-dot [animation-delay:-2s]" />
         {/* Con scroll ligado: la línea se llena y una punta de luz sigue al dedo */}
         <span className="rail-fill" />
         <span className="rail-head" />
@@ -133,7 +116,7 @@ export function JourneyMobile() {
               <li
                 key={c.label}
                 style={d(0.15 + i * 0.09, i)}
-                className="journey-chip elev-1 flex items-center gap-2 rounded-full border border-line bg-navy-850 py-1.5 pl-2 pr-3 text-[13px] text-ink"
+                className="journey-chip flex items-center gap-2 rounded-full border border-line bg-navy-850 py-1.5 pl-2 pr-3 text-[13px] text-ink"
               >
                 <Mark glyph={c.glyph} className="size-4 text-ink" />
                 {c.label}
@@ -144,7 +127,7 @@ export function JourneyMobile() {
 
         <Row index={1} scanner icon={<Sparkle weight="light" className="size-6" />}>
           <div className="flex flex-wrap items-center gap-2 text-[13px] [perspective:600px]">
-            <span style={d(0.35)} className="journey-chip flex items-center gap-1.5 rounded-full border border-blue-400/60 bg-blue-500/15 px-3 py-1.5 text-ink light:bg-blue-500/10">
+            <span style={d(0.35)} className="journey-chip flex items-center gap-1.5 rounded-full border border-blue-400/60 bg-blue-500/15 px-3 py-1.5 text-ink">
               <span className="size-1.5 rounded-full bg-blue-400" />
               Quiere comprar
             </span>
@@ -161,7 +144,7 @@ export function JourneyMobile() {
               <div
                 key={a.label}
                 style={{ ...d(0.2 + i * 0.12, i), "--from": `${(1 - i) * 100}%` } as CSSProperties}
-                className="journey-card elev-1 flex flex-col items-center gap-1.5 rounded-2xl border border-line bg-navy-850 px-2 py-3 text-[13px] text-ink"
+                className="journey-card flex flex-col items-center gap-1.5 rounded-2xl border border-line bg-navy-850 px-2 py-3 text-[13px] text-ink"
               >
                 <a.icon weight="light" className="size-5 text-blue-300" />
                 {a.label}

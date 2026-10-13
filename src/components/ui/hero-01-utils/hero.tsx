@@ -11,11 +11,9 @@
     se zambulle entre las cintas (las poses las maneja el escenario según las marcas).
   - Celulares: la S arriba, entera y centrada en su hueco (#hero-slot); abajo el titular, el
     botón, la prueba (proyectos entregados) y los cinco servicios como íconos de app que llevan
-    a su tarjeta. En vertical y con movimiento el hero queda fijado (sticky, sin JS) y el resto
-    de la página sube encima como una hoja (data-stage-cover, en hero-01.tsx): primero se va el
-    texto, la S crece y se abre en capas por encima de la hoja y la cámara la atraviesa justo
-    antes de que la hoja tape el hero. Nunca queda una pantalla vacía. Acostado o con reduced
-    motion, el hero es una pantalla común y la S se va con él.
+    a su tarjeta. El hero es una pantalla común: no se fija y el texto nunca se oculta. El
+    escenario va al principio de la página (no fijo), así la S sube con el hero como una imagen
+    y, mientras se va, gira y se abre en capas hasta apagarse al final del hero.
   - Sobre el isotipo hay una superficie para girarlo con el dedo o el mouse: en touch solo toma
     el arrastre horizontal, el vertical sigue siendo scroll. Un toque corto hace respirar a la S
     (las cintas se abren y vuelven) y manda una onda por sus partículas.
@@ -24,7 +22,7 @@
 */
 import { ArrowDown, Browsers, Code, Cpu, Megaphone, Sparkle, type Icon } from "@phosphor-icons/react";
 import Image from "next/image";
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion, useMotionValue, useScroll, useTransform } from "motion/react";
 import { useRef, useSyncExternalStore, type CSSProperties, type MouseEvent } from "react";
 import { CONTACT_LABEL, PrimaryCta } from "@/components/cta";
 import { HapticLink } from "@/components/nav/haptic-link";
@@ -49,9 +47,6 @@ const TITLE: Record<ServiceKey, string> = Object.fromEntries(SERVICES.map((s) =>
 >;
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
-// Celular o tablet en vertical y con movimiento: el hero se fija (misma consulta que la
-// variante pin: de globals.css)
-const PINNED_QUERY = "(max-width: 1023.98px) and (orientation: portrait) and (prefers-reduced-motion: no-preference)";
 const useMedia = (query: string) =>
   useSyncExternalStore(
     (onChange) => {
@@ -148,51 +143,36 @@ export default function HeroSection() {
   const ref = useRef<HTMLElement>(null);
   const drag = useStageDrag();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  // El texto se aleja en profundidad mientras la cámara entra en la S. Cada caso tiene su ritmo
-  // (en el arranque, scroll 0, todos valen lo mismo: el HTML del servidor coincide)
+  // Escritorio: el texto se aleja en profundidad mientras la cámara entra en la S. En celulares
+  // el texto queda quieto y siempre visible: sube con la página (en el arranque, scroll 0, los
+  // dos casos valen lo mismo y el HTML del servidor coincide)
   const desktop = useMedia(DESKTOP_QUERY);
-  const pinned = useMedia(PINNED_QUERY);
-  // Celular fijado: el tramo mide 200svh y el texto se va en los primeros 12svh (antes de que la
-  // S salga de su hueco y mientras la hoja empieza a subir)
-  const opacityPinned = useTransform(scrollYProgress, [0, 0.06], [1, 0]);
-  const scalePinned = useTransform(scrollYProgress, [0, 0.065], [1, 0.95]);
-  const yPinned = useTransform(scrollYProgress, [0, 0.065], [0, -36]);
-  const opacityMobile = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
-  const scaleMobile = useTransform(scrollYProgress, [0, 0.6], [1, 0.92]);
-  const yMobile = useTransform(scrollYProgress, [0, 0.6], [0, -60]);
   const opacityDesktop = useTransform(scrollYProgress, [0, 0.26], [1, 0]);
   const scaleDesktop = useTransform(scrollYProgress, [0, 0.3], [1, 0.94]);
   const yDesktop = useTransform(scrollYProgress, [0, 0.3], [0, 40]);
-  const opacity = desktop ? opacityDesktop : pinned ? opacityPinned : opacityMobile;
-  const scale = desktop ? scaleDesktop : pinned ? scalePinned : scaleMobile;
-  const y = desktop ? yDesktop : pinned ? yPinned : yMobile;
+  const one = useMotionValue(1);
+  const zero = useMotionValue(0);
+  const opacity = desktop ? opacityDesktop : one;
+  const scale = desktop ? scaleDesktop : one;
+  const y = desktop ? yDesktop : zero;
   // Ya desvanecido, el bloque deja de recibir toques y foco (los botones no quedan invisibles pero activos)
   const hide = (v: number) => (v < 0.02 ? "hidden" : "visible");
   const visibility = useTransform(opacity, hide);
 
   return (
-    // Celulares fijados: un tramo de 200svh con el hero fijado arriba durante 100svh; la hoja
-    // que sigue (hero-01.tsx) sube encima desde el primer scroll y lo tapa entero al soltarse
-    <section ref={ref} id="hero" aria-labelledby="hero-titulo" className="relative pin:h-[200svh]">
+    <section ref={ref} id="hero" aria-labelledby="hero-titulo" className="relative">
       {/* Marcas del recorrido de la S (ver choreography.ts) */}
       <StageMark pose="hero" slot="hero-slot" className="absolute left-0 top-0" />
       {/* Escritorio: mientras el texto se va, la S gira de frente y se abre en sus tres cintas */}
       <StageMark pose="unfold" className="absolute left-0 top-[17%] max-lg:hidden" />
       <StageMark pose="plunge" className="absolute left-0 top-[38%] max-lg:hidden" />
       <StageMark pose="dive" className="absolute left-0 top-[72%] max-lg:hidden" />
-      {/* Celulares fijados: gira en su hueco mientras se va el texto, crece sobre la hoja que
-          sube, se abre en capas, avanza y la cámara la atraviesa antes de que la hoja tape todo */}
-      <StageMark pose="rise" slot="hero-slot" className="absolute left-0 top-[7svh] hidden pin:block" />
-      <StageMark pose="center" region className="absolute left-0 top-[20svh] hidden pin:block" />
-      <StageMark pose="explode" region className="absolute left-0 top-[38svh] hidden pin:block" />
-      <StageMark pose="plunge" region className="absolute left-0 top-[56svh] hidden pin:block" />
-      <StageMark pose="dive" region className="absolute left-0 top-[76svh] hidden pin:block" />
-      {/* Celulares sin tramo fijado: la S se va con el hero y se apaga al final */}
-      <StageMark pose="leave" slot="hero-slot" className="absolute bottom-0 left-0 hidden loose:block" />
+      {/* Celulares: la S sube con el hero, gira, se abre en capas y se apaga al final */}
+      <StageMark pose="leave" slot="hero-slot" className="absolute bottom-0 left-0 lg:hidden" />
 
       <div
         data-stage-frame
-        className="relative flex min-h-[100svh] flex-col overflow-hidden pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[calc(max(1rem,env(safe-area-inset-top))+4.25rem)] pin:sticky pin:top-0 pin:h-[100svh] lg:justify-center lg:pb-20 lg:pt-28"
+        className="relative flex min-h-[100svh] flex-col overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[calc(max(1rem,env(safe-area-inset-top))+4.25rem)] lg:justify-center lg:pb-20 lg:pt-28"
       >
         {/* Arrastre del isotipo en escritorio: la mitad derecha */}
         <div

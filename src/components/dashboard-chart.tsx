@@ -19,7 +19,6 @@ import {
 } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import AreaChartCard, { type ChartMetric, type ChartSeries } from "@/components/ui/area-chart-1";
-import { tap } from "@/lib/haptics";
 import { LiveBadge, usePreviewLoop } from "./previews/preview-shell";
 import { LogoMark } from "./logo";
 import { useTheme } from "@/lib/theme";
@@ -46,7 +45,7 @@ const SERIES: Record<"dark" | "light", ChartSeries[]> = {
   ],
   light: [
     { key: "Consultas recibidas", color: "#1f6bff", data: RECIBIDOS },
-    { key: "Calificados por IA", color: "#0b1f4d", data: CALIFICADOS },
+    { key: "Calificados por IA", color: "#23345c", data: CALIFICADOS },
   ],
 };
 
@@ -100,12 +99,9 @@ function LiveFeed() {
           <LiveBadge paused={paused} />
           <button
             type="button"
-            onClick={() => {
-              tap();
-              setPaused((p) => !p);
-            }}
+            onClick={() => setPaused((p) => !p)}
             aria-label={paused ? "Reanudar la actividad de ejemplo" : "Pausar la actividad de ejemplo"}
-            className="-mr-2 flex size-11 items-center justify-center rounded-full text-ink-muted transition-[color,scale] duration-150 ease-[var(--ease-out)] hover:text-ink active:scale-[0.9] motion-reduce:hidden"
+            className="-mr-2 flex size-11 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:text-ink motion-reduce:hidden"
           >
             {paused ? <Play size={12} weight="fill" aria-hidden="true" /> : <Pause size={12} weight="fill" aria-hidden="true" />}
           </button>
@@ -123,7 +119,7 @@ function LiveFeed() {
                 animate={{ opacity: 1, transform: "translateY(0px) scale(1)" }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-                className="flex items-start gap-3 rounded-xl border border-line bg-navy-900/70 p-2.5 light:bg-navy-850"
+                className="flex items-start gap-3 rounded-xl border border-line bg-navy-900/70 p-2.5"
               >
                 <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-fg/[0.05] text-blue-400">
                   <e.icon size={15} aria-hidden="true" />
@@ -173,7 +169,7 @@ export function GrowthChart() {
       series={SERIES[theme]}
       metrics={METRICS}
       formatTick={weekday}
-      className="h-full bg-navy-900/50 light:bg-navy-850 light:ring-1 light:ring-line"
+      className="h-full bg-navy-900/50"
     />
   );
 }

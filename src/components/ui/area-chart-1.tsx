@@ -5,13 +5,12 @@
   - datos, leyenda y métricas por props (antes estaban fijos en el archivo)
   - íconos de Phosphor en lugar de SVG dibujados a mano
   - variables de reaviz en el contenedor (styled-jsx global no se renderiza en el servidor con App Router)
-  - tendencia en colores de marca (azul si mejora, gris si empeora), siempre con ícono + texto;
-    los colores son tokens del tema (en claro, el azul de texto oscurecido y el gris navy)
-  - sin framer-motion: las métricas entran en cascada con CSS (.metric-list, globals.css), sin
-    animación por cuadro
+  - motion/react en lugar de framer-motion (mismo motor, ya instalado)
+  - tendencia en colores de marca (azul si mejora, gris si empeora), siempre con ícono + texto
   - tabla accesible con los mismos datos para lectores de pantalla
 */
-import React, { useRef } from 'react';
+import React from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { ArrowDown, ArrowUp, type Icon } from '@phosphor-icons/react';
 import {
   AreaChart,
@@ -28,7 +27,6 @@ import {
   Gridline,
   type ChartNestedDataShape,
 } from 'reaviz';
-import { useRevealAttr } from '@/components/in-view';
 import { cn } from '@/lib/utils';
 
 export interface ChartDataPoint {
@@ -63,10 +61,9 @@ export interface AreaChartCardProps {
   className?: string;
 }
 
-// Paleta del brand board: el azul es la única señal de color; empeorar se lee en gris + texto.
-// Tokens del tema: el mismo componente se lee bien en claro y en oscuro
-const STATUS_GOOD = 'var(--blue-400)';
-const STATUS_CRITICAL = 'var(--ink-muted)';
+// Paleta del brand board: el azul es la única señal de color; empeorar se lee en gris + texto
+const STATUS_GOOD = '#3d8bff';
+const STATUS_CRITICAL = '#a7b0c0';
 
 const validateChartData = (data: ChartSeries[]): ChartNestedDataShape[] =>
   data.map((series) => ({
@@ -87,7 +84,7 @@ function TrendBadge({ trend, good }: { trend: 'up' | 'down'; good: boolean }) {
     <span className="flex items-center gap-1.5">
       <span
         className="flex size-6 items-center justify-center rounded-full"
-        style={{ backgroundColor: `color-mix(in oklab, ${color} 18%, transparent)`, color }}
+        style={{ backgroundColor: `${color}33`, color }}
       >
         <Arrow size={14} weight="bold" aria-hidden="true" />
       </span>
@@ -104,8 +101,7 @@ const AreaChartCard: React.FC<AreaChartCardProps> = ({
   formatTick = defaultTick,
   className,
 }) => {
-  const metricsRef = useRef<HTMLUListElement>(null);
-  useRevealAttr(metricsRef, '0%');
+  const reduce = useReducedMotion();
   const data = validateChartData(series);
   const colors = series.map((s) => s.color);
   const keys = series[0]?.data.map((d) => d.key) ?? [];
@@ -217,12 +213,15 @@ const AreaChartCard: React.FC<AreaChartCardProps> = ({
           </table>
         </div>
 
-        <ul ref={metricsRef} className="metric-list flex flex-col divide-y divide-border">
+        <ul className="flex flex-col divide-y divide-border">
           {metrics.map((metric, i) => (
-            <li
+            <motion.li
               key={metric.id}
-              style={{ '--i': i } as React.CSSProperties}
-              className="metric-item grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 py-2.5 md:flex md:flex-col md:items-start md:py-4"
+              initial={reduce ? false : { opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.06, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+              className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 py-2.5 md:flex md:flex-col md:items-start md:py-4"
             >
               {/* En celulares el nombre puede ocupar dos líneas; el valor nunca se parte */}
               <span className="flex min-w-0 items-start gap-2 text-sm leading-snug text-muted-foreground">
@@ -233,7 +232,7 @@ const AreaChartCard: React.FC<AreaChartCardProps> = ({
                 <span className="tabular text-lg font-semibold text-foreground md:text-2xl">{metric.value}</span>
                 <TrendBadge trend={metric.trend} good={metric.trendIsGood} />
               </span>
-            </li>
+            </motion.li>
           ))}
         </ul>
       </div>

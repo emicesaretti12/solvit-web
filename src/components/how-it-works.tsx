@@ -7,13 +7,10 @@
   Cada paso: el verbo, una frase y la vista viva del servicio que lo resuelve.
   En celulares, otra versión más simple (how-it-works-mobile): tarjetas en el scroll común que
   se levantan en 3D, cada una con su S de capas en CSS; sin panel fijo ni canvas.
-  Arriba del panel, el número del paso es un tambor en 3D (un prisma de cuatro caras, 01 a 04)
-  que rueda hacia el paso activo con una sola transición de CSS.
 
   - Sin GSAP pin: un contenedor alto con un panel sticky (convive con Lenis sin saltos)
   - El cambio de paso es un barrido en diagonal, con la inclinación de las cintas del isotipo
-    (24,5°), y el paso que llega se endereza desde apenas inclinado (profundidad); con reduced
-    motion, un fundido. Las variantes tienen las mismas claves en los dos
+    (24,5°); con reduced motion, un fundido. Las variantes tienen las mismas claves en los dos
     casos: el HTML del servidor y el del cliente coinciden y nada queda trabado al hidratar
   - Las vistas se escalan para entrar en el espacio que queda (nunca se cortan) y solo se
     montan al acercarse a su paso; las de los pasos que no se ven quedan en pausa
@@ -29,7 +26,7 @@ import {
   useTransform,
   type MotionValue,
 } from "motion/react";
-import { memo, useEffect, useRef, useState, type ComponentType, type CSSProperties, type ReactNode } from "react";
+import { memo, useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { HowItWorksMobile } from "@/components/how-it-works-mobile";
 import { MaskWords } from "@/components/mask-words";
 import { AgentPreview } from "@/components/previews/agent-preview";
@@ -40,7 +37,6 @@ import { SafeBoundary } from "@/components/safe-boundary";
 import { getLenis } from "@/components/smooth-scroll";
 import { StageMark } from "@/components/three/stage";
 import type { PoseKey } from "@/components/three/choreography";
-import { tap } from "@/lib/haptics";
 
 const GrowthChart = dynamic(() => import("@/components/dashboard-chart").then((m) => m.GrowthChart), {
   ssr: false,
@@ -93,32 +89,12 @@ const STEPS: Step[] = [
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
+
 // Barrido en diagonal con la inclinación de las cintas: tan(24,5°) ≈ 0,46 del alto
 const SHOWN = "polygon(-46% 0%, 100% 0%, 146% 100%, 0% 100%)";
 const BEFORE = "polygon(-46% 0%, -46% 0%, 0% 100%, 0% 100%)";
 const AFTER = "polygon(100% 0%, 100% 0%, 146% 100%, 146% 100%)";
-// En reposo, un transform 2D (el texto y la vista quedan nítidos); al entrar y salir, una
-// inclinación leve con perspectiva propia
 const STILL = "translateY(0px)";
-const BEFORE_T = "perspective(1200px) translateY(22px) rotateX(-9deg)";
-const AFTER_T = "perspective(1200px) translateY(-22px) rotateX(9deg)";
-
-/* Tambor del paso: cuatro caras (01 a 04) en un prisma que rueda hacia el paso activo; el
-   número nuevo sube desde abajo como en un cuentakilómetros. Una sola transición de CSS por
-   cambio (globals.css, .step-drum); con reduced motion cambia sin girar */
-function StepDrum({ active, total }: { active: number; total: number }) {
-  return (
-    <span aria-hidden="true" className="step-drum font-display" style={{ "--a": active } as CSSProperties}>
-      <span className="step-drum-roll">
-        {Array.from({ length: total }, (_, i) => (
-          <span key={i} className="step-drum-face" style={{ "--i": i } as CSSProperties}>
-            0{i + 1}
-          </span>
-        ))}
-      </span>
-    </span>
-  );
-}
 
 function RailSegment({ progress, index, total }: { progress: MotionValue<number>; index: number; total: number }) {
   const fill = useTransform(progress, [index / total, (index + 1) / total], [0, 1]);
@@ -228,8 +204,8 @@ export function HowItWorks() {
   // y queda solo el fundido
   const variants = {
     shown: { clipPath: SHOWN, opacity: 1, transform: STILL },
-    before: { clipPath: BEFORE, opacity: 0, transform: BEFORE_T },
-    after: { clipPath: AFTER, opacity: 0, transform: AFTER_T },
+    before: { clipPath: BEFORE, opacity: 0, transform: "translateY(18px)" },
+    after: { clipPath: AFTER, opacity: 0, transform: "translateY(-18px)" },
   };
 
   return (
@@ -273,47 +249,37 @@ export function HowItWorks() {
 
         <div data-stage-panel className="sticky top-0 flex h-[100svh] flex-col overflow-hidden">
           <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col px-4 pb-6 pt-[84px] md:px-6 lg:pb-12 lg:pt-28">
-            {/* Pasos: el tambor con el número y la navegación con el progreso de cada tramo */}
-            <div className="flex items-end gap-5 lg:max-w-[540px]">
-              <span className="flex shrink-0 items-baseline gap-1.5">
-                <StepDrum active={active} total={STEPS.length} />
-                <span aria-hidden="true" className="font-mono text-[11px] tabular-nums text-ink-faint">
-                  /0{STEPS.length}
-                </span>
-              </span>
-              <nav aria-label="Pasos de la venta" className="min-w-0 flex-1">
-                <ol className="grid grid-cols-4 gap-2 sm:gap-4">
-                  {STEPS.map((s, i) => (
-                    <li key={s.verb}>
-                      <button
-                        ref={(el) => {
-                          buttons.current[i] = el;
-                        }}
-                        type="button"
-                        onClick={() => {
-                          tap();
-                          goTo(i);
-                        }}
-                        aria-current={i === active ? "step" : undefined}
-                        aria-controls={`paso-${s.pose}`}
-                        className={`group flex min-h-11 w-full origin-left flex-col justify-end text-left text-[13px] font-medium transition-[color,scale] duration-150 ease-[var(--ease-out)] active:scale-[0.96] sm:text-sm ${
-                          i === active ? "text-ink" : "text-ink-faint hover:text-ink-muted"
-                        }`}
-                      >
-                        <span>
-                          <span className="sr-only">{`Paso ${i + 1}: `}</span>
-                          {s.verb}
-                        </span>
-                        <RailSegment progress={scrollYProgress} index={i} total={STEPS.length} />
-                      </button>
-                    </li>
-                  ))}
-                </ol>
-              </nav>
-            </div>
+            {/* Pasos: navegación y progreso */}
+            <nav aria-label="Pasos de la venta" className="lg:max-w-[540px]">
+              <ol className="grid grid-cols-4 gap-2 sm:gap-4">
+                {STEPS.map((s, i) => (
+                  <li key={s.verb}>
+                    <button
+                      ref={(el) => {
+                        buttons.current[i] = el;
+                      }}
+                      type="button"
+                      onClick={() => goTo(i)}
+                      aria-current={i === active ? "step" : undefined}
+                      aria-controls={`paso-${s.pose}`}
+                      className={`group flex min-h-11 w-full flex-col justify-end text-left text-[13px] font-medium transition-colors duration-200 sm:text-sm ${
+                        i === active ? "text-ink" : "text-ink-faint hover:text-ink-muted"
+                      }`}
+                    >
+                      <span>
+                        <span className="mr-1.5 font-mono text-[11px] tabular-nums text-ink-faint">0{i + 1}</span>
+                        {s.verb}
+                      </span>
+                      <RailSegment progress={scrollYProgress} index={i} total={STEPS.length} />
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </nav>
             <p aria-live="polite" className="sr-only">
               {`Paso ${active + 1} de ${STEPS.length}: ${STEPS[active].verb}. ${STEPS[active].title}`}
             </p>
+
 
             <div className="relative grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)] lg:mt-10 lg:max-w-[540px]">
               {STEPS.map((s, i) => {

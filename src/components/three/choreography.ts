@@ -11,17 +11,10 @@
   - layers: cómo se abren las cintas. 0 en diagonal (escritorio: las etapas de la venta); 1 en
     capas, como una vista explotada que conserva la silueta de la S (celulares). Con spread
     mayor a 1 las capas se dispersan hacia los bordes y dejan pasar a la cámara
-  - En celulares (vertical y con movimiento) el hero queda fijado y el resto de la página sube
-    encima como una hoja (data-stage-cover). Las poses del recorrido se ubican solas:
-    · con `slot`, en el centro y el tamaño del hueco que el hero deja para el isotipo
-    · con `region`, en lo que queda a la vista por encima de la hoja cuando el scroll llega a la
-      marca: y es un corrimiento en medias alturas de esa zona (positivo = hacia arriba) y la
-      escala se achica si no entra. Así la S nunca queda detrás del contenido que sube
-    Recorrido: la S gira en su hueco mientras se va el texto (rise), crece y se pone de frente
-    sobre la hoja que empieza a subir (center), se abre en sus tres capas (explode), avanza hacia
-    la cámara por encima de la hoja (plunge) y la atraviesa (dive)
-  - Sin tramo fijado (reduced motion o un celular acostado) la S queda en su hueco, se va con el
-    hero y se apaga al final (leave)
+  - En celulares la S solo vive en el hero, en el hueco que deja arriba del texto (las poses con
+    `slot` toman el centro y el tamaño de ese hueco). El escenario no es fijo: la S sube con el
+    hero como una imagen y, mientras se va, gira y se abre en capas hasta apagarse (leave). El
+    texto nunca se oculta ni queda tapado
   - unfold solo existe en escritorio (su marca está oculta en celulares)
   - La profundidad también mueve las partículas: z > 0 las vuelve un flujo hacia la cámara
     (zambullida) y z < 0 las dispersa (la S llega desde el fondo y se vuelve a juntar)
@@ -77,43 +70,24 @@ export const POSES = {
     mobile: m({ scale: 1 }),
     reducedHold: true,
   },
-  // Celulares: mientras se va el texto, la S gira en su hueco sin salir de él
-  rise: {
-    desktop: p({ x: 0.6, y: -0.02, scale: 0.98 }),
-    mobile: m({ scale: 1.04, turn: 0.34, tilt: 0.05 }),
-    reducedHold: true,
-  },
-  // Celulares: sin texto, la S crece y queda casi de frente en el centro de la zona libre (la
-  // hoja recién empieza a subir), apenas abierta
-  center: {
-    desktop: p({ x: 0.6, y: -0.02, scale: 0.98 }),
-    mobile: m({ y: 0.08, z: 0.04, scale: 0.95, spread: 0.25, turn: 0.42, tilt: 0.08 }),
-    reducedHold: true,
-  },
-  // Celulares: vista explotada. Las tres capas separadas en altura y profundidad, giradas para
-  // que se lea el espesor de cada una, pero con la silueta de la S entera
-  explode: {
-    desktop: p({ x: 0.6, y: -0.02, scale: 0.98 }),
-    mobile: m({ y: 0.1, z: 0.06, scale: 1.3, spread: 1, turn: -0.3, tilt: 0.26 }),
-    reducedHold: true,
-  },
-  // Escritorio: mitad del hero, la S se abre y avanza hacia la cámara, todavía entera a la
-  // vista. Celulares: la hoja ya tapa media pantalla; la S avanza por encima y se dispersa
+  // Escritorio: mitad del hero, la S se abre y avanza hacia la cámara, todavía entera a la vista
   plunge: {
     desktop: p({ x: 0.22, z: 0.42, scale: 1.1, spread: 1.1, turn: 0.7, tilt: 0.22 }),
-    mobile: m({ z: 0.42, scale: 0.75, spread: 1.5, turn: -0.62, tilt: 0.36 }),
+    mobile: OFF,
     reducedHold: true,
   },
-  // Salida del hero: las cintas se abren hacia los bordes y pasan al lado de la cámara
+  // Escritorio, salida del hero: las cintas se abren hacia los bordes y pasan al lado de la cámara
   dive: {
     desktop: p({ x: 0.04, z: 0.9, scale: 1.25, spread: 2.6, turn: 1.15, tilt: 0.38, opacity: 0 }),
-    mobile: m({ z: 0.9, scale: 1.1, spread: 2.6, turn: -1.05, tilt: 0.46, opacity: 0 }),
+    mobile: OFF,
     reducedHold: true,
   },
-  // Celulares sin tramo fijado: la S se va con el hero (va en su hueco) y se apaga al final
+  // Celulares: la S sube con el hero (en su hueco), gira, se abre en capas y se apaga al final.
+  // Con reduced motion, solo se apaga
   leave: {
     desktop: p({ x: 0.6, y: -0.02, scale: 0.98, opacity: 0 }),
-    mobile: m({ scale: 1, opacity: 0 }),
+    mobile: m({ scale: 1.06, spread: 0.7, turn: 0.9, tilt: 0.24, opacity: 0 }),
+    reduced: STILL,
   },
   // Del otro lado: las cintas llegan desde el fondo, todavía abiertas
   arrive: {

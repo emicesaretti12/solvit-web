@@ -3,7 +3,6 @@
 import { Pause, Play } from "@phosphor-icons/react";
 import { useInView, useReducedMotion } from "motion/react";
 import { createContext, useContext, useState, type ReactNode, type RefObject } from "react";
-import { tap } from "@/lib/haptics";
 
 /*
   true cuando la vista quedó tapada por otra tarjeta del apilado: los loops se detienen igual
@@ -27,9 +26,7 @@ export function usePreviewLoop(ref: RefObject<HTMLElement | null>) {
   Marco común de las vistas vivas: interfaces reales en miniatura, con datos de ejemplo
   rotulados como tales (nunca capturas falsas armadas con divs).
   En celulares el contenido va más compacto (max-lg); la cabecera con la pausa siempre queda a
-  la vista. Cada vista tiene el alto trabado (sus listas y su chat no crecen ni se achican en el
-  loop): nada de lo que está debajo salta. Los controles responden al apoyar el dedo (escala y
-  un golpe háptico donde hay vibración).
+  la vista.
 */
 export function PreviewShell({
   title,
@@ -51,7 +48,7 @@ export function PreviewShell({
 }) {
   return (
     <div
-      className={`flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-[1.25rem] border border-line bg-navy-950/70 shadow-[inset_0_1px_0_rgb(var(--fg-rgb)/0.04)] light:bg-navy-900 light:shadow-[inset_0_1px_0_rgb(255_255_255/0.9)] ${className}`}
+      className={`flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-[1.25rem] border border-line bg-navy-950/70 shadow-[inset_0_1px_0_rgb(var(--fg-rgb)/0.04)] light:bg-navy-800/60 light:shadow-none ${className}`}
     >
       <div className="flex shrink-0 items-center gap-2 border-b border-line py-1.5 pl-4 pr-1.5">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 py-1">
@@ -67,15 +64,12 @@ export function PreviewShell({
         {onTogglePause && (
           <button
             type="button"
-            onClick={() => {
-              tap();
-              onTogglePause();
-            }}
+            onClick={onTogglePause}
             aria-label={paused ? "Reanudar la vista de ejemplo" : "Pausar la vista de ejemplo"}
             title={paused ? "Reanudar" : "Pausar"}
             className="group/pause flex size-11 shrink-0 items-center justify-center rounded-full focus-visible:outline-none motion-reduce:hidden"
           >
-            <span className="flex size-8 items-center justify-center rounded-full border border-line-strong bg-navy-850 text-ink-muted transition-[color,border-color,scale] duration-150 ease-[var(--ease-out)] group-hover/pause:border-blue-400/60 group-hover/pause:text-ink group-focus-visible/pause:outline-2 group-focus-visible/pause:outline-offset-2 group-focus-visible/pause:outline-blue-400 group-active/pause:scale-[0.9]">
+            <span className="flex size-8 items-center justify-center rounded-full border border-line-strong text-ink-muted transition-[color,border-color,transform] duration-150 ease-out group-hover/pause:border-blue-400/60 group-hover/pause:text-ink group-focus-visible/pause:outline-2 group-focus-visible/pause:outline-offset-2 group-focus-visible/pause:outline-blue-400 group-active/pause:scale-[0.94]">
               {paused ? (
                 <Play size={12} weight="fill" aria-hidden="true" />
               ) : (
@@ -93,7 +87,7 @@ export function PreviewShell({
 /* Lugar de una vista mientras carga, o si no puede cargar: reaviz falla con algunos idiomas del
    navegador y, sin el SafeBoundary de cada vista, eso desmontaría la página entera */
 export function PreviewPlaceholder() {
-  return <div className="h-[300px] rounded-[1.25rem] border border-line bg-navy-900/50 light:bg-navy-800/60" />;
+  return <div className="h-[300px] rounded-[1.25rem] border border-line bg-navy-900/50" />;
 }
 
 export function LiveBadge({ label = "En vivo", paused = false }: { label?: string; paused?: boolean }) {

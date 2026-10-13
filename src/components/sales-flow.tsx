@@ -5,48 +5,49 @@
   → el CRM ordena por área → venta cerrada → crecimiento.
 
   - Panel sticky dentro de un tramo alto: el scroll elige la etapa y el cambio se reproduce con
-    tiempo propio (se dibuja el tramo, el nodo se eleva con una onda), así se ve completo aunque
-    el dedo pase rápido; si salta varias etapas, las encadena de a una
-  - El circuito es una placa en 3D, inclinada como sobre una mesa, que se endereza mientras el
-    panel está fijo (animation-timeline, en el compositor). Los nodos son fichas con espesor
-    paradas sobre la placa: cuando llega la consulta se elevan, dejan su sombra en la placa y
-    sueltan una onda. Sin soporte de animaciones ligadas al scroll, la placa queda inclinada fija
-  - Todo con CSS: el estado de cada pieza es un atributo (data-on) y las transiciones hacen el
-    resto (trazo con stroke-dashoffset y pathLength, fichas con transform, fundidos con
-    opacidad). Cada pieza tiene su momento dentro de la etapa (--t). Nada de JS por cuadro
+    tiempo propio (se dibuja el tramo, se enciende el nodo con una onda), así se ve completo
+    aunque el dedo pase rápido; mientras tanto el scroll no mueve nada del SVG
   - Las consultas son puntos que viajan por las líneas (SMIL animateMotion, sin JS por cuadro).
-    Las que solo consultaban se van en gris al costado. Fuera de pantalla se pausan
+    Las que solo consultaban se van en gris al costado
+  - Solo atributos SVG (pathLength, r) y opacidad: sin transforms ni guiones en px, que Safari
+    resuelve distinto
   - Esto es el escritorio; en celulares, journey-mobile: bloques en vertical en el scroll
     común, cada uno con su escena en 3D con CSS (sin panel fijo)
-  - Con reduced motion: placa quieta, sin puntos en viaje y cambios sin transición
+  - Fuera de pantalla las animaciones se pausan; con reduced motion no hay puntos en viaje
 */
-import { useInView, useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
-import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import {
+  animate,
+  motion,
+  useInView,
+  useMotionValue,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+  type MotionValue,
+} from "motion/react";
+import { useEffect, useId, useRef, useState } from "react";
 import { MaskWords } from "./mask-words";
 import { JourneyMobile } from "./journey-mobile";
-import { DESKTOP, EDGES, NODES, STAGES, type EdgeDef, type NodeDef } from "./sales-flow-data";
+import { DESKTOP, EDGES, NODES, STAGES, type EdgeDef, type Layout, type NodeDef, type Point } from "./sales-flow-data";
 
-// viewBox del circuito de escritorio: las fichas se ubican en % de la placa
-const VB = { w: 1160, h: 460 };
-// Segundos que dura una etapa: cada pieza entra en su fracción (--t)
-const STAGE_S = 1.1;
-// Capas del canto de cada ficha (de la más profunda a la cara)
-const TILE_DEPTH = [3, 2, 1];
+// Cada cambio de etapa se reproduce con su propio tiempo (no atado a la velocidad del dedo)
+const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 
-const pct = (v: number, of: number) => `${(v / of) * 100}%`;
-const t = (s: number) => ({ "--t": `${s.toFixed(2)}s` }) as CSSProperties;
-
-function Edge({ d, edge, on }: { d: string; edge: EdgeDef; on: boolean }) {
-  const muted = edge.tone === "muted";
+function Edge({ d, stage, tone, sf }: { d: string; stage: number; tone?: "muted"; sf: MotionValue<number> }) {
+  // El tramo se dibuja en el primer 70 % de su etapa. Motion pone pathLength y el trazo como
+  // atributos sin unidades (así se dibuja igual en Safari); en 0 se oculta para que el remate
+  // redondeado no deje un punto suelto
+  const length = useTransform(sf, [stage, stage + 0.7], [0, 1]);
+  const opacity = useTransform(length, [0, 0.02], [0, 1]);
+  const muted = tone === "muted";
   return (
     <g>
       <path d={d} className="fill-none stroke-line-strong" strokeWidth={1.5} />
-      {/* pathLength 1: el trazo se dibuja con stroke-dashoffset de 1 a 0 (igual en Safari) */}
-      <path
+      <motion.path
         d={d}
-        pathLength={1}
-        data-on={on}
-        className={`flow-edge fill-none ${muted ? "stroke-ink-faint" : "stroke-blue-400"}`}
+        style={{ pathLength: length, opacity }}
+        className={`fill-none ${muted ? "stroke-ink-faint" : "stroke-blue-400"}`}
         strokeWidth={muted ? 1.5 : 2}
         strokeLinecap="round"
       />
@@ -54,16 +55,17 @@ function Edge({ d, edge, on }: { d: string; edge: EdgeDef; on: boolean }) {
   );
 }
 
-function Particles({ d, edge, on }: { d: string; edge: EdgeDef; on: boolean }) {
+function Particles({ d, edge, sf, r }: { d: string; edge: EdgeDef; sf: MotionValue<number>; r: number }) {
   // Los puntos aparecen cuando el tramo ya está dibujado. animateMotion lleva el trazado en su
   // propio atributo path (sin <mpath href>, que algunos Safari no resuelven)
+  const opacity = useTransform(sf, [edge.stage + 0.55, edge.stage + 0.85], [0, 1]);
   const dur = edge.tone === "muted" ? 2.6 : 2.1;
   return (
-    <g data-on={on} style={t(0.65 * STAGE_S)} className="flow-fade motion-reduce:hidden">
+    <motion.g style={{ opacity }} className="motion-reduce:hidden">
       {Array.from({ length: edge.particles }, (_, i) => {
         const begin = `${(i * dur) / edge.particles + (edge.stage % 2) * 0.35}s`;
         return (
-          <circle key={i} r={4} className={edge.tone === "muted" ? "fill-ink-faint" : "fill-blue-400"} opacity={0}>
+          <circle key={i} r={r} className={edge.tone === "muted" ? "fill-ink-faint" : "fill-blue-400"} opacity={0}>
             <animateMotion
               path={d}
               dur={`${dur}s`}
@@ -85,45 +87,112 @@ function Particles({ d, edge, on }: { d: string; edge: EdgeDef; on: boolean }) {
           </circle>
         );
       })}
+    </motion.g>
+  );
+}
+
+function FlowNode({ def, at, layout, sf }: { def: NodeDef; at: Point; layout: Layout; sf: MotionValue<number> }) {
+  const { r, iconSize, labelSize, labelGap } = layout;
+  // Arranca en 0 aunque el nodo se encienda temprano (las fuentes): en la etapa -1 todo apagado
+  const on = useTransform(sf, [Math.max(0, def.at - 0.3), def.at], [0, 1]);
+  const dim = useTransform(on, [0, 1], [0.35, 1]);
+  // Al encenderse, el relleno crece desde el centro y una onda sale del nodo (y todo vuelve si
+  // se retrocede). Solo atributos (r) y opacidad: nada de transforms sobre el SVG
+  const fillR = useTransform(on, [0, 1], [r * 0.55, r]);
+  // La onda corre con su propio tiempo cuando el nodo termina de encenderse (si saliera de sf,
+  // quedaría a medio abrir cuando la etapa se detiene)
+  const wave = useMotionValue(0);
+  useMotionValueEvent(on, "change", (v) => {
+    const prev = on.getPrevious() ?? 0;
+    if (v >= 0.999 && prev < 0.999) animate(wave, [0, 1], { duration: 0.9, ease: EASE_OUT });
+    else if (v < 0.5 && wave.get() > 0) wave.set(0);
+  });
+  const waveR = useTransform(wave, [0, 1], [r, r * 2.1]);
+  const waveOpacity = useTransform(wave, [0, 0.12, 1], [0, 0.6, 0]);
+  const muted = def.tone === "muted";
+  return (
+    <motion.g style={{ opacity: dim }}>
+      <motion.circle
+        cx={at.x}
+        cy={at.y}
+        style={{ r: waveR, opacity: waveOpacity }}
+        className={`fill-none motion-reduce:hidden ${muted ? "stroke-ink-faint" : "stroke-blue-400"}`}
+        strokeWidth={1.5}
+      />
+      <circle cx={at.x} cy={at.y} r={r} className="fill-navy-850 stroke-line-strong" strokeWidth={1.5} />
+      {/* Encendido: relleno tenue y aro de color cuando la consulta llega */}
+      <motion.circle
+        cx={at.x}
+        cy={at.y}
+        style={{ r: fillR, opacity: on }}
+        className={muted ? "fill-ink-faint/10" : "fill-blue-400/15"}
+      />
+      <motion.circle
+        cx={at.x}
+        cy={at.y}
+        r={r}
+        style={{ opacity: on }}
+        className={`fill-none ${muted ? "stroke-ink-faint" : "stroke-blue-400"}`}
+        strokeWidth={2}
+      />
+      {"icon" in def.glyph ? (
+        <def.glyph.icon
+          x={at.x - iconSize / 2}
+          y={at.y - iconSize / 2}
+          size={iconSize}
+          weight="light"
+          className={muted ? "text-ink-faint" : "text-ink"}
+        />
+      ) : (
+        <svg
+          x={at.x - iconSize * 0.4}
+          y={at.y - iconSize * 0.4}
+          width={iconSize * 0.8}
+          height={iconSize * 0.8}
+          viewBox="0 0 24 24"
+          className="fill-ink"
+        >
+          <path d={def.glyph.path} />
+        </svg>
+      )}
+      <text
+        x={at.x}
+        y={at.y + labelGap}
+        textAnchor="middle"
+        fontSize={labelSize}
+        className={muted ? "fill-ink-faint" : "fill-ink-muted"}
+      >
+        {def.label}
+      </text>
+    </motion.g>
+  );
+}
+
+function Chart({ layout, sf, gradientId }: { layout: Layout; sf: MotionValue<number>; gradientId: string }) {
+  const length = useTransform(sf, [4.05, 4.75], [0, 1]);
+  const lineOpacity = useTransform(length, [0, 0.02], [0, 1]);
+  const fill = useTransform(sf, [4.4, 4.9], [0, 1]);
+  return (
+    <g>
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="var(--blue-400)" stopOpacity="0.35" />
+          <stop offset="1" stopColor="var(--blue-400)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <motion.path d={layout.chart.area} style={{ opacity: fill }} fill={`url(#${gradientId})`} />
+      <motion.path
+        d={layout.chart.line}
+        style={{ pathLength: length, opacity: lineOpacity }}
+        className="fill-none stroke-blue-400"
+        strokeWidth={2.5}
+        strokeLinecap="round"
+      />
     </g>
   );
 }
 
-/* Ficha del circuito: un zócalo en la placa, la sombra y la ficha con su canto, que se eleva
-   cuando la consulta llega. El nombre queda en la placa, debajo */
-function FlowNode({ def, on }: { def: NodeDef; on: boolean }) {
-  const at = DESKTOP.nodes[def.id];
-  const muted = def.tone === "muted";
-  const stage = Math.floor(def.at);
-  return (
-    <div
-      data-on={on}
-      data-tone={muted ? "muted" : undefined}
-      className="fn"
-      style={{ left: pct(at.x, VB.w), top: pct(at.y, VB.h), ...t((def.at - stage) * STAGE_S) }}
-    >
-      <span aria-hidden="true" className="fn-shadow" />
-      <div className="fn-tile">
-        {TILE_DEPTH.map((z) => (
-          <span key={z} aria-hidden="true" className="fn-side" style={{ "--z": z } as CSSProperties} />
-        ))}
-        <span className="fn-face">
-          <span aria-hidden="true" className="fn-wave" />
-          {"icon" in def.glyph ? (
-            <def.glyph.icon weight="light" className="fn-icon" />
-          ) : (
-            <svg viewBox="0 0 24 24" className="fn-icon fn-icon-brand fill-current" aria-hidden="true">
-              <path d={def.glyph.path} />
-            </svg>
-          )}
-        </span>
-      </div>
-      <span className="fn-label">{def.label}</span>
-    </div>
-  );
-}
-
-function Board({ stage }: { stage: number }) {
+function Diagram({ layout, sf, className }: { layout: Layout; sf: MotionValue<number>; className: string }) {
   const gradientId = `${useId().replace(/[^a-zA-Z0-9_-]/g, "")}-area`;
   const svg = useRef<SVGSVGElement>(null);
   const inView = useInView(svg, { amount: 0.1 });
@@ -137,40 +206,20 @@ function Board({ stage }: { stage: number }) {
     else el.pauseAnimations();
   }, [inView, reduce]);
 
+  const r = 4;
   return (
-    <div className="flow-stage" aria-hidden="true">
-      <div className="flow-board">
-        <span className="flow-board-edge" />
-        <svg ref={svg} viewBox={DESKTOP.viewBox} preserveAspectRatio="none" className="absolute inset-0 size-full overflow-visible">
-          {EDGES.map((e) => (
-            <Edge key={e.id} d={DESKTOP.edges[e.id]} edge={e} on={stage >= e.stage} />
-          ))}
-          <defs>
-            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="var(--blue-400)" stopOpacity="0.35" />
-              <stop offset="1" stopColor="var(--blue-400)" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          {/* Crecimiento: el área aparece y la curva se dibuja después de la venta */}
-          <path d={DESKTOP.chart.area} data-on={stage >= 4} style={t(0.45 * STAGE_S)} className="flow-fade" fill={`url(#${gradientId})`} />
-          <path
-            d={DESKTOP.chart.line}
-            pathLength={1}
-            data-on={stage >= 4}
-            style={t(0.05 * STAGE_S)}
-            className="flow-edge fill-none stroke-blue-400"
-            strokeWidth={2.5}
-            strokeLinecap="round"
-          />
-          {EDGES.map((e) => (
-            <Particles key={e.id} d={DESKTOP.edges[e.id]} edge={e} on={stage >= e.stage} />
-          ))}
-        </svg>
-        {NODES.map((n) => (
-          <FlowNode key={n.id} def={n} on={stage >= Math.floor(n.at)} />
-        ))}
-      </div>
-    </div>
+    <svg ref={svg} viewBox={layout.viewBox} aria-hidden="true" preserveAspectRatio="xMidYMid meet" className={className}>
+      {EDGES.map((e) => (
+        <Edge key={e.id} d={layout.edges[e.id]} stage={e.stage} tone={e.tone} sf={sf} />
+      ))}
+      <Chart layout={layout} sf={sf} gradientId={gradientId} />
+      {EDGES.map((e) => (
+        <Particles key={e.id} d={layout.edges[e.id]} edge={e} sf={sf} r={r} />
+      ))}
+      {NODES.map((n) => (
+        <FlowNode key={n.id} def={n} at={layout.nodes[n.id]} layout={layout} sf={sf} />
+      ))}
+    </svg>
   );
 }
 
@@ -184,11 +233,11 @@ function useChainedStage(target: number, reduce: boolean) {
     if (shown === target) return;
     const gap = reduce ? 0 : target > shown ? 420 : 160;
     const wait = Math.max(0, gap - (performance.now() - lastStep.current));
-    const timer = setTimeout(() => {
+    const t = setTimeout(() => {
       lastStep.current = performance.now();
       setShown((s) => (reduce ? target : s + Math.sign(target - s)));
     }, wait);
-    return () => clearTimeout(timer);
+    return () => clearTimeout(t);
   }, [shown, target, reduce]);
   return shown;
 }
@@ -204,6 +253,25 @@ export function SalesFlow() {
     const next = v < 0.015 ? -1 : Math.min(STAGES.length - 1, Math.floor((v / 0.92) * STAGES.length));
     setStage((current) => (current === next ? current : next));
   });
+
+  // Etapas como número continuo (0 a 5): cada tramo y cada nodo leen su parte. El scroll solo
+  // elige la etapa; el recorrido hasta ella se anima con tiempo propio, así se ve completo
+  // aunque el dedo pase rápido (y si salta varias etapas, las encadena más rápido)
+  const sf = useMotionValue(0);
+  useEffect(() => {
+    const target = stage + 1;
+    // En celulares el diagrama es otro (sales-flow-mobile): el de escritorio no se anima
+    if (reduce || window.matchMedia("(max-width: 1023.98px)").matches) {
+      sf.set(target);
+      return;
+    }
+    const distance = Math.abs(target - sf.get());
+    const controls = animate(sf, target, {
+      duration: Math.min(2.4, 1.25 + 0.3 * Math.max(0, distance - 1)),
+      ease: EASE_OUT,
+    });
+    return () => controls.stop();
+  }, [stage, reduce, sf]);
 
   const shown = useChainedStage(stage, Boolean(reduce));
   const active = Math.max(0, shown);
@@ -225,23 +293,28 @@ export function SalesFlow() {
       </div>
 
       {/* Escritorio: el circuito en un panel fijo que se arma con el scroll */}
-      <div ref={track} className="flow-track relative hidden lg:block" style={{ height: `${STAGES.length * 60 + 100}svh` }}>
+      <div ref={track} className="relative hidden lg:block" style={{ height: `${STAGES.length * 60 + 100}svh` }}>
         <div className="sticky top-0 flex h-[100svh] flex-col overflow-hidden">
-          <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col px-6 pb-10 pt-28">
+          <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col px-4 pb-6 pt-[84px] md:px-6 lg:pb-10 lg:pt-28">
             <div className="relative flex min-h-0 flex-1 items-center justify-center">
-              <Board stage={shown} />
+              <Diagram layout={DESKTOP} sf={sf} className="hidden h-full max-h-[62svh] w-full lg:block" />
             </div>
 
-            {/* Las cinco etapas a la vista; la activa se enciende y muestra su texto */}
-            <ol className="mt-6 grid grid-cols-5 gap-6">
+            {/* Etapas: en escritorio las cinco a la vista; en celulares, la activa. En celulares
+                comparten una celda (el texto más largo fija el alto, así el diagrama no cambia
+                de tamaño) y se relevan sin pisarse: la que sale se va rápido hacia arriba y la
+                que llega entra desde abajo apenas después */}
+            <ol className="mt-4 grid lg:mt-6 lg:grid-cols-5 lg:gap-6">
               {STAGES.map((s, i) => {
                 const on = i === active;
                 return (
                   <li
                     key={s.title}
                     aria-current={on ? "step" : undefined}
-                    className={`border-t pt-3 transition-[border-color] duration-500 ease-[var(--ease-out)] ${
-                      on ? "border-blue-400" : "border-line"
+                    className={`col-start-1 row-start-1 border-t pt-3 transition-[opacity,translate,border-color] ease-[var(--ease-out)] motion-reduce:!translate-none lg:col-start-auto lg:row-start-auto ${
+                      on
+                        ? "border-blue-400 delay-150 duration-500"
+                        : `border-line duration-200 max-lg:opacity-0 ${i < active ? "max-lg:-translate-y-2" : "max-lg:translate-y-2"}`
                     }`}
                   >
                     <p className={`text-sm font-medium transition-colors duration-500 ${on ? "text-ink" : "text-ink-faint"}`}>
@@ -249,8 +322,8 @@ export function SalesFlow() {
                       {s.title}
                     </p>
                     <p
-                      className={`mt-1 text-sm leading-relaxed transition-[opacity,translate] duration-500 ease-[var(--ease-out)] ${
-                        on ? "text-ink-muted" : "translate-y-1 text-ink-faint opacity-0"
+                      className={`mt-1 text-[13px] leading-relaxed transition-opacity duration-500 lg:text-sm ${
+                        on ? "text-ink-muted" : "text-ink-faint lg:opacity-0"
                       }`}
                     >
                       {s.text}

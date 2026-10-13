@@ -3,7 +3,6 @@
 import { motion } from "motion/react";
 import { TrendDown } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
-import { tap } from "@/lib/haptics";
 import { PreviewShell, usePreviewLoop } from "./preview-shell";
 
 type Channel = "Meta Ads" | "Google Ads";
@@ -63,25 +62,24 @@ export function MarketingPreview() {
         paused={paused}
         onTogglePause={() => setPaused((p) => !p)}
       >
-        <div role="group" aria-label="Canal" className="inline-flex gap-1 rounded-xl border border-line bg-navy-900 p-1 light:bg-navy-800">
+        <div role="group" aria-label="Canal" className="inline-flex gap-1 rounded-xl border border-line bg-navy-900 p-1">
           {CHANNELS.map((c) => (
             <button
               key={c}
               type="button"
               aria-pressed={c === channel}
               onClick={() => {
-                tap();
                 setPaused(true);
                 setChannel(c);
               }}
-              className={`relative rounded-lg px-3 py-1.5 text-[12px] font-medium transition-[color,scale] duration-150 ease-[var(--ease-out)] active:scale-[0.95] pointer-coarse:min-h-11 ${
+              className={`relative rounded-lg px-3 py-1.5 text-[12px] font-medium transition-colors duration-150 active:scale-[0.97] pointer-coarse:min-h-11 ${
                 c === channel ? "text-white" : "text-ink-muted hover:text-ink"
               }`}
             >
               {c === channel && (
                 <motion.span
                   layoutId="mkt-channel"
-                  className="absolute inset-0 rounded-lg bg-blue-500 shadow-[inset_0_1px_0_rgb(255_255_255/0.2)]"
+                  className="absolute inset-0 rounded-lg bg-blue-500"
                   transition={{ type: "spring", duration: 0.4, bounce: 0.15 }}
                 />
               )}
@@ -108,14 +106,14 @@ export function MarketingPreview() {
         </ol>
 
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="rounded-xl border border-line bg-navy-900/80 p-3 light:bg-navy-850">
+          <div className="rounded-xl border border-line bg-navy-900/80 p-3">
             <p className="text-[11px] text-ink-faint">Costo por venta</p>
             <p className="mt-1 font-mono text-[15px] text-ink tabular">{cpa.now}</p>
             <p className="mt-1 flex items-center gap-1 text-[11px] text-blue-300">
               <TrendDown size={12} weight="bold" aria-hidden="true" /> {cpa.delta} vs. {cpa.before}
             </p>
           </div>
-          <div className="rounded-xl border border-line bg-navy-900/80 p-3 light:bg-navy-850">
+          <div className="rounded-xl border border-line bg-navy-900/80 p-3">
             <p className="text-[11px] text-ink-faint">Consulta a venta</p>
             <p className="mt-1 font-mono text-[15px] text-ink tabular">{rate} %</p>
             <p className="mt-1 text-[11px] text-ink-muted">Cada venta, atribuida a su anuncio</p>

@@ -9,7 +9,7 @@
   - en diagonal (SPREAD, escritorio): cada cinta sale hacia su lado, las tres etapas de la venta
   - en capas (LAYERS, celulares): una vista explotada que conserva la silueta de la S (las capas
     se separan en altura y en profundidad); pasada la apertura completa se dispersan hacia los
-    bordes de la pantalla para que la cámara pase entre ellas en la zambullida
+    bordes (SCATTER)
 */
 import { useThree } from "@react-three/fiber";
 import { useEffect, useMemo } from "react";

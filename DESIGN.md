@@ -108,12 +108,10 @@ puro, campos grandes de azul saturado. La única luz de la página es la del obj
   secciones dejan marcas `<StageMark pose="..."/>` y el director interpola la pose del isotipo
   entre la marca anterior y la siguiente según el scroll (poses en `choreography.ts`). El
   render se detiene cuando el objeto no se ve. three.js se carga solo en el cliente.
-  En escritorio la S recorre la página. En celulares (vertical y con movimiento) el hero queda
-  fijado y el resto de la página sube encima como una hoja opaca con el borde redondeado: se va
-  el texto, la S crece en la zona libre, se abre en capas (una vista explotada que conserva la
-  silueta) y la cámara la atraviesa por encima de la hoja, justo antes de que la tape. Nunca
-  queda una pantalla vacía ni la S detrás de un texto (las poses `region` se ubican sobre la
-  hoja). Acostado o con reduced motion el hero no se fija y la S sube con la página.
+  En escritorio la S recorre la página. En celulares el hero es una pantalla común (sin tramo
+  fijado): el escenario va al principio de la página, la S sube con el hero como una imagen y,
+  mientras se va, gira y se abre en capas (una vista explotada que conserva la silueta) hasta
+  apagarse. El texto nunca se oculta ni queda tapado. Con reduced motion la S solo se apaga.
 - **Titulares (celulares):** cada palabra se para en 3D sobre su base, de a una, al ritmo del
   dedo (MaskWords). Tarjetas grandes (galería, formulario, principios, cierre de proyectos) se
   paran desde inclinadas; los logos giran de canto a frente.

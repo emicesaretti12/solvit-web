@@ -438,7 +438,7 @@ export function Projects() {
   return (
     <section id="proyectos" aria-label="Proyectos realizados" className="relative border-t border-line">
       <div className="mx-auto max-w-[1200px] px-4 py-24 [perspective:1600px] md:px-6 md:py-36">
-        <Reveal depth>
+        <Reveal className="sd-3d">
           <PortfolioGallery
             stat={<Stat3D value={DELIVERED} />}
             title={

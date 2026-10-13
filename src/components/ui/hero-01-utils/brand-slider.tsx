@@ -45,9 +45,9 @@ function BrandGlyph({ brand }: { brand: BrandList }) {
 export default function BrandSlider({ brandList }: { brandList: BrandList[] }) {
   // Con pocos logos va una fila quieta: la única marquesina de la página es la de clientes
   return (
-    <section aria-labelledby="plataformas-titulo" className="relative pb-4 pt-6 md:pb-28">
+    <section aria-labelledby="plataformas-titulo" className="relative pb-4 pt-2 md:pb-28 md:pt-6">
       <div className="mx-auto max-w-[1200px] px-4 md:px-6">
-        <div className="flex items-center justify-between gap-4 md:border-t md:border-line md:pt-8">
+        <div className="flex items-center justify-between gap-4 border-t border-line pt-6 md:pt-8">
           <p id="plataformas-titulo" className="text-sm text-ink-muted">
             Trabajamos con
           </p>
