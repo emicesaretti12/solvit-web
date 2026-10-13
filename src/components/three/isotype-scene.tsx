@@ -13,7 +13,9 @@
   el tema claro es la que la apoya en el espacio.
 
   La pose llega en un objeto mutable (IsoPose) que se anima desde afuera sin re-renderizar React;
-  acá cada cuadro se amortigua hacia esa pose. El arrastre (touch o mouse) gira la pieza con un
+  acá cada cuadro se amortigua hacia esa pose. Las cintas se abren de dos maneras (la pose las
+  mezcla con `layers`): en diagonal, las tres etapas de la venta (escritorio), o en capas, una
+  vista explotada que conserva la silueta de la S y después se dispersa (celulares). El arrastre (touch o mouse) gira la pieza con un
   resorte que hereda la velocidad del dedo y vuelve a la pose de reposo; un toque corto la hace
   respirar (las cintas se abren y vuelven con un rebote) y lanza una onda por las partículas.
 
@@ -26,7 +28,17 @@ import { useEffect, useMemo, useRef, type MutableRefObject } from "react";
 import * as THREE from "three";
 import { useTheme } from "@/lib/theme";
 import { FOV, fitDistance, stageSignal, type DragState, type IsoPose } from "./pose";
-import { RIBBONS, SPREAD, STAGGER, STEP_SPREAD, StudioEnvironment, smoothstep, useRibbonGeometry } from "./ribbons";
+import {
+  LAYERS,
+  RIBBONS,
+  SCATTER,
+  SPREAD,
+  STAGGER,
+  STEP_SPREAD,
+  StudioEnvironment,
+  smoothstep,
+  useRibbonGeometry,
+} from "./ribbons";
 import { RIBBON_SHARES } from "./ribbon-geometry";
 import { createRibbonUniforms, patchRibbonMaterial } from "./ribbon-material";
 import { createParticleMaterial, createParticleUniforms, sampleRibbonParticles } from "./particle-field";
@@ -158,12 +170,24 @@ function Ribbon({
     const staged = MOBILE || raw >= STEP_SPREAD ? raw : STEP_SPREAD * smoothstep(lo, hi, raw / STEP_SPREAD);
     // El rebote del toque abre las tres por igual (sin el escalonado)
     const s = Math.max(0, staged + fx.kick.value);
+    // En diagonal (escritorio) la apertura sigue derecho; en capas (celulares) hasta 1 se separan
+    // conservando la silueta y, pasado 1, se dispersan hacia los bordes (la zambullida)
+    const L = p.layers;
+    const s1 = Math.min(1, s);
+    const s2 = s - s1;
     const [offset, rz, ry] = SPREAD[index];
+    const [layer, lrz, lry] = LAYERS[index];
+    const [scatter, crz, cry] = SCATTER[index];
+    const along = (d: number, l: number, c: number) => lerp(d * s, l * s1 + c * s2, L);
     // La cinta del paso activo se adelanta hacia la cámara: en un celular, donde la S es chica,
     // se lee qué parte trabaja aunque el brillo no alcance
     pop.current = reduce ? (p.focus === index ? 1 : 0) : damp(pop.current, p.focus === index ? 1 : 0, 7, dt);
-    g.position.set(center.x + offset.x * s, center.y + offset.y * s, ribbon.z + offset.z * s + pop.current * 0.45);
-    g.rotation.set(0, ry * s, rz * s);
+    g.position.set(
+      center.x + along(offset.x, layer.x, scatter.x),
+      center.y + along(offset.y, layer.y, scatter.y),
+      ribbon.z + along(offset.z, layer.z, scatter.z) + pop.current * 0.45,
+    );
+    g.rotation.set(0, along(ry, lry, cry), along(rz, lrz, crz));
     g.scale.setScalar(1 + pop.current * 0.05);
 
     // Con una cinta destacada, las otras bajan la luz; con focus -2 (crecer) brillan las tres. En

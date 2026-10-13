@@ -9,7 +9,9 @@
   su nombre al lado: en el claro, la baldosa es blanca con borde fino y una sombra corta que la
   despega del fondo; en el oscuro, navy con el borde de luz arriba. Así se leen igual de bien
   en los dos temas sin usar los colores de cada marca (el único acento del sitio es el azul).
-  En celulares van en una grilla de 2 x 2; en escritorio, en una fila.
+  En celulares va todo en una sola fila compacta (es lo primero de la hoja que sube sobre el
+  hero): el rótulo a la izquierda y las cuatro baldosas a la derecha, con el nombre solo para
+  lectores de pantalla; desde sm, cada baldosa con su nombre al lado.
 */
 import type { CSSProperties } from "react";
 
@@ -43,15 +45,15 @@ function BrandGlyph({ brand }: { brand: BrandList }) {
 export default function BrandSlider({ brandList }: { brandList: BrandList[] }) {
   // Con pocos logos va una fila quieta: la única marquesina de la página es la de clientes
   return (
-    <section aria-labelledby="plataformas-titulo" className="relative pb-20 pt-6 md:pb-28">
+    <section aria-labelledby="plataformas-titulo" className="relative pb-4 pt-6 md:pb-28">
       <div className="mx-auto max-w-[1200px] px-4 md:px-6">
-        <div className="flex flex-col items-start gap-6 border-t border-line pt-8 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center justify-between gap-4 md:border-t md:border-line md:pt-8">
           <p id="plataformas-titulo" className="text-sm text-ink-muted">
             Trabajamos con
           </p>
           {/* sd-flip: en celulares con scroll ligado, cada logo gira de canto a frente, de a uno
               (la animación va en el <li>; la baldosa de adentro no tiene preserve-3d) */}
-          <ul className="grid w-full grid-cols-2 gap-x-4 gap-y-4 [perspective:600px] sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-x-8 md:gap-x-10">
+          <ul className="flex items-center gap-2 [perspective:600px] sm:flex-wrap sm:gap-x-8 md:gap-x-10">
             {brandList.map((brand, i) => (
               <li
                 key={brand.name}
@@ -60,7 +62,7 @@ export default function BrandSlider({ brandList }: { brandList: BrandList[] }) {
               >
                 <span
                   className={[
-                    "flex size-11 shrink-0 items-center justify-center rounded-[14px] border text-ink",
+                    "flex size-10 shrink-0 items-center justify-center rounded-[13px] border text-ink sm:size-11 sm:rounded-[14px]",
                     "border-line bg-navy-850 shadow-[inset_0_1px_0_rgb(255_255_255/0.06)]",
                     "light:border-line-strong light:shadow-[0_1px_2px_rgb(var(--shade-rgb)/0.08),0_8px_18px_-10px_rgb(var(--shade-rgb)/0.35)]",
                     "transition-[translate] duration-200 ease-[var(--ease-out)] motion-safe:pointer-fine:group-hover/brand:-translate-y-0.5",
@@ -68,7 +70,7 @@ export default function BrandSlider({ brandList }: { brandList: BrandList[] }) {
                 >
                   <BrandGlyph brand={brand} />
                 </span>
-                <span className="text-sm font-medium text-ink-muted transition-colors duration-200 pointer-fine:group-hover/brand:text-ink">
+                <span className="sr-only text-sm font-medium text-ink-muted transition-colors duration-200 sm:not-sr-only pointer-fine:group-hover/brand:text-ink">
                   {brand.name}
                 </span>
               </li>

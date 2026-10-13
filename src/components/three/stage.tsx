@@ -10,7 +10,8 @@
   - three.js se carga recién en el cliente (next/dynamic, ssr: false)
   - al cargar, las partículas llegan desde una nube y arman la S; en la zambullida pasan al
     costado de la cámara como un flujo de datos (todo en la GPU, ver particle-field.ts)
-  - en celulares el hero queda fijado mientras la S se abre y la cámara la atraviesa
+  - en celulares el hero queda fijado y el resto de la página sube encima como una hoja: la S
+    se abre en capas por encima de esa hoja y la cámara la atraviesa
   - fuera de las zonas donde se ve, el render se detiene
   - sin WebGL queda el isotipo en SVG, ubicado con la misma pose
   - con reduced motion no hay zambullida ni apertura: solo cambios de lugar y de luz
@@ -38,16 +39,19 @@ const pointer = { current: { x: 0, y: 0 } };
 const DESKTOP = "(min-width: 1024px)";
 
 /** Marca de pose: cuando su borde superior llega al borde superior de la pantalla, el isotipo
- *  está en esa pose. Entre dos marcas, la pose se interpola. `slot` es el id del hueco que la
- *  sección deja para el isotipo en celulares: la pose toma su centro y su alto. */
+ *  está en esa pose. Entre dos marcas, la pose se interpola. En celulares, `slot` es el id del
+ *  hueco que la sección deja para el isotipo (la pose toma su centro y su alto) y `region` ubica
+ *  la pose en lo que queda a la vista por encima de la hoja que sube sobre el hero fijado */
 export function StageMark({
   pose: key,
   slot,
+  region,
   className = "",
   style,
 }: {
   pose: PoseKey;
   slot?: string;
+  region?: boolean;
   className?: string;
   style?: CSSProperties;
 }) {
@@ -55,6 +59,7 @@ export function StageMark({
     <div
       data-stage={key}
       data-slot={slot}
+      data-region={region || undefined}
       aria-hidden="true"
       style={style}
       className={`pointer-events-none h-px w-px ${className}`}
@@ -184,9 +189,29 @@ export function Stage() {
       return { ...pose, y: 1 - (2 * (top + rect.height / 2)) / vh, scale: Math.min(pose.scale, fit) };
     };
 
+    // Hoja que sube sobre el hero fijado (celulares): las poses `region` se ubican en lo que queda
+    // a la vista por encima de ella cuando el scroll llega a su marca. Su y es un corrimiento en
+    // medias alturas de esa zona; si la S se acerca a la cámara (z > 0) la perspectiva la agranda
+    // y la aleja del centro, así que se compensa. Abierta en capas, la S ocupa ~20 % más de alto.
+    // Acercándose puede pasarse un poco de la zona; la que atraviesa la cámara (z ≥ 0,6) no se
+    // achica: tiene que llenar la pantalla
+    const regionPose = (pose: StagePose, at: number, coverTop: number): StagePose => {
+      const top = vh * 0.1; // debajo del header
+      const bottom = Math.max(top + vh * 0.22, Math.min(vh, coverTop - at) - vh * 0.03);
+      const half = (bottom - top) / 2;
+      const cy = top + half - pose.y * half;
+      const near = 1 - Math.max(0, pose.z);
+      const extent = 1 + 0.22 * Math.min(1, pose.spread);
+      const fit = (0.94 * (bottom - top)) / (isotypeHeightPx(window.innerWidth, vh) * extent);
+      const room = pose.z >= 0.6 ? Infinity : pose.z > 0.2 ? 1.25 : 1;
+      return { ...pose, y: (1 - (2 * cy) / vh) * near, scale: Math.min(pose.scale, fit * near * room) };
+    };
+
     const measure = () => {
       // Alto del canvas (100lvh), que es la referencia de las fracciones de pantalla
       vh = layer.current?.offsetHeight || window.innerHeight;
+      const cover = document.querySelector<HTMLElement>("[data-stage-cover]");
+      const coverTop = cover ? cover.getBoundingClientRect().top + window.scrollY : Infinity;
       const els = Array.from(document.querySelectorAll<HTMLElement>("[data-stage]"))
         // Una marca dentro de algo oculto (la versión de escritorio de una sección, en celulares)
         // no cuenta: si no, mediría 0 y se metería entre las del hero
@@ -198,6 +223,7 @@ export function Stage() {
         const def: PoseDef = POSES[el.dataset.stage as PoseKey];
         let pose = { ...(desktop.matches ? def.desktop : def.mobile) };
         if (!desktop.matches && el.dataset.slot) pose = slotPose(pose, el.dataset.slot);
+        if (!desktop.matches && el.dataset.region !== undefined) pose = regionPose(pose, at, coverTop);
         if (reduce) {
           const prev = next[next.length - 1];
           // Sin zambullida: se queda en el lugar de la marca anterior y solo se desvanece
@@ -231,6 +257,7 @@ export function Stage() {
       p.z = lerp(A.z, B.z, t);
       p.scale = lerp(A.scale, B.scale, t);
       p.spread = lerp(A.spread, B.spread, t);
+      p.layers = lerp(A.layers, B.layers, t);
       p.turn = lerp(A.turn, B.turn, t);
       p.tilt = lerp(A.tilt, B.tilt, t);
       p.focus = t < 0.5 ? A.focus : B.focus;
@@ -269,13 +296,13 @@ export function Stage() {
   return (
     // Alto estable (100lvh): al aparecer o esconderse la barra del navegador el canvas no se
     // redimensiona y la S no salta. En celulares la S solo vive en el hero, que queda fijado
-    // mientras dura su recorrido: el texto no se mueve y la S nunca se desfasa del contenido.
-    // Con reduced motion el hero no se fija: el escenario va al principio de la página y la S
-    // sube con el texto como una imagen
+    // mientras el resto de la página sube encima: el texto no se mueve y la S nunca se desfasa
+    // del contenido. Sin tramo fijado (acostado o con reduced motion) el escenario va al
+    // principio de la página y la S sube con el texto como una imagen
     <div
       ref={layer}
       aria-hidden="true"
-      className="pointer-events-none fixed inset-x-0 top-0 z-0 h-[100lvh] max-lg:motion-reduce:absolute"
+      className="pointer-events-none fixed inset-x-0 top-0 z-0 h-[100lvh] loose:absolute"
       style={{ opacity: 0 }}
     >
       {/* Póster: el isotipo plano mientras carga WebGL (o si no hay). Con movimiento se va rápido:
