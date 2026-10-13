@@ -12,9 +12,13 @@
     capas, como una vista explotada que conserva la silueta de la S (celulares). Con spread
     mayor a 1 las capas se dispersan hacia los bordes y dejan pasar a la cámara
   - En celulares la S solo vive en el hero, en el hueco que deja arriba del texto (las poses con
-    `slot` toman el centro y el tamaño de ese hueco). El escenario no es fijo: la S sube con el
-    hero como una imagen y, mientras se va, gira y se abre en capas hasta apagarse (leave). El
-    texto nunca se oculta ni queda tapado
+    `slot` toman el centro y el tamaño de ese hueco; si se acerca a la cámara, crece desde ese
+    centro). En vertical y con movimiento el hero queda fijado un tramo corto y el texto NUNCA se
+    oculta: la S gira (rise), se abre en sus tres capas (open), avanza hacia la cámara (plunge),
+    la atraviesa con las partículas como un flujo de datos (dive), vuelve a llegar desde el fondo
+    (reform) y se arma otra vez en su hueco (settle) justo cuando el hero se suelta; después sube
+    con el hero y se apaga (leave, marca lineal: acompaña al hero). Acostado o con reduced motion
+    no hay tramo fijado: la S sube con el hero y se apaga
   - unfold solo existe en escritorio (su marca está oculta en celulares)
   - La profundidad también mueve las partículas: z > 0 las vuelve un flujo hacia la cámara
     (zambullida) y z < 0 las dispersa (la S llega desde el fondo y se vuelve a juntar)
@@ -70,16 +74,43 @@ export const POSES = {
     mobile: m({ scale: 1 }),
     reducedHold: true,
   },
-  // Escritorio: mitad del hero, la S se abre y avanza hacia la cámara, todavía entera a la vista
-  plunge: {
-    desktop: p({ x: 0.22, z: 0.42, scale: 1.1, spread: 1.1, turn: 0.7, tilt: 0.22 }),
-    mobile: OFF,
+  // Celulares (hero fijado): la S gira en su hueco
+  rise: {
+    desktop: p({ x: 0.6, y: -0.02, scale: 0.98 }),
+    mobile: m({ z: 0.06, scale: 1.04, turn: 0.34, tilt: 0.05 }),
     reducedHold: true,
   },
-  // Escritorio, salida del hero: las cintas se abren hacia los bordes y pasan al lado de la cámara
+  // Celulares: vista explotada en su hueco. Las tres capas separadas en altura y profundidad,
+  // giradas para que se lea el espesor de cada una, con la silueta de la S entera
+  open: {
+    desktop: p({ x: 0.6, y: -0.02, scale: 0.98 }),
+    mobile: m({ z: 0.18, scale: 1.1, spread: 1, turn: -0.3, tilt: 0.26 }),
+    reducedHold: true,
+  },
+  // Mitad del hero: la S se abre y avanza hacia la cámara, todavía entera a la vista (en
+  // celulares crece desde su hueco y las capas empiezan a dispersarse)
+  plunge: {
+    desktop: p({ x: 0.22, z: 0.42, scale: 1.1, spread: 1.1, turn: 0.7, tilt: 0.22 }),
+    mobile: m({ z: 0.45, scale: 1.1, spread: 1.5, turn: -0.62, tilt: 0.36 }),
+    reducedHold: true,
+  },
+  // Salida del hero: las cintas se abren hacia los bordes y pasan al lado de la cámara
   dive: {
     desktop: p({ x: 0.04, z: 0.9, scale: 1.25, spread: 2.6, turn: 1.15, tilt: 0.38, opacity: 0 }),
-    mobile: OFF,
+    mobile: m({ z: 0.9, scale: 1.1, spread: 2.6, turn: -1.05, tilt: 0.46, opacity: 0 }),
+    reducedHold: true,
+  },
+  // Celulares: del otro lado de la cámara, la S vuelve a llegar desde el fondo, todavía abierta
+  // (las partículas llegan dispersas y se juntan)
+  reform: {
+    desktop: p({ x: 0.6, y: -0.02, scale: 0.98, opacity: 0 }),
+    mobile: m({ z: -0.7, scale: 1, spread: 0.9, turn: 0.9, tilt: 0.2, opacity: 0 }),
+    reducedHold: true,
+  },
+  // Celulares: armada otra vez en su hueco, justo cuando el hero se suelta
+  settle: {
+    desktop: p({ x: 0.6, y: -0.02, scale: 0.98 }),
+    mobile: m({ scale: 1 }),
     reducedHold: true,
   },
   // Celulares: la S sube con el hero (en su hueco), gira, se abre en capas y se apaga al final.

@@ -80,10 +80,11 @@ puro, campos grandes de azul saturado. La única luz de la página es la del obj
   el "+10" en 3D (capas en profundidad, como el wordmark del pie); en celulares, un anillo 3D de
   portadas con scroll nativo y snap, con "3 / 10" y puntos; en escritorio, el abanico entero.
   Los casos destacados van en una laptop 3D en CSS que se abre con el scroll.
-- **Hero en celulares:** la S arriba, entera y centrada en su hueco; abajo el titular, el
-  contacto, la prueba (más de 10 proyectos, con tres portadas) y los cinco servicios como
-  íconos de app que llevan a su tarjeta del mazo (scroll calculado: la tarjeta llega entera
-  arriba del mazo). En celulares bajos la frase cede su lugar a la S.
+- **Hero:** el titular, el contacto, la prueba (más de 10 proyectos, con tres portadas) y los
+  cinco servicios como íconos de app que llevan a su tarjeta (en el mazo de celulares, scroll
+  calculado: la tarjeta llega entera arriba del mazo). En escritorio, a la izquierda de la S; en
+  celulares, la S arriba, entera y centrada en su hueco, y en celulares bajos la frase cede su
+  lugar a la S.
 - **Inputs:** etiqueta arriba, error abajo, 16px mínimo, foco azul.
 - **Tema:** claro por defecto; botón en el header y en el menú. El cambio es un círculo que
   crece desde el botón (View Transition). El script del layout aplica la preferencia guardada
@@ -108,10 +109,12 @@ puro, campos grandes de azul saturado. La única luz de la página es la del obj
   secciones dejan marcas `<StageMark pose="..."/>` y el director interpola la pose del isotipo
   entre la marca anterior y la siguiente según el scroll (poses en `choreography.ts`). El
   render se detiene cuando el objeto no se ve. three.js se carga solo en el cliente.
-  En escritorio la S recorre la página. En celulares el hero es una pantalla común (sin tramo
-  fijado): el escenario va al principio de la página, la S sube con el hero como una imagen y,
-  mientras se va, gira y se abre en capas (una vista explotada que conserva la silueta) hasta
-  apagarse. El texto nunca se oculta ni queda tapado. Con reduced motion la S solo se apaga.
+  En escritorio la S recorre la página. En celulares (vertical y con movimiento) el hero queda
+  fijado un tramo corto (80svh) y el texto NUNCA se oculta: la S gira, se abre en capas (una
+  vista explotada que conserva la silueta), avanza y atraviesa la cámara con las partículas
+  como un flujo de datos, vuelve desde el fondo y se arma otra vez en su hueco justo cuando el
+  hero se suelta; después sube con él (marca lineal) y se apaga. El canvas no dibuja mientras la
+  S no se ve. Acostado o con reduced motion no hay tramo fijado y la S sube con el hero.
 - **Titulares (celulares):** cada palabra se para en 3D sobre su base, de a una, al ritmo del
   dedo (MaskWords). Tarjetas grandes (galería, formulario, principios, cierre de proyectos) se
   paran desde inclinadas; los logos giran de canto a frente.

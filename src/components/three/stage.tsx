@@ -10,7 +10,8 @@
   - three.js se carga recién en el cliente (next/dynamic, ssr: false)
   - al cargar, las partículas llegan desde una nube y arman la S; en la zambullida pasan al
     costado de la cámara como un flujo de datos (todo en la GPU, ver particle-field.ts)
-  - en celulares la S vive en el hero y sube con él; mientras se va, gira y se abre en capas
+  - en celulares la S vive en el hero: con el hero fijado un tramo corto (el texto siempre a la
+    vista) se abre en capas, atraviesa la cámara, se vuelve a armar en su hueco y sube con él
   - fuera de las zonas donde se ve, el render se detiene
   - sin WebGL queda el isotipo en SVG, ubicado con la misma pose
   - con reduced motion no hay zambullida ni apertura: solo cambios de lugar y de luz
@@ -38,16 +39,19 @@ const pointer = { current: { x: 0, y: 0 } };
 const DESKTOP = "(min-width: 1024px)";
 
 /** Marca de pose: cuando su borde superior llega al borde superior de la pantalla, el isotipo
- *  está en esa pose. Entre dos marcas, la pose se interpola. `slot` es el id del hueco que la
- *  sección deja para el isotipo en celulares: la pose toma su centro y su alto. */
+ *  está en esa pose. Entre dos marcas, la pose se interpola (con una curva suave, o pareja con
+ *  `linear`: así la S acompaña a algo que se mueve con el scroll). `slot` es el id del hueco que
+ *  la sección deja para el isotipo en celulares: la pose toma su centro y su alto. */
 export function StageMark({
   pose: key,
   slot,
+  linear,
   className = "",
   style,
 }: {
   pose: PoseKey;
   slot?: string;
+  linear?: boolean;
   className?: string;
   style?: CSSProperties;
 }) {
@@ -55,6 +59,7 @@ export function StageMark({
     <div
       data-stage={key}
       data-slot={slot}
+      data-linear={linear || undefined}
       aria-hidden="true"
       style={style}
       className={`pointer-events-none h-px w-px ${className}`}
@@ -158,7 +163,7 @@ export function Stage() {
 
   // Director: marcas del documento → pose interpolada según el scroll
   useEffect(() => {
-    let marks: { at: number; pose: StagePose }[] = [];
+    let marks: { at: number; pose: StagePose; linear: boolean }[] = [];
     let shown = false;
     let vh = window.innerHeight;
     const desktop = window.matchMedia(DESKTOP);
@@ -166,22 +171,43 @@ export function Stage() {
     // Hueco reservado para el isotipo (celulares): su centro y su alto, en la pantalla, cuando
     // la sección está a la vista (el hero). En los pasos, los celulares tienen su propia S
     // dentro del panel (steps-isotype) y este escenario queda apagado
-    const slotPose = (pose: StagePose, slotId: string): StagePose => {
+    const slotPose = (pose: StagePose, slotId: string, at: number): StagePose => {
       const el = document.getElementById(slotId);
       if (!el || !el.offsetHeight) return pose;
       const rect = el.getBoundingClientRect();
-      let top = rect.top + window.scrollY;
-      // Si el hueco vive en un panel que se fija (el hero en celulares), su lugar en la pantalla
-      // es el del panel sin desplazar, que arranca donde arranca su sección: así la medida da
-      // igual aunque la página se recargue con el panel ya fijado
+      const sy = window.scrollY;
+      let top = rect.top + sy;
       const frame = el.closest<HTMLElement>("[data-stage-frame]");
-      if (frame?.parentElement) {
-        top = rect.top - frame.getBoundingClientRect().top + frame.parentElement.getBoundingClientRect().top + window.scrollY;
+      const section = frame?.parentElement;
+      if (frame && section) {
+        // Lugar del hueco dentro de su panel y del panel en el documento (sin desplazar: la
+        // medida da igual aunque la página se recargue con el panel ya fijado)
+        const inFrame = rect.top - frame.getBoundingClientRect().top;
+        const sectionTop = section.getBoundingClientRect().top + sy;
+        if (layer.current && getComputedStyle(layer.current).position === "fixed") {
+          // Escenario fijo (celular en vertical): dónde queda el hueco en la pantalla cuando el
+          // scroll llega a la marca. El panel está fijado (sticky) durante su tramo y después
+          // sube con la página
+          const end = sectionTop + section.offsetHeight - frame.offsetHeight;
+          const frameTop =
+            getComputedStyle(frame).position !== "sticky" || at < sectionTop
+              ? sectionTop - at
+              : Math.min(0, end - at);
+          top = frameTop + inFrame;
+        } else {
+          // Escenario al principio de la página (acostado o con reduced motion): el hueco en el
+          // documento, la S sube con él
+          top = sectionTop + inFrame;
+        }
       }
-      // La S abierta ocupa más alto: ~0,47 unidades extra por cada punto de apertura
-      const extent = 1 + 0.47 * pose.spread;
+      // La S abierta ocupa más alto: ~0,47 unidades extra por cada punto de apertura en diagonal
+      // y ~0,22 en capas
+      const extent = 1 + (0.47 - 0.25 * pose.layers) * Math.min(1, pose.spread);
       const fit = (0.92 * rect.height) / (isotypeHeightPx(window.innerWidth, vh) * extent);
-      return { ...pose, y: 1 - (2 * (top + rect.height / 2)) / vh, scale: Math.min(pose.scale, fit) };
+      // Si la S se acerca a la cámara (z > 0), la perspectiva la agranda y la aleja del centro:
+      // se compensa el lugar, así crece desde el centro del hueco hasta atravesar la cámara
+      const near = 1 - Math.max(0, pose.z);
+      return { ...pose, y: (1 - (2 * (top + rect.height / 2)) / vh) * near, scale: Math.min(pose.scale, fit) };
     };
 
     const measure = () => {
@@ -197,13 +223,13 @@ export function Stage() {
       for (const { el, at } of els) {
         const def: PoseDef = POSES[el.dataset.stage as PoseKey];
         let pose = { ...(desktop.matches ? def.desktop : def.mobile) };
-        if (!desktop.matches && el.dataset.slot) pose = slotPose(pose, el.dataset.slot);
+        if (!desktop.matches && el.dataset.slot) pose = slotPose(pose, el.dataset.slot, at);
         if (reduce) {
           const prev = next[next.length - 1];
           // Sin zambullida: se queda en el lugar de la marca anterior y solo se desvanece
           pose = def.reducedHold && prev ? { ...prev.pose, opacity: pose.opacity } : { ...pose, ...def.reduced };
         }
-        next.push({ at, pose });
+        next.push({ at, pose, linear: el.dataset.linear !== undefined });
       }
       marks = next;
       update(window.scrollY);
@@ -222,7 +248,8 @@ export function Stage() {
         b = marks[i];
       }
       const span = b.at - a.at;
-      const t = span > 0 ? smooth(Math.min(1, Math.max(0, (y - a.at) / span))) : 0;
+      const run = span > 0 ? Math.min(1, Math.max(0, (y - a.at) / span)) : 0;
+      const t = b.linear ? run : smooth(run);
       const p = pose.current;
       const A = a.pose;
       const B = b.pose;
@@ -270,12 +297,13 @@ export function Stage() {
   return (
     // Alto estable (100lvh): al aparecer o esconderse la barra del navegador el canvas no se
     // redimensiona y la S no salta. En escritorio el escenario es fijo y la S recorre la página.
-    // En celulares la S solo vive en el hero: el escenario va al principio de la página (no
-    // fijo), así la S sube con el hero como una imagen y nunca se desfasa del texto
+    // En celulares la S solo vive en el hero: en vertical el hero queda fijado un tramo corto
+    // (el texto siempre a la vista) mientras la S hace su transición; acostado o con reduced
+    // motion el escenario va al principio de la página y la S sube con el hero como una imagen
     <div
       ref={layer}
       aria-hidden="true"
-      className="pointer-events-none fixed inset-x-0 top-0 z-0 h-[100lvh] max-lg:absolute"
+      className="pointer-events-none fixed inset-x-0 top-0 z-0 h-[100lvh] loose:absolute"
       style={{ opacity: 0 }}
     >
       {/* Póster: el isotipo plano mientras carga WebGL (o si no hay). Con movimiento se va rápido:

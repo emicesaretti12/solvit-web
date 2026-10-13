@@ -28,7 +28,7 @@ npm run lint
 - `src/app/page.tsx`: composición de la página (hero, servicios, cómo funciona, recorrido,
   proyectos, nosotros, contacto)
 - `src/app/globals.css`: tokens de marca (navy medianoche + azul eléctrico), temas (claro por
-  defecto) y animaciones ligadas al scroll
+  defecto), variantes `pin:`/`loose:` del hero de celulares y animaciones ligadas al scroll
 - `src/app/native.css`: capa de app nativa (sin zoom ni rebote, áreas seguras, cambio de tema
   con View Transition); `manifest.ts`, `apple-icon.tsx` e `icons/`: app instalable
 - `src/app/scenes.css`: escenas 3D en CSS (objetos de los servicios, mazo de celulares y la

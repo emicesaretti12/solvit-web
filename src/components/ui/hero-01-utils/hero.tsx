@@ -2,25 +2,27 @@
 
 /*
   HeroSection del hero-01, rehecho para SEN con una sola idea: el isotipo en 3D (WebGL, en el
-  escenario fijo de la página) y, al lado, lo necesario: la bajada de la marca, el titular, el
-  botón de contacto y el camino a los servicios.
+  escenario de la página) y, al lado, lo necesario: la bajada de la marca, el titular, el botón
+  de contacto, la prueba (más de 10 proyectos entregados) y los cinco servicios como íconos de
+  app que llevan a su tarjeta.
 
   - El titular entra línea por línea con CSS (se pinta sin esperar a JavaScript); después de
     "ventas" aparece el corte azul de la N del wordmark.
   - Escritorio: texto a la izquierda y la S a la derecha. Al bajar, el texto se aleja y la cámara
     se zambulle entre las cintas (las poses las maneja el escenario según las marcas).
   - Celulares: la S arriba, entera y centrada en su hueco (#hero-slot); abajo el titular, el
-    botón, la prueba (proyectos entregados) y los cinco servicios como íconos de app que llevan
-    a su tarjeta. El hero es una pantalla común: no se fija y el texto nunca se oculta. El
-    escenario va al principio de la página (no fijo), así la S sube con el hero como una imagen
-    y, mientras se va, gira y se abre en capas hasta apagarse al final del hero.
+    botón, la prueba y los íconos. En vertical y con movimiento el hero queda fijado un tramo
+    corto (sticky, sin JS) y el texto NUNCA se oculta: mientras tanto la S gira, se abre en capas,
+    atraviesa la cámara, vuelve desde el fondo y se arma otra vez en su hueco justo cuando el
+    hero se suelta; después sube con él. Acostado o con reduced motion, el hero es una pantalla
+    común y la S sube con él.
   - Sobre el isotipo hay una superficie para girarlo con el dedo o el mouse: en touch solo toma
     el arrastre horizontal, el vertical sigue siendo scroll. Un toque corto hace respirar a la S
     (las cintas se abren y vuelven) y manda una onda por sus partículas.
   - Al cargar, las partículas llegan desde una nube y arman la S; la pieza sólida aparece encima
     con un barrido (todo en el escenario WebGL, ver src/components/three).
 */
-import { ArrowDown, Browsers, Code, Cpu, Megaphone, Sparkle, type Icon } from "@phosphor-icons/react";
+import { Browsers, Code, Cpu, Megaphone, Sparkle, type Icon } from "@phosphor-icons/react";
 import Image from "next/image";
 import { motion, useMotionValue, useScroll, useTransform } from "motion/react";
 import { useRef, useSyncExternalStore, type CSSProperties, type MouseEvent } from "react";
@@ -33,7 +35,7 @@ import { SERVICES, type ServiceKey } from "@/content/services";
 
 const LINES = ["Especialistas en", "solucionar", "tus ventas."];
 
-// Accesos a los servicios (celulares): el nombre corto va escrito, el completo en aria-label
+// Accesos a los servicios: el nombre corto va escrito, el completo en aria-label
 const QUICK: { key: ServiceKey; label: string; icon: Icon }[] = [
   { key: "web", label: "Web", icon: Browsers },
   { key: "software", label: "Software", icon: Code },
@@ -109,8 +111,8 @@ function goToService(key: ServiceKey, event: MouseEvent<HTMLAnchorElement>) {
 /* Los cinco servicios como íconos de app: llevan a su tarjeta */
 function QuickServices() {
   return (
-    <nav aria-label="Servicios" className="mt-6 lg:hidden">
-      <ul className="grid grid-cols-5 gap-1.5">
+    <nav aria-label="Servicios" className="mt-6 lg:mt-10 lg:max-w-[460px]">
+      <ul className="grid grid-cols-5 gap-1.5 lg:gap-3">
         {QUICK.map(({ key, label, icon: Glyph }, i) => (
           <li key={key} className="hero-fade" style={{ animationDelay: `${700 + i * 45}ms` }}>
             <HapticLink
@@ -122,15 +124,18 @@ function QuickServices() {
               <span
                 aria-hidden="true"
                 className={[
-                  "relative flex size-12 items-center justify-center rounded-[15px] border text-blue-400",
+                  "relative flex size-12 items-center justify-center rounded-[15px] border text-blue-400 lg:size-14 lg:rounded-[17px]",
                   "border-line bg-navy-850 shadow-[inset_0_1px_0_rgb(255_255_255/0.07),0_10px_22px_-14px_rgb(var(--shade-rgb)/0.9)]",
                   "light:border-line-strong light:shadow-[0_1px_2px_rgb(var(--shade-rgb)/0.08),0_10px_20px_-12px_rgb(var(--shade-rgb)/0.4)]",
-                  "transition-[scale,translate] duration-150 ease-[var(--ease-out)] group-active:scale-[0.92]",
+                  "transition-[scale,translate,border-color] duration-150 ease-[var(--ease-out)] group-active:scale-[0.92]",
+                  "motion-safe:pointer-fine:group-hover:-translate-y-0.5 pointer-fine:group-hover:border-blue-400/50",
                 ].join(" ")}
               >
                 <Glyph size={22} weight="duotone" />
               </span>
-              <span className="text-[11.5px] font-medium leading-none text-ink-muted">{label}</span>
+              <span className="text-[11.5px] font-medium leading-none text-ink-muted transition-colors duration-150 pointer-fine:group-hover:text-ink lg:text-[12.5px]">
+                {label}
+              </span>
             </HapticLink>
           </li>
         ))}
@@ -160,19 +165,29 @@ export default function HeroSection() {
   const visibility = useTransform(opacity, hide);
 
   return (
-    <section ref={ref} id="hero" aria-labelledby="hero-titulo" className="relative">
+    // Celulares fijados: un tramo de 180svh con el hero fijado arriba durante 80svh (el texto
+    // siempre a la vista); la transición de la S termina justo cuando el hero se suelta
+    <section ref={ref} id="hero" aria-labelledby="hero-titulo" className="relative pin:h-[180svh]">
       {/* Marcas del recorrido de la S (ver choreography.ts) */}
       <StageMark pose="hero" slot="hero-slot" className="absolute left-0 top-0" />
       {/* Escritorio: mientras el texto se va, la S gira de frente y se abre en sus tres cintas */}
       <StageMark pose="unfold" className="absolute left-0 top-[17%] max-lg:hidden" />
       <StageMark pose="plunge" className="absolute left-0 top-[38%] max-lg:hidden" />
       <StageMark pose="dive" className="absolute left-0 top-[72%] max-lg:hidden" />
-      {/* Celulares: la S sube con el hero, gira, se abre en capas y se apaga al final */}
-      <StageMark pose="leave" slot="hero-slot" className="absolute bottom-0 left-0 lg:hidden" />
+      {/* Celulares fijados: gira, se abre en capas, avanza, atraviesa la cámara, vuelve desde el
+          fondo y se arma en su hueco cuando el hero se suelta (80svh) */}
+      <StageMark pose="rise" slot="hero-slot" className="absolute left-0 top-[8svh] hidden pin:block" />
+      <StageMark pose="open" slot="hero-slot" className="absolute left-0 top-[24svh] hidden pin:block" />
+      <StageMark pose="plunge" slot="hero-slot" className="absolute left-0 top-[42svh] hidden pin:block" />
+      <StageMark pose="dive" slot="hero-slot" className="absolute left-0 top-[58svh] hidden pin:block" />
+      <StageMark pose="reform" slot="hero-slot" className="absolute left-0 top-[60svh] hidden pin:block" />
+      <StageMark pose="settle" slot="hero-slot" className="absolute left-0 top-[80svh] hidden pin:block" />
+      {/* Celulares: la S sube con el hero (marca lineal: la acompaña), gira, se abre y se apaga */}
+      <StageMark pose="leave" slot="hero-slot" linear className="absolute bottom-0 left-0 lg:hidden" />
 
       <div
         data-stage-frame
-        className="relative flex min-h-[100svh] flex-col overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[calc(max(1rem,env(safe-area-inset-top))+4.25rem)] lg:justify-center lg:pb-20 lg:pt-28"
+        className="relative flex min-h-[100svh] flex-col overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[calc(max(1rem,env(safe-area-inset-top))+4.25rem)] pin:sticky pin:top-0 pin:h-[100svh] lg:justify-center lg:pb-16 lg:pt-28"
       >
         {/* Arrastre del isotipo en escritorio: la mitad derecha */}
         <div
@@ -226,19 +241,7 @@ export default function HeroSection() {
 
             <div className="hero-fade mt-6 flex flex-wrap items-center gap-x-5 gap-y-3 [animation-delay:640ms] md:mt-9 lg:gap-x-7">
               <PrimaryCta label={CONTACT_LABEL} />
-              <Proof className="lg:hidden" />
-              <a
-                href="#servicios"
-                className="group hidden min-h-11 items-center gap-2 text-sm font-medium text-ink transition-colors duration-150 hover:text-blue-300 lg:inline-flex"
-              >
-                Ver servicios
-                <ArrowDown
-                  size={15}
-                  weight="bold"
-                  aria-hidden="true"
-                  className="transition-transform duration-200 ease-[var(--ease-out)] group-hover:translate-y-0.5"
-                />
-              </a>
+              <Proof />
             </div>
 
             <QuickServices />
