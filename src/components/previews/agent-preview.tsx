@@ -73,8 +73,8 @@ export function AgentPreview() {
         paused={paused}
         onTogglePause={() => setPaused((p) => !p)}
       >
-        <div className="grid h-full gap-3 sm:grid-cols-[1.25fr_1fr] stack-sm:flex stack-sm:min-h-0 stack-sm:flex-col">
-          <div className="flex min-h-[230px] flex-col justify-end gap-2 rounded-xl border border-line bg-navy-900/80 p-3 stack-sm:min-h-[200px]">
+        <div className="grid h-full gap-3 sm:grid-cols-[1.25fr_1fr] max-lg:flex max-lg:min-h-0 max-lg:flex-col">
+          <div className="flex min-h-[230px] flex-col justify-end gap-2 rounded-xl border border-line bg-navy-900/80 p-3 max-lg:min-h-[200px]">
             <AnimatePresence initial={false}>
               {MESSAGES.slice(0, shown).map((m, i) => (
                 <motion.div
@@ -111,9 +111,9 @@ export function AgentPreview() {
             </AnimatePresence>
           </div>
 
-          {/* En el apilado de celulares la ficha se resume en una línea (prioridad y asignación) */}
+          {/* En celulares la ficha se resume en una línea (prioridad y asignación) */}
           <div
-            className={`hidden items-center justify-between gap-2 rounded-xl border px-3 py-2 text-[12px] transition-[opacity,border-color] duration-300 stack-sm:flex ${
+            className={`hidden items-center justify-between gap-2 rounded-xl border px-3 py-2 text-[12px] transition-[opacity,border-color] duration-300 max-lg:flex ${
               assigned ? "border-blue-400/40 bg-blue-500/10 text-ink" : "border-line text-ink-muted"
             }`}
           >
@@ -122,7 +122,7 @@ export function AgentPreview() {
               Asignado a Asesor 1
             </span>
           </div>
-          <div className="flex flex-col gap-2 rounded-xl border border-line bg-navy-900/80 p-3 stack-sm:hidden">
+          <div className="flex flex-col gap-2 rounded-xl border border-line bg-navy-900/80 p-3 max-lg:hidden">
             <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-ink-faint">
               <Sparkle size={12} className="text-blue-400" /> Ficha del cliente
             </p>

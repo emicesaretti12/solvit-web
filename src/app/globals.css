@@ -2,18 +2,6 @@
 @import "tw-animate-css";
 
 /*
-  Secciones que se fijan y apilan con el scroll (servicios): solo con pantalla ancha y alta,
-  donde cada tarjeta entra completa, y sin reduced motion. Misma consulta que usa GSAP.
-*/
-@custom-variant stack (@media (min-width: 1024px) and (min-height: 760px) and (prefers-reduced-motion: no-preference));
-
-/*
-  La misma idea en celulares y tablets (versiones compactas de cada sección): pantalla de al
-  menos 700px de alto y sin reduced motion. Misma consulta que STACK_SM_QUERY en lib/motion.ts.
-*/
-@custom-variant stack-sm (@media (max-width: 1023.98px) and (min-height: 700px) and (prefers-reduced-motion: no-preference));
-
-/*
   SEN Software · tokens de marca (brand board)
   Fondo medianoche casi negro, azul eléctrico del isotipo solo como acento (logo, CTA, líneas, luz),
   blanco para la tipografía y grises fríos para lo secundario. Nada de campos azules grandes.
@@ -196,15 +184,6 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* En pantallas táctiles no hay Lenis: las anclas se deslizan con el scroll del navegador */
-@media (hover: none), (pointer: coarse) {
-  @media (prefers-reduced-motion: no-preference) {
-    html {
-      scroll-behavior: smooth;
-    }
-  }
-}
-
 body {
   background: var(--navy-900);
   color: var(--ink);
@@ -257,7 +236,13 @@ button,
   -webkit-user-select: none;
 }
 
-/* Grano sutil, fijo y sin eventos para no repintar al hacer scroll */
+/* Grano sutil, fijo y sin eventos para no repintar al hacer scroll. Solo en escritorio: en un
+   teléfono casi no se ve y es una capa de pantalla completa más para el compositor */
+@media (max-width: 1023.98px) {
+  .grain::after {
+    content: none !important;
+  }
+}
 .grain::after {
   content: "";
   position: fixed;
@@ -498,6 +483,19 @@ html.lenis body {
 .flow-scan {
   animation: flow-spin 1.6s linear infinite;
 }
+
+/* Fuera de pantalla los loops de tiempo se pausan (la sección lleva data-offscreen, ver
+   offscreen-pause.tsx): no gastan batería ni cuadros del compositor mientras no se ven */
+[data-offscreen] .animate-marquee,
+[data-offscreen] .animate-marquee-reverse,
+[data-offscreen] .animate-float,
+[data-offscreen] .step-floor,
+[data-offscreen] .s3d-sway,
+[data-offscreen] .journey-dot,
+[data-offscreen] .flow-scan,
+[data-offscreen] .live-dot::after {
+  animation-play-state: paused;
+}
 @keyframes flow-pop {
   0% {
     transform: scale(1);
@@ -660,10 +658,40 @@ html.lenis body {
       animation-timeline: view();
       animation-range: entry 0% cover 30%;
     }
+    /* Bloques que se paran en 3D (tarjetas, principios): el padre pone la perspectiva */
+    .sd-rise.sd-3d {
+      transform-origin: 50% 100%;
+      animation-name: sd-rise-3d;
+      animation-range: entry 0% cover 34%;
+    }
+    /* Titulares (MaskWords): cada palabra se para sobre su base, de a una */
+    .mw {
+      view-timeline: --mw block;
+    }
+    .mw-mask {
+      perspective: 520px;
+    }
+    .mw-word {
+      transform-origin: 50% 100%;
+      animation: mw-flip linear both;
+      animation-timeline: --mw;
+      animation-range: cover calc(5% + var(--n) * 2.4%) cover calc(19% + var(--n) * 2.4%);
+    }
+    /* Logos de "Trabajamos con": giran de canto a frente, de a uno */
+    .sd-flip {
+      animation: sd-flip linear both;
+      animation-timeline: view();
+      animation-range: entry calc(20% + var(--n) * 12%) cover calc(28% + var(--n) * 6%);
+    }
     .sd-parallax {
       animation: sd-parallax linear both;
       animation-timeline: view();
       animation-range: cover 0% cover 100%;
+    }
+    .sd-tilt {
+      animation: sd-tilt linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 42%;
     }
   }
 }
@@ -677,12 +705,56 @@ html.lenis body {
     opacity: 1;
   }
 }
-@keyframes sd-parallax {
+@keyframes sd-rise-3d {
   from {
-    transform: translateY(-7%) scale(1.16);
+    transform: translateY(72px) rotateX(28deg);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
   }
   to {
-    transform: translateY(7%) scale(1.16);
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes mw-flip {
+  from {
+    transform: translateY(35%) rotateX(-96deg);
+    opacity: 0;
+  }
+  45% {
+    opacity: 1;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes sd-flip {
+  from {
+    transform: rotateY(-85deg) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes sd-parallax {
+  from {
+    transform: translateY(-6%);
+  }
+  to {
+    transform: translateY(6%);
+  }
+}
+@keyframes sd-tilt {
+  from {
+    transform: translateY(48px) rotateX(20deg);
+  }
+  to {
+    transform: none;
   }
 }
 @keyframes step-card-in {
@@ -805,199 +877,6 @@ html.lenis body {
   }
 }
 
-/* Trabajos: escenas de cada servicio. Se arman al entrar (data-shown, con html.js: sin JS se
-   ven armadas) y sus loops corren solo mientras la tarjeta se ve (data-live). Todo es transform
-   y opacidad, salvo las pistas de la placa (stroke-dashoffset en un SVG chico) */
-.svc-grid {
-  background-image:
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 24px 24px;
-  mask-image: radial-gradient(80% 75% at 50% 35%, #000 25%, transparent 75%);
-}
-.svc-card:not([data-live="true"]) *,
-.svc-card:not([data-live="true"]) *::after {
-  animation-play-state: paused !important;
-}
-.svc-bar,
-.svc-rise,
-.svc-pop,
-.svc-node {
-  transition:
-    transform 800ms var(--ease-out) var(--d, 0s),
-    opacity 500ms var(--ease-out) var(--d, 0s);
-}
-.svc-bar {
-  transform-origin: left;
-}
-.js .svc-card:not([data-shown="true"]) .svc-bar {
-  transform: scaleX(0);
-  opacity: 0;
-}
-.js .svc-card:not([data-shown="true"]) .svc-rise {
-  transform: translateY(14px);
-  opacity: 0;
-}
-.js .svc-card:not([data-shown="true"]) .svc-pop {
-  transform: translateY(26px) scale(0.96);
-  opacity: 0;
-}
-.js .svc-card:not([data-shown="true"]) .svc-node {
-  transform: scale(0.85);
-  opacity: 0;
-}
-/* Marketing: posteo, reel y anuncio se abren en abanico */
-.svc-fan {
-  transition:
-    transform 900ms var(--ease-out),
-    opacity 600ms var(--ease-out);
-}
-.svc-fan-l {
-  transform: rotate(-9deg) translate(-6px, 8px);
-  transition-delay: 0.18s;
-}
-.svc-fan-r {
-  transform: rotate(9deg) translate(6px, 8px);
-  transition-delay: 0.28s;
-}
-.svc-fan-c {
-  transition-delay: 0.06s;
-}
-.js .svc-card:not([data-shown="true"]) .svc-fan {
-  transform: translateY(34px);
-  opacity: 0;
-}
-.svc-progress {
-  animation: svc-progress 4s linear infinite;
-}
-/* Web: el botón se toca y llega la consulta */
-.svc-press::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  border: 1px solid var(--blue-400);
-  opacity: 0;
-  animation: svc-ring 4.8s var(--ease-out) infinite;
-}
-.svc-toast {
-  animation: svc-toast 4.8s var(--ease-out) infinite;
-}
-/* Software: la consulta avanza de columna hasta "Ganadas" (paso = ancho de columna) */
-.svc-move {
-  animation: svc-move 6.4s var(--ease-in-out) infinite;
-}
-/* Agentes: consultas que viajan hacia el agente y un halo que late */
-.svc-packet {
-  animation: svc-packet 2.7s linear infinite;
-}
-.svc-halo {
-  animation: svc-halo 2.4s var(--ease-out) infinite;
-}
-/* Híbridos: un pulso de datos recorre cada pista desde la placa */
-.svc-trace {
-  stroke-dasharray: 14 86;
-  animation: svc-trace 2.2s linear infinite;
-}
-@keyframes svc-progress {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-@keyframes svc-ring {
-  0%,
-  8% {
-    transform: scale(1);
-    opacity: 0;
-  }
-  10% {
-    transform: scale(1);
-    opacity: 0.9;
-  }
-  30%,
-  100% {
-    transform: scale(1.7, 2.2);
-    opacity: 0;
-  }
-}
-@keyframes svc-toast {
-  0%,
-  14% {
-    transform: translateY(-10px) scale(0.96);
-    opacity: 0;
-  }
-  22%,
-  78% {
-    transform: none;
-    opacity: 1;
-  }
-  88%,
-  100% {
-    transform: translateY(-6px);
-    opacity: 0;
-  }
-}
-@keyframes svc-move {
-  0% {
-    transform: none;
-    opacity: 0;
-  }
-  8%,
-  24% {
-    transform: none;
-    opacity: 1;
-  }
-  40%,
-  56% {
-    transform: translateX(calc(100% + 24px));
-    opacity: 1;
-  }
-  72%,
-  90% {
-    transform: translateX(calc(200% + 48px));
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(calc(200% + 48px));
-    opacity: 0;
-  }
-}
-@keyframes svc-packet {
-  from {
-    transform: translateX(-8%);
-    opacity: 0;
-  }
-  15%,
-  85% {
-    opacity: 1;
-  }
-  to {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-}
-@keyframes svc-halo {
-  from {
-    transform: scale(0.94);
-    opacity: 0.9;
-  }
-  to {
-    transform: scale(1.18);
-    opacity: 0;
-  }
-}
-@keyframes svc-trace {
-  from {
-    stroke-dashoffset: 14;
-  }
-  to {
-    stroke-dashoffset: -86;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1018,14 +897,7 @@ html.lenis body {
   .journey-dot,
   .journey-node,
   .journey-ring,
-  .flow-scan,
-  .svc-progress,
-  .svc-press::after,
-  .svc-toast,
-  .svc-move,
-  .svc-packet,
-  .svc-halo,
-  .svc-trace {
+  .flow-scan {
     animation: none !important;
   }
   .step-card,

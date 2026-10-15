@@ -11,7 +11,8 @@ const NEXT_STEPS = [
 export function Contact() {
   return (
     <section id="contacto" aria-labelledby="contacto-titulo" className="relative overflow-hidden border-t border-line">
-      <div className="relative mx-auto grid max-w-[1200px] gap-12 px-4 py-24 md:px-6 md:py-36 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+      {/* La perspectiva es para la tarjeta del formulario, que en celulares se para en 3D al entrar */}
+      <div className="relative mx-auto grid max-w-[1200px] gap-12 px-4 py-24 [perspective:1400px] md:px-6 md:py-36 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
         <div>
           <h2
             id="contacto-titulo"
@@ -38,7 +39,7 @@ export function Contact() {
             </div>
           </Reveal>
         </div>
-        <Reveal delay={0.1} className="self-start rounded-[2rem] border border-line bg-navy-800 p-1.5">
+        <Reveal delay={0.1} className="sd-3d self-start rounded-[2rem] border border-line bg-navy-800 p-1.5">
           <div className="rounded-[calc(2rem-6px)] bg-navy-850 shadow-[inset_0_1px_1px_rgb(var(--fg-rgb)/0.06)]">
             <ContactForm />
           </div>

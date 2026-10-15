@@ -52,7 +52,21 @@ export function Wordmark({
 }
 
 export const BRAND_NAME = "SEN Software";
-export const BRAND_FULL = "SEN Software · Ing. & Soluciones";
+export const BRAND_TAGLINE = "Ingeniería y desarrollo de software";
+export const BRAND_FULL = `SEN Software · ${BRAND_TAGLINE}`;
+
+/* Ícono de app del brand board: el isotipo sobre un cuadrado navy con borde azul (igual en los
+   dos temas, como un ícono instalado) */
+export function AppIcon({ className = "" }: { className?: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`grid aspect-square shrink-0 place-items-center rounded-[28%] border border-blue-500/50 bg-[linear-gradient(160deg,#10264d,#061330)] ${className}`}
+    >
+      <LogoMark className="h-[50%] w-auto" />
+    </span>
+  );
+}
 
 export function Logo({
   className = "",
@@ -66,10 +80,9 @@ export function Logo({
       <LogoMark className="h-7 w-auto shrink-0" />
       <span className="flex flex-col">
         <Wordmark className="h-[0.95rem] w-auto self-start text-ink" />
+        {/* Bajada del brand board: mayúsculas con tracking amplio, solo en el logo */}
         {withTagline && (
-          <span className="mt-2 text-[0.55rem] uppercase tracking-[0.28em] text-ink-muted">
-            Software · Ing. &amp; Soluciones
-          </span>
+          <span className="mt-2 text-[0.55rem] uppercase tracking-[0.28em] text-ink-muted">{BRAND_TAGLINE}</span>
         )}
       </span>
       <span className="sr-only">{BRAND_NAME}</span>

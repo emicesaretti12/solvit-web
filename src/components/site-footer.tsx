@@ -1,20 +1,20 @@
-import { Logo, Wordmark } from "./logo";
+import { FooterLockup, FooterWordmark } from "./footer-3d";
+import { BRAND_FULL, Logo } from "./logo";
 
 const COLUMNS = [
   {
     title: "Servicios",
     links: [
-      { href: "#trabajo-web", label: "Desarrollo web" },
-      { href: "#trabajo-software", label: "Software a medida" },
-      { href: "#trabajo-ia", label: "Agentes de IA" },
-      { href: "#trabajo-marketing", label: "Marketing, contenido y pauta" },
-      { href: "#trabajo-hibridos", label: "Proyectos con software y hardware" },
+      { href: "#servicios", label: "Desarrollo web" },
+      { href: "#servicios", label: "Software a medida" },
+      { href: "#servicios", label: "Agentes de IA" },
+      { href: "#servicios", label: "Hardware e IoT" },
+      { href: "#servicios", label: "Marketing digital" },
     ],
   },
   {
     title: "SEN",
     links: [
-      { href: "#trabajos", label: "Trabajos" },
       { href: "#como-funciona", label: "Cómo funciona" },
       { href: "#proyectos", label: "Proyectos" },
       { href: "#nosotros", label: "Nosotros" },
@@ -23,6 +23,9 @@ const COLUMNS = [
   },
 ];
 
+// Pilares del brand board, junto al ícono de la app
+const PILLARS = ["Software", "Hardware", "IA", "Marketing", "Crecimiento"];
+
 export function SiteFooter() {
   return (
     <footer className="relative overflow-hidden border-t border-line bg-navy-950">
@@ -30,9 +33,12 @@ export function SiteFooter() {
         <div>
           <Logo withTagline />
           <p className="mt-6 max-w-[40ch] text-sm leading-relaxed text-ink-muted">
-            Especialistas en solucionar tus ventas: desarrollo web, software a medida, agentes de
-            IA, marketing y proyectos que unen software con hardware.
+            Desarrollo web, software a medida, agentes de IA, hardware e IoT y marketing digital: un mismo
+            equipo de ingeniería para que tu negocio venda más.
           </p>
+          {/* Lockup del brand board: el ícono con espesor y los pilares, separados por una
+              línea; entra en 3D (footer-3d.tsx) */}
+          <FooterLockup pillars={PILLARS} />
         </div>
         {COLUMNS.map((col) => (
           <nav key={col.title} aria-label={col.title}>
@@ -53,17 +59,14 @@ export function SiteFooter() {
         ))}
       </div>
 
-      {/* Wordmark de cierre, como en el brand board: blanco apagado con el corte de la N en azul */}
-      <div aria-hidden="true" className="pointer-events-none select-none overflow-hidden px-4 pt-6 md:px-6">
-        <Wordmark
-          className="mx-auto block h-auto w-full max-w-[1200px] translate-y-[18%] text-fg/[0.05]"
-          accentClassName="opacity-30"
-        />
-      </div>
+      {/* Wordmark de cierre, como en el brand board (con el corte de la N en azul), con volumen:
+          una extrusión de capas en profundidad que al llegar al final se para desde el piso
+          (footer-3d.tsx y scenes.css). Sin animación queda apenas inclinado, mostrando el espesor */}
+      <FooterWordmark />
 
       <div className="relative border-t border-line bg-navy-950">
-        <div className="mx-auto flex max-w-[1200px] flex-col gap-2 px-4 py-6 text-xs text-ink-faint sm:flex-row sm:justify-between md:px-6">
-          <p>© 2026 SEN Software · Ing. &amp; Soluciones.</p>
+        <div className="mx-auto flex max-w-[1200px] flex-col gap-2 px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6 text-xs text-ink-faint sm:flex-row sm:justify-between md:px-6">
+          <p>© 2026 {BRAND_FULL}.</p>
           <a href="#hero" className="self-start transition-colors duration-150 hover:text-ink">
             Volver arriba
           </a>

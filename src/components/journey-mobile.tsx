@@ -8,17 +8,18 @@
   - El agente de IA filtra: un arco de luz gira alrededor del agente; las consultas se separan
     en "quiere comprar" (sigue) y "solo consultaba" (queda al costado, apagada)
   - El CRM ordena por área: ventas, postventa y service se reparten como cartas
-  - Venta cerrada: el check rebota con una onda
+  - Venta cerrada: el check rebota con una onda y una moneda con espesor gira y muestra la venta
   - Crecimiento: barras en 3D que crecen de a una
   Todo es transform y opacidad con transiciones CSS (lo mueve el compositor del teléfono);
   con reduced motion aparece directo, sin giros. Donde el navegador tiene animaciones ligadas al
   scroll (animation-timeline: view()), los bloques, los canales, las cartas y las barras se
   arman al ritmo del dedo y la línea se llena con una punta de luz que sigue el scroll.
 */
-import { ChartLineUp, ChatsCircle, CheckCircle, Globe, Handshake, Kanban, Sparkle, Wrench, type Icon } from "@phosphor-icons/react";
+import { ChartLineUp, ChatsCircle, Check, CheckCircle, Globe, Handshake, Kanban, Sparkle, Wrench, type Icon } from "@phosphor-icons/react";
 import { useInView } from "motion/react";
 import { useRef, type CSSProperties, type ReactNode } from "react";
 import { siGoogleads, siInstagram, siMeta, siWhatsapp } from "simple-icons";
+import { LogoMark } from "./logo";
 import { STAGES } from "./sales-flow-data";
 
 type Glyph = { icon: Icon } | { path: string };
@@ -152,7 +153,26 @@ export function JourneyMobile() {
           </div>
         </Row>
 
-        <Row index={3} icon={<CheckCircle weight="light" className="size-6" />} />
+        <Row index={3} icon={<CheckCircle weight="light" className="size-6" />}>
+          {/* La moneda: cara con el check, canto de capas y el isotipo atrás (scenes.css) */}
+          <div className="flex items-center gap-3.5 [perspective:600px]">
+            <span className="coin" aria-hidden="true">
+              {[3.2, 2.4, 1.6, 0.8].map((z) => (
+                <span key={z} className="coin-edge" style={{ transform: `translateZ(${-z}px)` }} />
+              ))}
+              <span className="coin-face coin-back">
+                <LogoMark className="h-6 w-auto" />
+              </span>
+              <span className="coin-face">
+                <Check size={22} weight="bold" />
+              </span>
+            </span>
+            <p className="text-[13px] leading-snug text-ink-muted">
+              <span className="block text-[14px] text-ink">Moto 0km en cuotas</span>
+              Cerrada por Asesor 1
+            </p>
+          </div>
+        </Row>
 
         <Row index={4} icon={<ChartLineUp weight="light" className="size-6" />}>
           <div className="flex h-28 items-end gap-2.5 border-b border-line pb-px pl-1 pr-3">

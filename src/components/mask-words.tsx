@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
+import type { CSSProperties } from "react";
 
 /*
   Texto de un titular que entra palabra por palabra desde una máscara: cada palabra sube desde
@@ -9,6 +10,8 @@ import { motion, useReducedMotion } from "motion/react";
   - Mismo estado inicial en servidor y cliente; con reduced motion aparece sin moverse
   - El relleno de cada máscara (compensado con margen negativo) deja lugar a los descendentes
     y a los acentos y colas que sobresalen de la caja por el tracking negativo
+  - En celulares con animaciones ligadas al scroll (globals.css, .mw-*), cada palabra se para en
+    3D al ritmo del dedo: gira desde acostada sobre su base, de a una (pisa el estilo de Motion)
 */
 const EASE = [0.23, 1, 0.32, 1] as const;
 
@@ -20,6 +23,7 @@ export function MaskWords({ text, delay = 0 }: { text: string; delay?: number })
       <span className="sr-only">{text}</span>
       <motion.span
         aria-hidden="true"
+        className="mw block"
         initial="hidden"
         whileInView="shown"
         viewport={{ once: true, amount: 0.6 }}
@@ -27,9 +31,10 @@ export function MaskWords({ text, delay = 0 }: { text: string; delay?: number })
       >
         {words.map((word, i) => (
           <span key={i}>
-            <span className="-mx-[0.08em] -mb-[0.14em] inline-block overflow-hidden px-[0.08em] pb-[0.14em] align-top">
+            <span className="mw-mask -mx-[0.08em] -mb-[0.14em] inline-block overflow-hidden px-[0.08em] pb-[0.14em] align-top">
               <motion.span
-                className="inline-block motion-reduce:!transform-none"
+                className="mw-word inline-block motion-reduce:!transform-none"
+                style={{ "--n": i } as CSSProperties}
                 variants={{
                   hidden: { transform: "translateY(110%)" },
                   shown: { transform: "translateY(0%)" },

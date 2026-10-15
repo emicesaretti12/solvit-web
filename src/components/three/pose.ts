@@ -1,10 +1,14 @@
 /*
   Tipos y pose de reposo del isotipo, sin dependencias de three.js: así el escenario puede
   importarlos sin arrastrar three al bundle inicial (la escena se carga aparte, en el cliente).
+  También va acá el encuadre (cuánto mide la S en pantalla), que usa el escenario para ubicarla.
 */
 export type IsoPose = {
-  /** 0 = S armada, 1 = cintas separadas */
+  /** 0 = S armada, 1 = cintas separadas (más de 1: se dispersan, en la zambullida) */
   spread: number;
+  /** Cómo se separan: 0 en diagonal (las etapas de la venta), 1 en capas que conservan la
+   *  silueta de la S (vista explotada de celulares) */
+  layers: number;
   /** Giro extra en Y (radianes), por ejemplo según el scroll */
   turn: number;
   /** Inclinación extra en X (radianes) */
@@ -20,9 +24,20 @@ export type IsoPose = {
   focus: number;
 };
 
-export const restPose = (): IsoPose => ({ spread: 0, turn: 0, tilt: 0, x: 0, y: 0, z: 0, scale: 1, focus: -1 });
+export const restPose = (): IsoPose => ({
+  spread: 0,
+  layers: 0,
+  turn: 0,
+  tilt: 0,
+  x: 0,
+  y: 0,
+  z: 0,
+  scale: 1,
+  focus: -1,
+});
 
-export type DragState = { active: boolean; dx: number; dy: number; vx: number; vy: number };
+/** Arrastre del isotipo (px y px/s); `taps` cuenta los toques cortos (la S responde con un pulso) */
+export type DragState = { active: boolean; dx: number; dy: number; vx: number; vy: number; taps: number };
 
 // Encuadre: la S mide 3,2 unidades de alto; la cámara se aleja hasta que entra con margen
 export const FOV = 28;

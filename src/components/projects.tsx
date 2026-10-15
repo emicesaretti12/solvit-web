@@ -2,28 +2,24 @@
 
 /*
   Proyectos realizados.
-  1. Galería (PortfolioGallery): todas las portadas en abanico 3D (marquesina en celulares).
+  1. Vitrina (PortfolioGallery): panel navy en los dos temas con el contador 3D "+10" como
+     protagonista; en celulares, anillo 3D de portadas con scroll nativo; en escritorio, el
+     abanico entero.
   2. Clientes satisfechos: marquesina tipográfica con los nombres de los clientes.
-  3. Casos destacados: portada en un marco con relieve que se endereza al hacer scroll, con datos
-     flotantes del proyecto, y lo que se hizo.
+  3. Casos destacados: la portada en una laptop 3D que se abre con el scroll, y lo que se hizo.
   4. Índice filtrable por especialidad: filas con portada; con mouse en escritorio la portada
-     sigue al puntero. Al final, el total de proyectos entregados y el llamado a contacto.
+     sigue al puntero. Al final, el llamado a contacto.
   Elegir una portada en la galería lleva a su caso o fila (y quita el filtro si la ocultaba).
 */
-import {
-  AnimatePresence,
-  motion,
-  useMotionValue,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "motion/react";
+import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
 import { ArrowUpRight, CheckCircle, Pause, Play } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { PortfolioGallery } from "@/components/ui/portfolio-gallery";
+import { Laptop3D } from "@/components/projects/laptop-3d";
+import { Stat3D } from "@/components/projects/stat-3d";
+import { MaskWords } from "@/components/mask-words";
 import { LogoMark } from "@/components/logo";
 import { getLenis } from "@/components/smooth-scroll";
 import { CONTACT_LABEL, PrimaryCta } from "@/components/cta";
@@ -153,35 +149,17 @@ function Clients() {
   );
 }
 
-/* Caso destacado: portada con relieve que se endereza al llegar al centro de la pantalla */
+/* Caso destacado: la portada en una laptop 3D que se abre con el scroll, y lo que se hizo */
 function FeaturedCase({ project, flip }: { project: Project; flip: boolean }) {
-  const ref = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "center 60%"] });
-  const rotateX = useTransform(scrollYProgress, [0, 1], [22, 0]);
-  const scale = useTransform(scrollYProgress, [0, 1], [0.86, 1]);
-  const lift = useTransform(scrollYProgress, [0, 1], [60, 0]);
-
   return (
     <article
-      ref={ref}
       id={anchorOf(project)}
       tabIndex={-1}
       aria-labelledby={`${anchorOf(project)}-titulo`}
-      className="grid items-center gap-10 outline-none lg:grid-cols-[1.12fr_0.88fr] lg:gap-16"
+      className="grid items-center gap-6 outline-none lg:grid-cols-[1.12fr_0.88fr] lg:gap-14"
     >
-      <div className={cn("relative [perspective:1600px]", flip && "lg:order-2")}>
-        {/* Mismo estilo en servidor y cliente; con reduced motion el CSS la deja derecha */}
-        <motion.div
-          style={{ rotateX, scale, y: lift }}
-          className="relative origin-bottom overflow-hidden motion-reduce:!transform-none rounded-2xl border border-line-strong bg-navy-900 shadow-[0_50px_100px_-50px_rgb(var(--shade-rgb)/0.9)] light:shadow-[0_40px_80px_-50px_rgb(var(--shade-rgb)/0.4)]"
-        >
-          <div className="relative aspect-video">
-            {/* sd-parallax: en celulares con scroll ligado, la imagen se desliza dentro del marco */}
-            <div className="sd-parallax absolute inset-0">
-              <Image src={coverOf(project)} alt={altOf(project)} fill sizes="(min-width: 1024px) 640px, 100vw" className="object-cover" />
-            </div>
-          </div>
-        </motion.div>
+      <div className={cn("-mx-2 sm:mx-0", flip && "lg:order-2")}>
+        <Laptop3D src={coverOf(project)} alt={altOf(project)} sizes="(min-width: 1024px) 600px, 92vw" />
       </div>
 
       <Reveal className={cn(flip && "lg:order-1")}>
@@ -251,7 +229,7 @@ function ProjectIndex({
   };
 
   return (
-    <div id="proyectos-lista" className="mt-24 md:mt-36">
+    <div id="proyectos-lista" className="mt-24 [perspective:1400px] md:mt-36">
       <Reveal className="grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
         <div>
           <h3 className="font-display text-[1.9rem] font-semibold leading-[1.05] tracking-[-0.035em] text-ink md:text-[2.6rem]">
@@ -410,7 +388,7 @@ function ProjectIndex({
       </div>
 
       {/* Cierre: el siguiente paso */}
-      <Reveal className="mt-14 md:mt-16">
+      <Reveal className="sd-3d mt-14 md:mt-16">
         <div className="flex flex-col gap-6 rounded-2xl border border-line bg-navy-850 px-6 py-8 md:flex-row md:items-center md:justify-between md:px-10 md:py-10">
           <div>
             <p className="font-display text-[1.7rem] font-semibold leading-[1.1] tracking-[-0.03em] text-ink md:text-[2.2rem]">
@@ -471,10 +449,16 @@ export function Projects() {
 
   return (
     <section id="proyectos" aria-label="Proyectos realizados" className="relative border-t border-line">
-      <div className="mx-auto max-w-[1200px] px-4 py-24 md:px-6 md:py-36">
-        <Reveal>
+      <div className="mx-auto max-w-[1200px] px-4 py-24 [perspective:1600px] md:px-6 md:py-36">
+        <Reveal className="sd-3d">
           <PortfolioGallery
-            title={`Más de ${DELIVERED} proyectos entregados.`}
+            stat={<Stat3D value={DELIVERED} />}
+            title={
+              <>
+                <span className="sr-only">Más de {DELIVERED} </span>
+                <MaskWords text="proyectos entregados." />
+              </>
+            }
             description="Webs que venden, CRM a medida, sistemas de reservas y catálogos para clientes de motos, baterías, industria, salud, gastronomía y más."
             archiveButton={{ text: "Ver la lista", href: "#proyectos-lista" }}
             images={images}

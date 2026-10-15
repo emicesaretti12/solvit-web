@@ -1,0 +1,109 @@
+/*
+  Sensación de app nativa: la capa de plataforma (viewport, toque, scroll, áreas seguras y el
+  cambio de tema), lo que separa "una web en el navegador" de algo que se siente instalado.
+  Se importa en el layout después de globals.css y scenes.css.
+
+  - Sin zoom: el viewport ya pide maximum-scale=1 y user-scalable=no; touch-action en el html
+    saca el doble toque (y su demora de 300ms) y el pellizco donde el navegador lo respeta.
+    iOS Safari ignora las dos cosas para el pellizco: lo frena ZOOM_GUARD_SCRIPT (theme-config.ts)
+  - Sin rebote ni pull-to-refresh: la página es la app, no un documento dentro del navegador
+  - Los controles no se seleccionan ni abren el menú de mantener presionado; el contenido sí
+  - Áreas seguras: con viewport-fit=cover, en horizontal el contenido se corre del notch
+  - Cambio de tema: un círculo que crece desde el botón revela el tema nuevo (View Transition,
+    ver setTheme en src/lib/theme.ts). Con reduced motion no hay transición
+  Las reglas de elementos van en la capa base: una utilidad de Tailwind siempre puede pisarlas.
+*/
+
+@layer base {
+  html {
+    /* touch-action se cruza con el de cada elemento hasta el que scrollea: lo que pida un
+       control (pan-y en el canvas, none en un arrastre) se respeta, y el zoom queda afuera */
+    touch-action: pan-x pan-y;
+    overscroll-behavior: none;
+  }
+  body {
+    overscroll-behavior: none;
+    /* En horizontal, el notch y las esquinas redondeadas no tapan el contenido. Los fijos
+       (header, canvas, toasts) manejan su propio margen */
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  /* Controles: sin selección de texto ni el menú de mantener presionado (copiar, compartir,
+     abrir en otra pestaña). Los enlaces del contenido y del pie siguen siendo copiables */
+  button,
+  summary,
+  label,
+  [role="button"],
+  [role="tab"],
+  [role="switch"],
+  [role="menuitem"],
+  [role="option"],
+  header a,
+  nav a {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* El isotipo 3D se gira con el dedo: mantenerlo presionado no tiene que abrir la lupa de
+     selección de iOS ni el menú de guardar imagen */
+  canvas {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Imágenes e íconos no se arrastran como archivos con el mouse */
+  img,
+  svg {
+    -webkit-user-drag: none;
+  }
+}
+
+/* Sin Lenis (pantallas táctiles), las anclas del menú se deslizan con el scroll nativo. Con
+   Lenis (clase .lenis en el html) el scroll lo anima él: el del navegador tiene que quedar
+   instantáneo o los dos se pelean */
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.lenis) {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ── Cambio de tema con View Transition ─────────────────────────────────────────────────────
+   setTheme fija --vt-x/--vt-y (centro del botón) y --vt-r (hasta la esquina más lejana) y
+   marca el html con data-theme-switch mientras dura. La captura vieja queda quieta abajo y la
+   página nueva (en vivo) se recorta con un círculo que crece: sin fundido cruzado. */
+html[data-theme-switch] *,
+html[data-theme-switch] *::before,
+html[data-theme-switch] *::after {
+  /* El círculo ya es el cambio: adentro, el tema nuevo aparece quieto (sin los 300ms de
+     color del body ni las transiciones de los bordes) */
+  transition: none !important;
+}
+
+html[data-theme-switch]::view-transition-old(root),
+html[data-theme-switch]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+html[data-theme-switch]::view-transition-new(root) {
+  /* ease-out fuerte: el círculo responde enseguida bajo el dedo y frena al cubrir los bordes */
+  animation: theme-reveal 560ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0px at var(--vt-x, 50%) var(--vt-y, 0px));
+  }
+  to {
+    clip-path: circle(var(--vt-r, 150vmax) at var(--vt-x, 50%) var(--vt-y, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme-switch]::view-transition-new(root) {
+    animation: none;
+  }
+}

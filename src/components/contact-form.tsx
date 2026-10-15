@@ -10,11 +10,11 @@ type Errors = Partial<Record<"nombre" | "email" | "mensaje", string>>;
 
 const areas = [
   "No sé todavía, quiero un diagnóstico",
-  "Conseguir más consultas (marketing)",
-  "Responder más rápido (agente de IA)",
-  "Ordenar el seguimiento (CRM a medida)",
-  "Una web nueva o renovada",
+  "Desarrollo web (sitio, tienda o landing)",
+  "Software a medida (CRM, reservas, gestión)",
+  "Agente de IA para WhatsApp, Instagram o web",
   "Hardware e IoT",
+  "Marketing digital",
 ];
 
 const field =

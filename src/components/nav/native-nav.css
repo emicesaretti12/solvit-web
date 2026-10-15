@@ -1,0 +1,153 @@
+/*
+  Navegación con sensación de app nativa: el header flotante y la hoja inferior del menú.
+  La importan header.tsx y sheet.tsx (CSS global con nombres propios: nav-*, sheet-*). Sin
+  capa: le gana a las utilidades de Tailwind, así que nunca toca las mismas propiedades que
+  ellas en el mismo elemento.
+
+  - Solo transform y opacidad. Las curvas son las del sistema: la de las hojas de iOS
+    cubic-bezier(0.32, 0.72, 0, 1) para el menú y el header, la ease-out fuerte para los ítems.
+  - El header en celulares se esconde al bajar rápido y vuelve al subir (data-hidden lo pone
+    useScrollChrome); la línea de progreso de lectura va ligada al scroll en el compositor
+    donde hay soporte (sin soporte la mueve el mismo hook).
+  - La hoja sube desde abajo y sale por el mismo camino. Las keyframes tienen un solo extremo:
+    el otro es el valor de base, así que si el dedo la soltó a mitad de camino (transform en
+    línea), la salida arranca desde ahí y no desde arriba.
+  - Reduced motion: el header no se esconde, la hoja aparece y se va con un fundido y los
+    ítems no entran escalonados.
+*/
+
+/* ── Header ──────────────────────────────────────────────────────────────────────────────── */
+
+.nav-chrome {
+  transition: transform 420ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@media (max-width: 1023.98px) and (prefers-reduced-motion: no-preference) {
+  /* Fuera de pantalla por arriba, con margen para la sombra de la píldora */
+  .nav-chrome[data-hidden="true"] {
+    transform: translate3d(0, calc(-100% - 12px), 0);
+  }
+}
+
+/* Progreso de lectura: una línea fina que se llena de izquierda a derecha (scaleX) */
+.nav-progress {
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+@supports (animation-timeline: scroll()) {
+  .nav-progress {
+    animation: nav-progress linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+
+@keyframes nav-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Menos transparencia pedida por el sistema: la píldora pasa a ser sólida */
+@media (prefers-reduced-transparency: reduce) {
+  .nav-pill {
+    background-color: var(--navy-850);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* ── Hoja inferior ───────────────────────────────────────────────────────────────────────── */
+
+.sheet-panel,
+.sheet-overlay {
+  --sheet-ease: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* El gesto vertical es de la hoja (useDragToDismiss): el navegador no scrollea ni hace zoom */
+.sheet-panel {
+  touch-action: none;
+}
+
+/* Zona con scroll propio (lista larga en horizontal): mientras no desborda también es de la
+   hoja; si desborda, el dedo la scrollea y la hoja se arrastra desde la manija */
+.sheet-panel [data-sheet-scroll] {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: none;
+}
+.sheet-panel [data-sheet-scroll][data-overflow="true"] {
+  touch-action: pan-y;
+}
+
+/* Mientras se arrastra con el mouse no se selecciona texto */
+.sheet-panel[data-dragging] {
+  cursor: grabbing;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.sheet-panel[data-state="open"] {
+  animation: sheet-in 500ms var(--sheet-ease);
+}
+.sheet-panel[data-state="closed"] {
+  animation: sheet-out 320ms var(--sheet-ease) forwards;
+}
+.sheet-overlay[data-state="open"] {
+  animation: sheet-fade-in 500ms var(--sheet-ease);
+}
+.sheet-overlay[data-state="closed"] {
+  animation: sheet-fade-out 320ms var(--sheet-ease) forwards;
+}
+
+/* Ítems del menú: entran escalonados detrás de la hoja (--i es el orden, 40 ms entre cada uno).
+   Solo al abrir; al cerrar se van con la hoja, quietos */
+.sheet-panel[data-state="open"] .sheet-item {
+  animation: sheet-item-in 480ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation-delay: calc(90ms + var(--i, 0) * 40ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet-panel[data-state="open"],
+  .sheet-overlay[data-state="open"] {
+    animation: sheet-fade-in 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .sheet-panel[data-state="closed"],
+  .sheet-overlay[data-state="closed"] {
+    animation: sheet-fade-out 160ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  }
+  .sheet-panel[data-state="open"] .sheet-item {
+    animation: none;
+  }
+}
+
+/* Debajo del borde de la pantalla, con margen para la sombra que proyecta hacia arriba */
+@keyframes sheet-in {
+  from {
+    transform: translate3d(0, calc(100% + 40px), 0);
+  }
+}
+@keyframes sheet-out {
+  to {
+    transform: translate3d(0, calc(100% + 40px), 0);
+  }
+}
+@keyframes sheet-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes sheet-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes sheet-item-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+}
