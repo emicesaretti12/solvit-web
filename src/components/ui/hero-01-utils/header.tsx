@@ -17,7 +17,7 @@
 */
 import { CaretRight, X } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "motion/react";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useEffectEvent, useRef, useState, type CSSProperties } from "react";
 import { Logo, LogoMark } from "@/components/logo";
 import { CONTACT_LABEL, PrimaryCta } from "@/components/cta";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -106,6 +106,19 @@ export default function Header({ navigationData }: { navigationData: NavigationS
     }
     setOpen(next);
   };
+
+  // Si la ventana se ensancha a escritorio (lg) con la hoja abierta, se cierra: el botón que la
+  // abre ya no está. Por el mismo camino que el resto de los cierres, así Lenis vuelve a andar
+  const closeSheet = useEffectEvent(() => onOpenChange(false));
+  useEffect(() => {
+    if (!open) return;
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const onChange = (e: MediaQueryListEvent) => {
+      if (e.matches) closeSheet();
+    };
+    desktop.addEventListener("change", onChange);
+    return () => desktop.removeEventListener("change", onChange);
+  }, [open]);
 
   // Lenis ignora el ancla si sigue detenido: se reactiva antes de que procese el clic
   const followAnchor = () => getLenis()?.start();

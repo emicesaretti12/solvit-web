@@ -48,14 +48,17 @@ import { createShadowMaterial, projectShadow, type ShadowCaster } from "./backdr
 // comporta como en su primera versión: sin giro de entrada y con las cintas abriéndose juntas
 const MOBILE = typeof window !== "undefined" && window.matchMedia("(max-width: 1023.98px)").matches;
 
-// Presupuesto de partículas: ~1600 en celulares (la S es chica: alcanzan para leerse densas) y
-// ~7000 en escritorio; con pocos núcleos o poca memoria, menos (el vertex shader corre una vez
-// por partícula y por cuadro, y en la zambullida cada una cubre muchos píxeles)
+// Presupuesto de partículas: ~7000 en escritorio; con pocos núcleos o poca memoria, menos (el
+// vertex shader corre una vez por partícula y por cuadro, y en la zambullida cada una cubre
+// muchos píxeles)
 const PARTICLES = (() => {
   if (typeof navigator === "undefined") return 0;
   const nav = navigator as Navigator & { deviceMemory?: number };
   const modest = (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4;
-  return Math.round((MOBILE ? 1600 : 7000) * (modest ? 0.6 : 1));
+  // En celulares, sin partículas: la S del hero es la de la primera versión (y el teléfono se
+  // ahorra el vertex shader de cada punto en cada cuadro)
+  if (MOBILE) return 0;
+  return Math.round(7000 * (modest ? 0.6 : 1));
 })();
 
 // Armado (segundos desde el primer cuadro): las partículas llegan en INTRO y la S sólida aparece
@@ -312,7 +315,9 @@ function Rig({
     // solo de escritorio
     if (!introChecked.current) {
       introChecked.current = true;
-      if (reduce || performance.now() - mountedAt.current > 1200) intro.current = 10;
+      // En celulares no hay armado: la S llega entera (sin nube que la arme, el barrido solo
+      // la haría aparecer de a pedazos)
+      if (MOBILE || reduce || performance.now() - mountedAt.current > 1200) intro.current = 10;
     }
     if (!reduce) intro.current += dt;
     const t = intro.current;

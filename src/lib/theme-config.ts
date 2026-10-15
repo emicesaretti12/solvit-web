@@ -16,7 +16,7 @@ export const THEME_COLOR: Record<Theme, string> = { light: "#f6f8fb", dark: "#03
 // Se ejecuta inline en <head>, antes del primer pintado: marca que hay JavaScript (las
 // entradas animadas del CSS dependen de .js) y aplica el oscuro si quedó guardado. Las metas
 // de color pueden llegar después del script: se corrigen también al terminar de parsear.
-export const THEME_SCRIPT = `(function(){var d=document.documentElement;d.classList.add("js");try{if(localStorage.getItem("${THEME_KEY}")!=="dark")return;d.setAttribute("data-theme","dark");var f=function(){var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content","${THEME_COLOR.dark}");var s=document.querySelector('meta[name="color-scheme"]');if(s)s.setAttribute("content","dark")};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}})()`;
+export const THEME_SCRIPT = `(function(){var d=document.documentElement;d.classList.add("js");try{if(localStorage.getItem("${THEME_KEY}")!=="dark")return;d.setAttribute("data-theme","dark");var f=function(){document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute("content","${THEME_COLOR.dark}")});var s=document.querySelector('meta[name="color-scheme"]');if(s)s.setAttribute("content","dark")};f();document.addEventListener("DOMContentLoaded",f)}catch(e){}})()`;
 
 // Sin zoom, como una app instalada. iOS Safari ignora user-scalable=no en el viewport: el
 // pellizco se frena con sus eventos gesture* (solo existen con dos dedos, así que el scroll de

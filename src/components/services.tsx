@@ -1,9 +1,11 @@
 "use client";
 
 /*
-  Servicios: desarrollo web, software a medida, agentes de IA, hardware e IoT y marketing.
-  Cada tarjeta tiene su objeto 3D en CSS (services-3d), que se arma cuando la tarjeta llega y
-  queda en reposo (con su loop) mientras está a la vista.
+  Trabajos: lo que vendemos, en cinco líneas (desarrollo web, software a medida, agentes de IA,
+  proyectos híbridos de software con hardware y marketing: contenido, redes y pauta). Cada
+  tarjeta tiene su objeto 3D en CSS (services-3d), que se arma cuando la tarjeta llega y queda en
+  reposo (con su loop) mientras está a la vista, y nombra los proyectos reales donde lo hicimos
+  (llevan a su ficha en Proyectos).
 
   - Celulares (con al menos 640px de alto): un mazo. Cada tarjeta se queda pegada arriba y la
     siguiente sube y la tapa; la de abajo se inclina hacia atrás, se achica y se apaga. Donde el
@@ -29,9 +31,20 @@ import {
   useSpring,
   useTransform,
 } from "motion/react";
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import { ArrowUpRight } from "@phosphor-icons/react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+  type PointerEvent,
+} from "react";
 import { MaskWords } from "@/components/mask-words";
 import { ServiceScene } from "@/components/services-3d";
+import { getLenis } from "@/components/smooth-scroll";
+import { PROJECTS, type Project } from "@/content/projects";
 import { SERVICES, type Service, type ServiceKey } from "@/content/services";
 import { tap } from "@/lib/haptics";
 
@@ -81,9 +94,29 @@ const deckVars = (i: number) =>
 
 const same = (a: number[], b: number[]) => a.length === b.length && a.every((v, i) => v === b[i]);
 
+/* Lleva a la ficha del proyecto; si el filtro de Proyectos la ocultaba, primero lo quita (el
+   aviso lo escucha Proyectos, que vuelve a "Todos" antes de que se busque la ficha) */
+function goToProject(slug: string, event: MouseEvent<HTMLAnchorElement>) {
+  event.preventDefault();
+  // El toque en la tarjeta vuelve a armar su objeto: el enlace no tiene que dispararlo
+  event.stopPropagation();
+  window.dispatchEvent(new CustomEvent("sen:show-project", { detail: slug }));
+  const target = document.getElementById(`proyecto-${slug}`);
+  if (!target) return;
+  target.focus({ preventScroll: true });
+  const lenis = getLenis();
+  if (lenis) {
+    lenis.resize();
+    lenis.scrollTo(target);
+  } else target.scrollIntoView({ block: "start" });
+}
+
+const projectOf = (slug: string) => PROJECTS.find((p) => p.slug === slug);
+
 function ServiceCard({ service: s, index: i, on, live }: { service: Service; index: number; on: boolean; live: boolean }) {
   const card = useRef<HTMLElement>(null);
   const pointer = useRef("mouse");
+  const work = s.work.map(projectOf).filter((p): p is Project => p !== undefined);
 
   // Puntero sobre la tarjeta, de -0,5 a 0,5 en cada eje, con resorte. En reposo (0, 0) el
   // transform es "none": igual en el servidor y en el cliente, y sin capa de más en el mazo
@@ -163,6 +196,30 @@ function ServiceCard({ service: s, index: i, on, live }: { service: Service; ind
               </li>
             ))}
           </ul>
+          {work.length > 0 && (
+            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+              <span className="text-[12px] text-ink-faint">Lo hicimos para</span>
+              <ul className="flex flex-wrap gap-x-3 gap-y-1">
+                {work.map((p) => (
+                  <li key={p.slug}>
+                    <a
+                      href={`#proyecto-${p.slug}`}
+                      onClick={(e) => goToProject(p.slug, e)}
+                      className="group/link inline-flex min-h-8 items-center gap-1 text-[13px] font-medium text-blue-400 transition-colors duration-150 pointer-fine:hover:text-blue-300"
+                    >
+                      {p.client ?? p.name}
+                      <ArrowUpRight
+                        size={12}
+                        weight="bold"
+                        aria-hidden="true"
+                        className="transition-transform duration-200 ease-[var(--ease-out)] pointer-fine:group-hover/link:-translate-y-px pointer-fine:group-hover/link:translate-x-0.5"
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </motion.article>
     </li>
@@ -205,24 +262,24 @@ export function Services() {
   }, [update]);
 
   return (
-    <section id="servicios" aria-labelledby="servicios-titulo" className="relative">
+    <section id="trabajos" aria-labelledby="trabajos-titulo" className="relative">
       <div className="mx-auto max-w-[1200px] px-4 pt-20 md:px-6 md:pt-32">
-        <p className="text-sm text-blue-300">Servicios</p>
+        <p className="text-sm text-blue-300">Trabajos</p>
         <h2
-          id="servicios-titulo"
+          id="trabajos-titulo"
           className="font-display mt-3 max-w-[15ch] text-[clamp(2.3rem,8.4vw,3rem)] font-bold leading-[0.98] tracking-[-0.04em] text-ink sm:text-[3.6rem] lg:text-[4.4rem]"
         >
           <MaskWords text="Cinco servicios, un mismo equipo." />
         </h2>
-        <p className="mt-5 max-w-[50ch] text-base leading-relaxed text-ink-muted md:text-lg">
-          Cada uno resuelve una parte de tu negocio y todos se conectan: lo que pasa en tu web llega al agente, al CRM
-          y a tus números.
+        <p className="mt-5 max-w-[52ch] text-base leading-relaxed text-ink-muted md:text-lg">
+          Webs, software a medida, agentes de IA, proyectos que unen software con hardware y marketing con
+          contenido, redes y pauta. Todo se conecta: lo que pasa en tu web llega al agente, al CRM y a tus números.
         </p>
       </div>
 
       <ol
         ref={deck}
-        aria-label="Servicios de SEN"
+        aria-label="Trabajos de SEN"
         className="svc-deck mx-auto mt-10 max-w-[640px] px-4 md:mt-14 lg:grid lg:max-w-[1200px] lg:grid-cols-12 lg:gap-5 lg:px-6"
       >
         {SERVICES.map((s, i) => (

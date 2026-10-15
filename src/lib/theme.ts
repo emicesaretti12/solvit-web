@@ -33,8 +33,11 @@ export function useTheme(): Theme {
 function apply(theme: Theme) {
   const root = document.documentElement;
   root.setAttribute("data-theme", theme);
-  // Barra del navegador y de estado: siguen al tema elegido, no al del sistema
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", THEME_COLOR[theme]);
+  // Barra del navegador y de estado: siguen al tema elegido, no al del sistema (todas las
+  // metas theme-color, por si hay más de una)
+  document
+    .querySelectorAll('meta[name="theme-color"]')
+    .forEach((m) => m.setAttribute("content", THEME_COLOR[theme]));
   document.querySelector('meta[name="color-scheme"]')?.setAttribute("content", theme);
   try {
     localStorage.setItem(THEME_KEY, theme);

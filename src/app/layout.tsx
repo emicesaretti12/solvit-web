@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Geist, Geist_Mono, Krona_One } from "next/font/google";
+import { Archivo, Geist, Geist_Mono } from "next/font/google";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { Toaster } from "@/components/toaster";
 import { DEFAULT_THEME, THEME_COLOR, THEME_SCRIPT, ZOOM_GUARD_SCRIPT } from "@/lib/theme-config";
@@ -32,17 +32,10 @@ const archivo = Archivo({
   axes: ["wdth"],
 });
 
-// Logotipo y palabra del portal: extendida y pesada como el wordmark del brand board
-const krona = Krona_One({
-  variable: "--font-krona",
-  weight: "400",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
   title: "SEN Software · Ingeniería y desarrollo de software",
   description:
-    "Desarrollo web, software a medida, agentes de IA, hardware e IoT y marketing digital: un solo equipo de ingeniería para que tu negocio venda más.",
+    "Desarrollo web, software a medida, agentes de IA, proyectos de software con hardware y marketing con contenido, redes y pauta: un solo equipo para que tu negocio venda más.",
   applicationName: "SEN Software",
   // App en la pantalla de inicio de iOS: ventana propia, barra de estado clara (el tema
   // principal) y nombre corto bajo el ícono
@@ -60,7 +53,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "SEN Software · Ingeniería y desarrollo de software",
     description:
-      "Desarrollo web, software a medida, agentes de IA, hardware e IoT y marketing, hechos por un mismo equipo para que vendas más.",
+      "Desarrollo web, software a medida, agentes de IA, proyectos de software con hardware y marketing, hechos por un mismo equipo para que vendas más.",
     siteName: "SEN Software",
     locale: "es_AR",
     type: "website",
@@ -89,7 +82,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       // scroll-behavior: smooth (las anclas se deslizan sin Lenis, ver native.css)
       data-scroll-behavior="smooth"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable} ${krona.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable} h-full antialiased`}
     >
       <head>
         {/* Antes del primer pintado: el tema guardado (sin parpadeo) y el bloqueo del pellizco */}

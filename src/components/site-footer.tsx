@@ -3,18 +3,19 @@ import { BRAND_FULL, Logo } from "./logo";
 
 const COLUMNS = [
   {
-    title: "Servicios",
+    title: "Trabajos",
     links: [
-      { href: "#servicios", label: "Desarrollo web" },
-      { href: "#servicios", label: "Software a medida" },
-      { href: "#servicios", label: "Agentes de IA" },
-      { href: "#servicios", label: "Hardware e IoT" },
-      { href: "#servicios", label: "Marketing digital" },
+      { href: "#servicio-web", label: "Desarrollo web" },
+      { href: "#servicio-software", label: "Software a medida" },
+      { href: "#servicio-ia", label: "Agentes de IA" },
+      { href: "#servicio-hardware", label: "Proyectos híbridos" },
+      { href: "#servicio-marketing", label: "Marketing y contenido" },
     ],
   },
   {
     title: "SEN",
     links: [
+      { href: "#trabajos", label: "Trabajos" },
       { href: "#como-funciona", label: "Cómo funciona" },
       { href: "#proyectos", label: "Proyectos" },
       { href: "#nosotros", label: "Nosotros" },
@@ -33,8 +34,8 @@ export function SiteFooter() {
         <div>
           <Logo withTagline />
           <p className="mt-6 max-w-[40ch] text-sm leading-relaxed text-ink-muted">
-            Desarrollo web, software a medida, agentes de IA, hardware e IoT y marketing digital: un mismo
-            equipo de ingeniería para que tu negocio venda más.
+            Desarrollo web, software a medida, agentes de IA, proyectos de software con hardware y
+            marketing con contenido, redes y pauta: un mismo equipo para que tu negocio venda más.
           </p>
           {/* Lockup del brand board: el ícono con espesor y los pilares, separados por una
               línea; entra en 3D (footer-3d.tsx) */}

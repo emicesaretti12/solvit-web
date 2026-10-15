@@ -8,16 +8,15 @@
   - z: fracción de la distancia de la cámara (0,9 = casi contra la cámara), así la zambullida
     atraviesa la cámara igual en un celular que en un monitor
   - turn / tilt: radianes extra sobre la pose de reposo
-  - layers: cómo se abren las cintas. 0 en diagonal (escritorio: las etapas de la venta); 1 en
-    capas, como una vista explotada que conserva la silueta de la S (celulares). Con spread
-    mayor a 1 las capas se dispersan hacia los bordes y dejan pasar a la cámara
-  - En celulares la S solo vive en el hero, en el hueco que deja arriba del texto (las poses con
-    `slot` toman el centro y el tamaño de ese hueco con la página arriba; su y es un corrimiento
-    en fracciones de media pantalla y, si la S se acerca a la cámara, crece desde ese centro).
-    Nada se fija: con el scroll común la S se abre en capas (open), avanza (plunge) y atraviesa la
-    cámara (dive) mientras el texto sube por encima. No persigue al texto: queda en su lugar de la
-    pantalla y apenas sube, así se ve entera durante la transición y nunca tiembla
-  - unfold solo existe en escritorio (su marca está oculta en celulares)
+  - layers: cómo se abren las cintas. 0 en diagonal (las etapas de la venta); 1 en capas, como
+    una vista explotada que conserva la silueta de la S (el toque en celulares respira así). Con
+    spread mayor a 1 las capas se dispersan hacia los bordes y dejan pasar a la cámara
+  - En celulares la S solo vive en el hero, en el hueco que deja arriba del texto (la pose hero
+    toma el centro y el tamaño de ese hueco con la página arriba). Nada se fija: con el scroll
+    común el texto se desvanece y la S se abre en diagonal (plunge) y atraviesa la cámara (dive),
+    como en la primera versión del hero de celulares. No persigue al texto: queda en su lugar de
+    la pantalla, así nunca tiembla
+  - unfold solo existe en escritorio y open ya no tiene marca (sus marcas no se ven en celulares)
   - La profundidad también mueve las partículas: z > 0 las vuelve un flujo hacia la cámara
     (zambullida) y z < 0 las dispersa (la S llega desde el fondo y se vuelve a juntar)
 */
@@ -62,7 +61,7 @@ export const POSES = {
   // texto: el x y el y salen del hueco)
   hero: {
     desktop: p({ x: 0.6, y: -0.02, scale: 0.98 }),
-    mobile: m({ scale: 1 }),
+    mobile: p({ x: 0.12, scale: 0.95 }),
   },
   // Escritorio: mientras el titular se va, la S gira hasta quedar casi de frente y se abre en
   // sus tres cintas (vista explotada: las tres etapas de la venta); después la zambullida sigue
@@ -83,13 +82,13 @@ export const POSES = {
   // celulares crece desde su hueco y las capas empiezan a dispersarse)
   plunge: {
     desktop: p({ x: 0.22, z: 0.42, scale: 1.1, spread: 1.1, turn: 0.7, tilt: 0.22 }),
-    mobile: m({ y: 0.14, z: 0.46, scale: 1.1, spread: 1.5, turn: -0.62, tilt: 0.36 }),
+    mobile: p({ x: 0.04, y: 0.12, z: 0.42, scale: 1.1, spread: 1.1, turn: 0.7, tilt: 0.22 }),
     reducedHold: true,
   },
   // Salida del hero: las cintas se abren hacia los bordes y pasan al lado de la cámara
   dive: {
     desktop: p({ x: 0.04, z: 0.9, scale: 1.25, spread: 2.6, turn: 1.15, tilt: 0.38, opacity: 0 }),
-    mobile: m({ y: 0.22, z: 0.88, scale: 1.1, spread: 2.6, turn: -1.05, tilt: 0.46, opacity: 0 }),
+    mobile: p({ x: 0, y: 0.06, z: 0.9, scale: 1.25, spread: 2.6, turn: 1.15, tilt: 0.38, opacity: 0 }),
     reducedHold: true,
   },
   // Del otro lado: las cintas llegan desde el fondo, todavía abiertas

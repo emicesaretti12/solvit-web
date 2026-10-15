@@ -19,7 +19,7 @@ import { Stage } from "@/components/three/stage";
 
 // Navegación en el orden de la página
 const navigationData: NavigationSection[] = [
-  { title: "Servicios", href: "#servicios" },
+  { title: "Trabajos", href: "#trabajos" },
   { title: "Cómo funciona", href: "#como-funciona" },
   { title: "Proyectos", href: "#proyectos" },
   { title: "Nosotros", href: "#nosotros" },

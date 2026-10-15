@@ -12,7 +12,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "SEN Software",
     short_name: "SEN",
     description:
-      "Desarrollo web, software a medida, agentes de IA, hardware e IoT y marketing digital: un solo equipo de ingeniería para que tu negocio venda más.",
+      "Desarrollo web, software a medida, agentes de IA, proyectos de software con hardware y marketing con contenido, redes y pauta: un solo equipo para que tu negocio venda más.",
     lang: "es-AR",
     dir: "ltr",
     start_url: "/",
