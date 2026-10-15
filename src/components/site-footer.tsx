@@ -4,17 +4,19 @@ const COLUMNS = [
   {
     title: "Servicios",
     links: [
-      { href: "#como-funciona", label: "Marketing digital" },
-      { href: "#como-funciona", label: "Agentes de IA" },
-      { href: "#como-funciona", label: "Desarrollo web y software a medida" },
-      { href: "#proyectos", label: "Hardware e IoT (módulo aparte)" },
+      { href: "#trabajo-web", label: "Desarrollo web" },
+      { href: "#trabajo-software", label: "Software a medida" },
+      { href: "#trabajo-ia", label: "Agentes de IA" },
+      { href: "#trabajo-marketing", label: "Marketing, contenido y pauta" },
+      { href: "#trabajo-hibridos", label: "Proyectos con software y hardware" },
     ],
   },
   {
     title: "SEN",
     links: [
-      { href: "#proyectos", label: "Proyectos" },
+      { href: "#trabajos", label: "Trabajos" },
       { href: "#como-funciona", label: "Cómo funciona" },
+      { href: "#proyectos", label: "Proyectos" },
       { href: "#nosotros", label: "Nosotros" },
       { href: "#contacto", label: "Contacto" },
     ],
@@ -28,8 +30,8 @@ export function SiteFooter() {
         <div>
           <Logo withTagline />
           <p className="mt-6 max-w-[40ch] text-sm leading-relaxed text-ink-muted">
-            Especialistas en solucionar tus ventas: desarrollo web y software a medida,
-            agentes de IA y marketing digital. Hardware e IoT como módulo aparte.
+            Especialistas en solucionar tus ventas: desarrollo web, software a medida, agentes de
+            IA, marketing y proyectos que unen software con hardware.
           </p>
         </div>
         {COLUMNS.map((col) => (

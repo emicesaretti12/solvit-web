@@ -21,7 +21,7 @@ import {
 } from "motion/react";
 import { ArrowUpRight, CheckCircle, Pause, Play } from "@phosphor-icons/react";
 import Image from "next/image";
-import { useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { PortfolioGallery } from "@/components/ui/portfolio-gallery";
 import { LogoMark } from "@/components/logo";
@@ -438,6 +438,18 @@ export function Projects() {
     subtitle: `${p.sector} · ${p.kind}`,
     href: `#${anchorOf(p)}`,
   }));
+
+  // Desde Trabajos: si el filtro ocultaba el proyecto pedido, se quita antes de que lo busquen
+  useEffect(() => {
+    const onShow = (e: Event) => {
+      const project = PROJECTS.find((p) => p.slug === (e as CustomEvent<string>).detail);
+      if (project && !project.featured && filter !== "Todos" && !project.specialties.includes(filter as Specialty)) {
+        flushSync(() => setFilter("Todos"));
+      }
+    };
+    window.addEventListener("sen:show-project", onShow);
+    return () => window.removeEventListener("sen:show-project", onShow);
+  }, [filter]);
 
   // Lleva al caso o fila del proyecto; si el filtro lo ocultaba, primero lo quita
   const goTo = (index: number, event: MouseEvent<HTMLAnchorElement>) => {

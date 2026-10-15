@@ -1,11 +1,13 @@
 "use client";
 
-import { Fragment, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
+import { animate, useInView } from "motion/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { Reveal } from "./reveal";
 import { Wordmark } from "./logo";
+import { DELIVERED, SECTORS } from "@/content/projects";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -18,6 +20,40 @@ const PRINCIPLES = [
   "Un solo equipo: nadie se pasa la pelota.",
   "Trabajamos por etapas que podés medir.",
 ];
+
+// Datos reales: proyectos publicados, rubros distintos entre ellos y las líneas de servicio
+const STATS: { value: number; prefix?: string; suffix?: string; label: string }[] = [
+  { value: DELIVERED, prefix: "+", label: "proyectos entregados" },
+  { value: SECTORS, label: "rubros distintos, de motos a salud" },
+  { value: 5, label: "especialidades bajo un mismo equipo" },
+  { value: 24, suffix: "/7", label: "atención con agentes de IA" },
+];
+
+/* El número cuenta desde cero al entrar en pantalla. El HTML trae el valor final (sin JS o con
+   reduced motion queda ese) y la cuenta escribe el texto directo, sin re-renderizar React */
+function CountUp({ value, prefix = "", suffix = "" }: { value: number; prefix?: string; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.6 });
+  useEffect(() => {
+    const el = ref.current;
+    if (!inView || !el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const controls = animate(0, value, {
+      duration: 1.4,
+      ease: [0.23, 1, 0.32, 1],
+      onUpdate: (v) => {
+        el.textContent = `${prefix}${Math.round(v)}${suffix}`;
+      },
+    });
+    return () => controls.stop();
+  }, [inView, value, prefix, suffix]);
+  return (
+    <span ref={ref} className="tabular-nums">
+      {prefix}
+      {value}
+      {suffix}
+    </span>
+  );
+}
 
 export function About() {
   const ref = useRef<HTMLElement>(null);
@@ -68,9 +104,21 @@ export function About() {
           ))}
         </p>
 
-        <ul className="mt-16 grid gap-8 md:mt-24 md:grid-cols-3 md:gap-12">
+        <dl className="mt-16 grid grid-cols-2 gap-x-5 gap-y-10 md:mt-24 lg:grid-cols-4 lg:gap-x-10">
+          {STATS.map((stat, i) => (
+            <Reveal key={stat.label} delay={i * 0.06} className="flex flex-col border-t border-line-strong pt-5">
+              <dt className="order-2 mt-2 max-w-[22ch] text-sm leading-snug text-ink-muted md:text-[15px]">{stat.label}</dt>
+              <dd className="font-display order-1 text-[2.9rem] font-bold leading-none tracking-[-0.05em] text-ink md:text-[4rem]">
+                <CountUp value={stat.value} prefix={stat.prefix} suffix={stat.suffix} />
+              </dd>
+            </Reveal>
+          ))}
+        </dl>
+
+        <ul className="mt-16 grid gap-6 md:mt-20 md:grid-cols-3 md:gap-12">
           {PRINCIPLES.map((p, i) => (
-            <Reveal key={p} as="li" delay={i * 0.08} className="border-t border-line-strong pt-6">
+            <Reveal key={p} as="li" delay={i * 0.08} className="flex items-start gap-3">
+              <span aria-hidden="true" className="mt-[0.55em] h-2 w-3.5 shrink-0 -skew-x-[24.5deg] bg-blue-500" />
               <p className="text-lg leading-snug text-ink md:text-xl">{p}</p>
             </Reveal>
           ))}

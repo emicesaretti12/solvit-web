@@ -18,6 +18,7 @@ import { Stage } from "@/components/three/stage";
 export default function AgencyHeroSection({ children }: { children?: ReactNode }) {
   // Navegación en el orden de la página
   const navigationData: NavigationSection[] = [
+    { title: "Trabajos", href: "#trabajos" },
     { title: "Cómo funciona", href: "#como-funciona" },
     { title: "Proyectos", href: "#proyectos" },
     { title: "Nosotros", href: "#nosotros" },
