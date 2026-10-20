@@ -1,6 +1,7 @@
 import { MaskWords } from "./mask-words";
 import { Reveal } from "./reveal";
 import { ContactForm } from "./contact-form";
+import { CONTACT } from "@/content/contact-info";
 
 const NEXT_STEPS = [
   "Nos contás cómo vendés hoy.",
@@ -37,6 +38,18 @@ export function Contact() {
                 ))}
               </ol>
             </div>
+            <ul className="mt-10 space-y-2 text-ink">
+              <li>
+                <a href={`mailto:${CONTACT.email}`} className="transition-colors duration-150 hover:text-blue-300">
+                  {CONTACT.email}
+                </a>
+              </li>
+              <li>
+                <a href={CONTACT.whatsapp} className="transition-colors duration-150 hover:text-blue-300">
+                  WhatsApp · {CONTACT.phone}
+                </a>
+              </li>
+            </ul>
           </Reveal>
         </div>
         <Reveal delay={0.1} className="sd-3d self-start rounded-[2rem] border border-line bg-navy-800 p-1.5">
