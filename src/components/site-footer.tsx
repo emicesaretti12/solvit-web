@@ -1,5 +1,6 @@
 import { FooterLockup, FooterWordmark } from "./footer-3d";
 import { BRAND_FULL, Logo } from "./logo";
+import { CONTACT } from "@/content/contact-info";
 
 const COLUMNS = [
   {
@@ -40,6 +41,14 @@ export function SiteFooter() {
           {/* Lockup del brand board: el ícono con espesor y los pilares, separados por una
               línea; entra en 3D (footer-3d.tsx) */}
           <FooterLockup pillars={PILLARS} />
+          <p className="mt-6 space-y-1 text-sm text-ink-muted">
+            <a href={`mailto:${CONTACT.email}`} className="block transition-colors duration-150 hover:text-ink">
+              {CONTACT.email}
+            </a>
+            <a href={CONTACT.tel} className="block transition-colors duration-150 hover:text-ink">
+              {CONTACT.phone}
+            </a>
+          </p>
         </div>
         {COLUMNS.map((col) => (
           <nav key={col.title} aria-label={col.title}>
