@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Manrope } from "next/font/google";
 import { LogoMark, Wordmark } from "@/components/logo";
+import { JsonLd } from "@/components/json-ld";
 import { SmoothScroll } from "@/components/smooth-scroll";
+import { organizationSchema, websiteSchema } from "@/content/schema";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/content/site";
 import { Toaster } from "@/components/toaster";
 import { DEFAULT_THEME, INTRO_SCRIPT, JS_FLAG_SCRIPT, THEME_COLOR, ZOOM_GUARD_SCRIPT } from "@/lib/theme-config";
 import "./globals.css";
@@ -26,10 +29,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SEN Software · Ingeniería y desarrollo de software",
-  description:
-    "Desarrollo web, software a medida, agentes de IA, proyectos de software con hardware y marketing con contenido, redes y pauta: un solo equipo para que tu negocio venda más.",
-  applicationName: "SEN Software",
+  // Dominio canónico: las URL relativas de los metadatos (canónica, imagen para compartir) salen de acá
+  metadataBase: new URL(SITE_URL),
+  title: { default: SITE_TITLE, template: "%s | SEN Software" },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
+  // Verificación de Google Search Console: se completa con la variable de entorno al dar de alta el sitio
+  verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION },
   // App en la pantalla de inicio de iOS: ventana propia, barra de estado clara (el tema
   // principal) y nombre corto bajo el ícono
   appleWebApp: {
@@ -44,13 +52,14 @@ export const metadata: Metadata = {
     address: false,
   },
   openGraph: {
-    title: "SEN Software · Ingeniería y desarrollo de software",
-    description:
-      "Desarrollo web, software a medida, agentes de IA, proyectos de software con hardware y marketing, hechos por un mismo equipo para que vendas más.",
-    siteName: "SEN Software",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    siteName: SITE_NAME,
     locale: "es_AR",
     type: "website",
   },
+  twitter: { card: "summary_large_image", title: SITE_TITLE, description: SITE_DESCRIPTION },
 };
 
 export const viewport: Viewport = {
@@ -68,7 +77,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="es"
+      lang="es-AR"
       data-theme={DEFAULT_THEME}
       // Next pone el scroll instantáneo al navegar entre páginas aunque el html tenga
       // scroll-behavior: smooth (las anclas se deslizan sin Lenis, ver native.css)
@@ -114,6 +123,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SmoothScroll />
         {children}
         <Toaster />
+        <JsonLd data={[organizationSchema, websiteSchema]} />
       </body>
     </html>
   );

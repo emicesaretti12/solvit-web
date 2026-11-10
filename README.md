@@ -48,6 +48,12 @@ npm run lint
     (entradas al entrar en pantalla y pausa de loops fuera de pantalla)
 - `src/components/services-3d.tsx`: los objetos 3D de agentes de IA, proyectos híbridos y marketing
 - `src/content/`: servicios, proyectos, contacto y navegación
+- SEO: `src/app/robots.ts`, `sitemap.ts` y `opengraph-image.tsx`; metadatos y dominio canónico
+  en `layout.tsx` (`src/content/site.ts`); datos estructurados en `src/content/schema.ts`;
+  una página por servicio en `src/app/servicios/<slug>/` (contenido en `content/services.ts`,
+  plantilla en `components/site/service-page.tsx`); `public/llms.txt` para asistentes de IA.
+  Para verificar el sitio en Google Search Console, cargar la variable de entorno
+  `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` en Vercel
 - `src/app/api/contacto/route.ts`: endpoint del formulario (valida el correo y registra la consulta)
 
 ## Pendientes

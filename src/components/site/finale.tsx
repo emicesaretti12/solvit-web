@@ -8,6 +8,7 @@ import { ArrowDown } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/logo";
 import { CONTACT } from "@/content/contact-info";
 import { NAV } from "@/content/nav";
+import { SERVICES } from "@/content/services";
 import { LeadForm } from "./lead-form";
 import { ProximityTitle } from "./proximity-title";
 import { TileRain } from "./tile-rain";
@@ -23,7 +24,8 @@ const CROSSES = [
 const link =
   "inline-flex min-h-11 items-center bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1px] bg-[position:0_82%] bg-no-repeat transition-[background-size] duration-500 ease-[var(--ease-expo)] hover:bg-[length:100%_1px]";
 
-export function Finale() {
+/* `base` es "/" en las páginas internas (los enlaces a secciones van a la página principal) */
+export function Finale({ base = "" }: { base?: string }) {
   return (
     <div className="relative">
       <section
@@ -63,11 +65,25 @@ export function Finale() {
         <Logo withTagline />
 
         <div className="mt-14 grid flex-1 gap-14 md:mt-[6vw] lg:grid-cols-[0.5fr_0.5fr_1fr] lg:gap-10">
-          <address className="text-[19px] not-italic leading-[1.35] text-ink">
-            Córdoba
-            <br />
-            Argentina
-          </address>
+          <div>
+            <address className="text-[19px] not-italic leading-[1.35] text-ink">
+              Córdoba
+              <br />
+              Argentina
+            </address>
+            <nav aria-label="Servicios" className="mt-10">
+              <p className="text-[12px] uppercase tracking-[0.2em] text-ink-faint">Servicios</p>
+              <ul className="mt-2 text-[17px] text-ink">
+                {SERVICES.map((s) => (
+                  <li key={s.slug}>
+                    <a href={`/servicios/${s.slug}`} className={link}>
+                      {s.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
 
           <div className="flex flex-col gap-8 text-[19px] leading-[1.3] text-ink">
             <ul>
@@ -114,7 +130,7 @@ export function Finale() {
           <ul className="flex flex-wrap gap-x-6 gap-y-2">
             {NAV.slice(1, -1).map((item) => (
               <li key={item.id}>
-                <a href={`#${item.id}`} className={link}>
+                <a href={`${base}#${item.id}`} className={link}>
                   {item.label}
                 </a>
               </li>

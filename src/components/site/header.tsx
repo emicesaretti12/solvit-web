@@ -19,7 +19,8 @@ import { useActiveSection } from "./use-active-section";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-export function Header() {
+/* `base` es "/" en las páginas internas: ahí las secciones viven en la página principal */
+export function Header({ base = "" }: { base?: string }) {
   const [open, setOpen] = useState(false);
   const active = useActiveSection();
   const reduce = useReducedMotion();
@@ -75,7 +76,7 @@ export function Header() {
       <header className="pointer-events-none fixed inset-x-0 top-0 z-[52] px-5 py-4 md:px-[2.6vw] md:py-5">
         <div className="relative flex items-center justify-between">
           <a
-            href="#inicio"
+            href={base || "#inicio"}
             aria-label="SEN Software, ir al inicio"
             className={`drop-in pointer-events-auto -ml-3.5 flex h-[46px] items-center rounded-full px-3.5 transition-[background-color,box-shadow,backdrop-filter] duration-500 ease-out ${scrolled ? "bg-white/75 shadow-[0_1px_2px_rgb(var(--shade-rgb)/0.1)] backdrop-blur-md" : ""}`}
           >
@@ -146,7 +147,7 @@ export function Header() {
                   {NAV.map((item) => (
                     <li key={item.id}>
                       <a
-                        href={`#${item.id}`}
+                        href={item.id === "contacto" ? "#contacto" : `${base}#${item.id}`}
                         onClick={() => setOpen(false)}
                         aria-current={active === item.id ? "true" : undefined}
                         className="group flex items-center justify-between rounded-xl px-3.5 py-2 text-[26px] uppercase leading-tight tracking-[-0.02em] text-ink transition-colors duration-200 hover:bg-mist"

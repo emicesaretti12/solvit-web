@@ -88,8 +88,14 @@ function Card({ service, index, progress }: { service: Service; index: number; p
             ))}
           </ul>
           <a
+            href={`/servicios/${service.slug}`}
+            className="mt-6 inline-flex min-h-11 items-center gap-2 self-start text-[14px] font-medium text-white/75 underline decoration-white/25 underline-offset-[6px] transition-colors duration-200 hover:text-white hover:decoration-white"
+          >
+            Más sobre {service.title.toLowerCase()}
+          </a>
+          <a
             href="#contacto"
-            className="group mt-10 flex items-center justify-between border-t border-white/12 pt-6 text-[13px] font-semibold uppercase lg:mt-auto"
+            className="group mt-6 flex items-center justify-between border-t border-white/12 pt-6 text-[13px] font-semibold uppercase lg:mt-auto"
           >
             <span className="roll-host">
               <span className="roll">

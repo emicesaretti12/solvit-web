@@ -2,6 +2,10 @@ import { Stage } from "@/components/three/stage";
 import { About } from "@/components/site/about";
 import { ContactBadge } from "@/components/site/contact-badge";
 import { Facts } from "@/components/site/facts";
+import { Faqs } from "@/components/site/faqs";
+import { JsonLd } from "@/components/json-ld";
+import { faqSchema } from "@/content/schema";
+import { HOME_FAQS } from "@/content/services";
 import { Finale } from "@/components/site/finale";
 import { Header } from "@/components/site/header";
 import { Hero } from "@/components/site/hero";
@@ -32,8 +36,10 @@ export default function Home() {
         <System />
         <Facts />
         <About />
+        <Faqs faqs={HOME_FAQS} />
         <Finale />
       </main>
+      <JsonLd data={faqSchema(HOME_FAQS)} />
       <PageObservers />
     </>
   );

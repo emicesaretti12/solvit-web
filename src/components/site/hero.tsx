@@ -113,8 +113,8 @@ export function Hero() {
 
         <p className="hero-fade mt-4 max-w-[30ch] text-[17px] leading-[1.45] text-ink-muted [--d:400ms] lg:absolute lg:right-[7.5vw] lg:top-[47.5%] lg:mt-0 lg:max-w-none lg:-translate-y-1/2 lg:text-right lg:text-[clamp(1rem,1.18vw,1.25rem)] lg:leading-[1.5]">
           <motion.span className="block" style={part ? { x: right, opacity: fade } : undefined}>
-            Ingeniería y software para empresas
-            <br className="max-lg:hidden" /> que <span className="text-ink">quieren vender más.</span>
+            Desarrollo web, software a medida y agentes de IA
+            <br className="max-lg:hidden" /> para empresas que <span className="text-ink">quieren vender más.</span>
           </motion.span>
         </p>
 
