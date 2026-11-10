@@ -36,8 +36,8 @@ export const metadata: Metadata = {
   applicationName: SITE_NAME,
   alternates: { canonical: "/" },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
-  // Verificación de Google Search Console: se completa con la variable de entorno al dar de alta el sitio
-  verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION },
+  // Verificación de Google Search Console (código público del sitio; la variable de entorno lo pisa)
+  verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? "emhAbfSW0JWh3q8DmjfgypCf6_DpFEDkROwWUyDKrZ4" },
   // App en la pantalla de inicio de iOS: ventana propia, barra de estado clara (el tema
   // principal) y nombre corto bajo el ícono
   appleWebApp: {
