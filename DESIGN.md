@@ -107,7 +107,7 @@ Prohibido: negro puro, degradés violeta "de IA", glows, campos grandes de azul 
 - **Física:** las fichas del cierre se pueden agarrar y tirar con el mouse; en táctil, un toque
   las hace saltar.
 - **Curvas:** entradas con cubic-bezier(0.16, 1, 0.3, 1). Solo transform, opacity y clip-path.
-- **Reduced motion:** sin scroll suave, sin cursor propio, sin loops; todo visible desde el
+- **Reduced motion:** sin scroll suave, sin telón de carga, sin loops; todo visible desde el
   primer cuadro; las fichas aparecen ya apiladas y el globo y el valle quedan quietos.
 - **CSS:** las clases propias van en `@layer components` para que las utilidades puedan pisarlas.
 - **Cursor:** el del sistema. No hay cursor propio.
