@@ -71,7 +71,7 @@ export function LeadForm({ compact = false, origin }: { compact?: boolean; origi
           placeholder="nombre@correo.com"
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${id}-error` : undefined}
-          className="h-full min-w-0 flex-1 bg-transparent text-[17px] text-ink placeholder:text-ink-faint/70 focus:outline-none"
+          className="h-full min-w-0 flex-1 bg-transparent text-[17px] text-ink placeholder:text-ink-faint focus:outline-none"
         />
         <button
           type="submit"
@@ -99,7 +99,7 @@ export function LeadForm({ compact = false, origin }: { compact?: boolean; origi
                 name="mensaje"
                 rows={3}
                 placeholder="Contanos qué querés resolver (opcional)"
-                className="w-full resize-y rounded-2xl bg-haze px-6 py-4 text-[16px] text-ink placeholder:text-ink-faint/70 focus:outline-none focus:shadow-[0_0_0_2px_var(--blue-500)]"
+                className="w-full resize-y rounded-2xl bg-haze px-6 py-4 text-[16px] text-ink placeholder:text-ink-faint focus:outline-none focus:shadow-[0_0_0_2px_var(--blue-500)]"
               />
             </>
           ) : (

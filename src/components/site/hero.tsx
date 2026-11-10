@@ -103,7 +103,7 @@ export function Hero() {
               <ul
                 key={copy}
                 aria-hidden={copy === 1}
-                className="flex shrink-0 animate-marquee items-center gap-[var(--gap)] pr-[var(--gap)] text-[19px] text-ink/45"
+                className="flex shrink-0 animate-marquee items-center gap-[var(--gap)] pr-[var(--gap)] text-[19px] text-ink/60"
               >
                 {CLIENTS.map((name, i) => (
                   <li key={name} className={`whitespace-nowrap ${VOICES[i % VOICES.length]}`}>

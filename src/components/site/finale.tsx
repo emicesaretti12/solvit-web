@@ -35,7 +35,7 @@ export function Finale() {
         </p>
         <h2
           id="contacto-titulo"
-          className="mt-[19svh] text-[clamp(4.2rem,17vw,19rem)] font-light leading-[0.9] tracking-[-0.055em] text-ink md:mt-[15svh]"
+          className="mt-[19svh] text-[clamp(4.2rem,17vw,19rem)] font-light leading-[0.9] tracking-[-0.04em] text-ink md:mt-[15svh]"
         >
           <SplitText text="¡Hablemos!" />
         </h2>

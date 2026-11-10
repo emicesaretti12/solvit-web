@@ -106,7 +106,7 @@ export function Works() {
     <section id="trabajos" aria-labelledby="trabajos-titulo" className="relative bg-paper pb-20 pt-24 md:pb-[6vw] md:pt-[9vw]">
       <div className="mx-auto px-5 md:px-[5vw]">
         <div className="flex flex-wrap items-end justify-between gap-x-12 gap-y-6">
-          <h2 id="trabajos-titulo" className="text-[clamp(3rem,8.4vw,8.6rem)] leading-[0.98] tracking-[-0.045em] text-ink">
+          <h2 id="trabajos-titulo" className="text-[clamp(3rem,8.4vw,8.6rem)] leading-[0.98] tracking-[-0.04em] text-ink">
             <SplitText text="Últimos trabajos" />
           </h2>
           <p data-reveal className="rise max-w-[40ch] pb-3 text-[12.5px] uppercase leading-[1.5] text-ink [--delay:250ms]">
@@ -138,9 +138,8 @@ export function Works() {
 
         {/* Vitrina de marcas */}
         <div data-reveal className="rise marquee-hold mt-20 overflow-hidden rounded-[2rem] bg-night px-6 pt-9 text-white md:mt-[6vw] md:px-8">
-          <p className="text-[11.5px] uppercase text-white/50">Confían en SEN</p>
-          <div className="mt-3 flex items-end justify-between gap-8 border-b border-white/15 pb-5">
-            <h3 className="max-w-[20ch] text-[clamp(1.7rem,3.5vw,3rem)] font-bold uppercase leading-[0.95] tracking-[-0.03em]">
+          <div className="flex items-end justify-between gap-8 border-b border-white/15 pb-5">
+            <h3 className="max-w-[20ch] text-balance text-[clamp(1.7rem,3.5vw,3rem)] font-bold uppercase leading-[0.95] tracking-[-0.03em]">
               Marcas que ya construyen con nosotros.
             </h3>
             <p className="tabular shrink-0 text-[clamp(2rem,4vw,3.4rem)] font-bold leading-none tracking-[-0.03em]">+{DELIVERED}</p>

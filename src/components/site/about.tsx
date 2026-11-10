@@ -71,8 +71,7 @@ export function About() {
           <ul className="grid gap-6 sm:grid-cols-3">
             {PRINCIPLES.map((p, i) => (
               <li key={p} data-reveal className="rise border-t border-ink/15 pt-5" style={{ ["--delay" as string]: `${i * 90}ms` }}>
-                <span className="tabular font-mono text-[11px] text-ink-faint">0{i + 1}</span>
-                <p className="mt-3 text-[17px] leading-[1.35] text-ink">{p}</p>
+                <p className="text-[17px] leading-[1.35] text-ink">{p}</p>
               </li>
             ))}
           </ul>

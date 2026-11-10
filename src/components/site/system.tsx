@@ -66,12 +66,9 @@ export function System() {
     <section id="sistema" aria-labelledby="sistema-titulo" className="relative border-y border-line bg-paper py-20 md:py-[8vw]">
       <div className="mx-auto grid gap-14 px-5 md:px-[5.8vw] lg:grid-cols-[0.82fr_1.18fr] lg:gap-[5vw]">
         <div className="lg:sticky lg:top-28 lg:self-start">
-          <p data-reveal className="rise label-caps">
-            El sistema SEN
-          </p>
           <h2
             id="sistema-titulo"
-            className="mt-6 text-[clamp(2.2rem,4vw,3.9rem)] font-bold uppercase leading-[0.95] tracking-[-0.04em] text-ink"
+            className="text-[clamp(2.2rem,4vw,3.9rem)] font-bold uppercase leading-[0.95] tracking-[-0.04em] text-ink"
           >
             <SplitText text="Atraer, atender y cerrar." />
             <br />
@@ -107,7 +104,7 @@ export function System() {
           <div
             ref={frame}
             data-reveal
-            className="rise overflow-hidden rounded-[1.75rem] border border-line bg-white shadow-[0_40px_90px_-50px_rgb(var(--shade-rgb)/0.55)]"
+            className="rise overflow-hidden rounded-[1.75rem] bg-white shadow-[0_0_0_1px_rgb(var(--fg-rgb)/0.06),0_40px_90px_-50px_rgb(var(--shade-rgb)/0.55)]"
           >
             <div className="flex items-center gap-3 border-b border-line px-5 py-3.5">
               <span aria-hidden="true" className="flex gap-1.5">
@@ -167,7 +164,7 @@ export function System() {
                   className={`relative overflow-hidden rounded-3xl border p-5 pb-6 text-left transition-[border-color,background-color,transform] duration-300 ease-out active:scale-[0.98] ${on ? "border-ink/25 bg-white" : "border-line bg-white/60 hover:border-ink/20"}`}
                 >
                   <span className="flex items-center gap-2.5 text-[17px] font-semibold tracking-[-0.01em] text-ink">
-                    <span className="tabular font-mono text-[11px] font-normal text-ink-faint">0{i + 1}</span>
+                    <span className="tabular text-[12px] font-medium text-ink-faint">0{i + 1}</span>
                     {s.title}
                   </span>
                   <span className="mt-2.5 block text-[14.5px] leading-[1.5] text-ink-muted">{s.text}</span>

@@ -49,8 +49,8 @@ export function Header() {
       ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
       : {
           initial: { opacity: 0, y: -18, scale: 0.94 },
-          animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.55, ease: EASE, delay: i * 0.07 } },
-          exit: { opacity: 0, y: -10, scale: 0.97, transition: { duration: 0.2, delay: (2 - i) * 0.03 } },
+          animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: EASE, delay: i * 0.05 } },
+          exit: { opacity: 0, y: -8, scale: 0.97, transition: { duration: 0.16, delay: (2 - i) * 0.025 } },
         };
 
   return (
@@ -106,7 +106,7 @@ export function Header() {
             >
               <span className="relative hidden h-5 overflow-hidden md:block">
                 <span
-                  className="flex flex-col transition-transform duration-500 ease-[var(--ease-expo)]"
+                  className="flex flex-col transition-transform duration-300 ease-[var(--ease-expo)]"
                   style={{ transform: open ? "translateY(-50%)" : "none" }}
                 >
                   <span className="h-5 leading-5">Menú</span>
@@ -116,7 +116,7 @@ export function Header() {
               <span className="sr-only md:hidden">{open ? "Cerrar menú" : "Abrir menú"}</span>
               <span
                 aria-hidden="true"
-                className="flex gap-[5px] transition-transform duration-500 ease-[var(--ease-expo)]"
+                className="flex gap-[5px] transition-transform duration-300 ease-[var(--ease-expo)]"
                 style={{ transform: open ? "rotate(90deg)" : "none" }}
               >
                 <span className="size-[5px] rounded-full bg-ink" />
@@ -134,7 +134,7 @@ export function Header() {
                 data-lenis-prevent
                 className="pointer-events-auto absolute right-0 top-[calc(100%+10px)] flex max-h-[calc(100svh-96px)] w-[min(calc(100vw-40px),320px)] origin-top-right flex-col gap-2.5 overflow-y-auto overscroll-contain"
               >
-                <motion.ul {...card(0)} className="rounded-2xl bg-white p-3 shadow-[0_24px_60px_-24px_rgb(var(--shade-rgb)/0.45)]">
+                <motion.ul {...card(0)} className="origin-top-right rounded-2xl bg-white p-3 shadow-[0_24px_60px_-24px_rgb(var(--shade-rgb)/0.45)]">
                   {NAV.map((item) => (
                     <li key={item.id}>
                       <a
@@ -154,7 +154,7 @@ export function Header() {
                     </li>
                   ))}
                 </motion.ul>
-                <motion.div {...card(1)} className="rounded-2xl bg-white p-7 pb-4 shadow-[0_24px_60px_-24px_rgb(var(--shade-rgb)/0.45)]">
+                <motion.div {...card(1)} className="origin-top-right rounded-2xl bg-white p-7 pb-4 shadow-[0_24px_60px_-24px_rgb(var(--shade-rgb)/0.45)]">
                   <p className="mb-6 text-[34px] leading-[1.02] tracking-[-0.03em] text-ink">Dejanos tu correo</p>
                   <LeadForm compact origin="menu" />
                 </motion.div>
@@ -163,7 +163,7 @@ export function Header() {
                   href={CONTACT.whatsapp}
                   target="_blank"
                   rel="noreferrer"
-                  className="group flex items-center justify-between rounded-2xl bg-night px-7 py-6 text-white shadow-[0_24px_60px_-24px_rgb(var(--shade-rgb)/0.6)]"
+                  className="group flex origin-top-right items-center justify-between rounded-2xl bg-night px-7 py-6 text-white shadow-[0_24px_60px_-24px_rgb(var(--shade-rgb)/0.6)]"
                 >
                   <span className="text-[17px]">
                     <span className="font-bold">Escribinos</span> por WhatsApp

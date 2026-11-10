@@ -37,7 +37,7 @@ function Column({ facts, reverse, duration, className = "" }: { facts: Fact[]; r
           className={`flex flex-col gap-[var(--gap)] pb-[var(--gap)] ${reverse ? "animate-marquee-y-reverse" : "animate-marquee-y"}`}
         >
           {facts.map((fact, i) => (
-            <li key={i} className="rounded-3xl border border-line bg-white p-5 shadow-[0_14px_34px_-26px_rgb(var(--shade-rgb)/0.5)]">
+            <li key={i} className="rounded-3xl border border-line bg-white p-5">
               <div className="flex items-center gap-3">
                 <span className={`grid size-9 shrink-0 place-items-center rounded-full text-[12px] font-bold ${TINTS[fact.tint % TINTS.length]}`}>
                   {initials(fact.who)}
@@ -63,10 +63,7 @@ export function Facts() {
   return (
     <section id="hechos" aria-labelledby="hechos-titulo" className="relative overflow-hidden bg-paper py-20 md:py-[7vw]">
       <div className="mx-auto px-5 text-center md:px-[5.8vw]">
-        <p data-reveal className="rise text-[12.5px] uppercase text-ink-muted">
-          Proyectos entregados
-        </p>
-        <h2 id="hechos-titulo" className="mt-3 text-[clamp(2.1rem,4.4vw,3.6rem)] font-bold uppercase leading-[1] tracking-[-0.035em] text-ink">
+        <h2 id="hechos-titulo" className="text-[clamp(2.1rem,4.4vw,3.6rem)] font-bold uppercase leading-[1] tracking-[-0.035em] text-ink">
           <SplitText text="Hechos, no promesas" />
         </h2>
         <p data-reveal className="rise mt-4 text-[16px] text-ink-muted [--delay:200ms]">

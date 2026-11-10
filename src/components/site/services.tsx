@@ -106,11 +106,8 @@ export function Services() {
   return (
     <section id="servicios" aria-labelledby="servicios-titulo" className="relative bg-paper pt-20 md:pt-[7vw]">
       <div className="mx-auto px-5 md:px-[5.8vw]">
-        <p data-reveal className="rise label-caps">
-          Qué hacemos
-        </p>
-        <div className="mt-4 flex flex-wrap items-end justify-between gap-6">
-          <h2 id="servicios-titulo" className="text-[clamp(2.6rem,6vw,5.6rem)] font-medium leading-[1] tracking-[-0.045em] text-ink">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <h2 id="servicios-titulo" className="text-[clamp(2.6rem,6vw,5.6rem)] font-medium leading-[1] tracking-[-0.04em] text-balance text-ink">
             <SplitText text="Tecnología que vende." />
           </h2>
           <a

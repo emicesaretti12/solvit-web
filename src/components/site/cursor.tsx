@@ -28,8 +28,9 @@ export function Cursor() {
     let ry = y;
     let scale = 1;
     let target = 1;
-    let bubbleScale = 0;
+    let bubbleScale = 0.6;
     let bubbleTarget = 0;
+    let bubbleAlpha = 0;
     let shown = false;
     let frame = 0;
 
@@ -37,17 +38,22 @@ export function Cursor() {
       rx += (x - rx) * 0.16;
       ry += (y - ry) * 0.16;
       scale += (target - scale) * 0.18;
-      bubbleScale += (bubbleTarget - bubbleScale) * 0.16;
+      bubbleScale += (0.6 + 0.4 * bubbleTarget - bubbleScale) * 0.18;
+      bubbleAlpha += (bubbleTarget - bubbleAlpha) * 0.22;
       if (dot.current) dot.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
       if (ring.current) ring.current.style.transform = `translate3d(${rx}px, ${ry}px, 0) scale(${scale})`;
-      if (bubble.current) bubble.current.style.transform = `translate3d(${rx}px, ${ry}px, 0) scale(${bubbleScale})`;
+      // La burbuja nunca nace de la nada: crece desde 0,6 mientras se funde
+      if (bubble.current) {
+        bubble.current.style.transform = `translate3d(${rx}px, ${ry}px, 0) scale(${bubbleScale})`;
+        bubble.current.style.opacity = shown ? String(bubbleAlpha) : "0";
+      }
       frame = requestAnimationFrame(loop);
     };
 
     const show = (v: boolean) => {
       if (shown === v) return;
       shown = v;
-      for (const el of [dot.current, ring.current, bubble.current]) if (el) el.style.opacity = v ? "1" : "0";
+      for (const el of [dot.current, ring.current]) if (el) el.style.opacity = v ? "1" : "0";
     };
 
     const onMove = (e: PointerEvent) => {
@@ -95,8 +101,8 @@ export function Cursor() {
       </div>
       <div
         ref={bubble}
-        className="absolute -left-11 -top-11 grid size-[88px] place-items-center rounded-full bg-blue-500 text-center text-[12px] font-semibold uppercase leading-tight tracking-[0.04em] text-white opacity-0 transition-opacity duration-300"
-        style={{ transform: "scale(0)" }}
+        className="absolute -left-11 -top-11 grid size-[88px] place-items-center rounded-full bg-blue-500 text-center text-[12px] font-semibold uppercase leading-tight tracking-[0.04em] text-white opacity-0"
+        style={{ transform: "scale(0.6)" }}
       >
         <span ref={label} className="max-w-[70px]" />
       </div>
