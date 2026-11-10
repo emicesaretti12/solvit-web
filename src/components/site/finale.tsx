@@ -1,7 +1,7 @@
 /*
   Cierre: una pantalla entera que queda fija mientras el pie blanco sube y la tapa (el pie tiene
   las esquinas de arriba redondeadas, como una hoja). Adentro, la pregunta, un "¡Hablemos!"
-  gigante que entra letra por letra y la lluvia de fichas. El pie trae los datos de contacto y
+  gigante que entra letra por letra, engorda cerca del puntero, y la lluvia de fichas. El pie trae los datos de contacto y
   el formulario corto.
 */
 import { ArrowDown } from "@phosphor-icons/react/dist/ssr";
@@ -9,13 +9,19 @@ import { Logo } from "@/components/logo";
 import { CONTACT } from "@/content/contact-info";
 import { NAV } from "@/content/nav";
 import { LeadForm } from "./lead-form";
-import { SplitText } from "./split-text";
+import { ProximityTitle } from "./proximity-title";
 import { TileRain } from "./tile-rain";
 
-const CROSSES = ["left-[5vw] top-[9.5%]", "right-[5vw] top-[9.5%]", "left-[5vw] top-[43%]", "left-1/2 top-[43%]", "right-[5vw] top-[43%]"];
+const CROSSES = [
+  "left-[5vw] top-[9.5%]",
+  "right-[5vw] top-[9.5%]",
+  "left-[5vw] top-[43%]",
+  "left-1/2 top-[43%]",
+  "right-[5vw] top-[43%]",
+];
 
 const link =
-  "bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1px] bg-[position:0_100%] bg-no-repeat transition-[background-size] duration-500 ease-[var(--ease-expo)] hover:bg-[length:100%_1px]";
+  "inline-flex min-h-11 items-center bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1px] bg-[position:0_82%] bg-no-repeat transition-[background-size] duration-500 ease-[var(--ease-expo)] hover:bg-[length:100%_1px]";
 
 export function Finale() {
   return (
@@ -35,9 +41,9 @@ export function Finale() {
         </p>
         <h2
           id="contacto-titulo"
-          className="mt-[19svh] text-[clamp(4.2rem,17vw,19rem)] font-light leading-[0.9] tracking-[-0.04em] text-ink md:mt-[15svh]"
+          className="mt-[19svh] text-[clamp(4.2rem,17vw,19rem)] leading-[0.9] tracking-[-0.04em] text-ink [contain:layout] md:mt-[15svh]"
         >
-          <SplitText text="¡Hablemos!" />
+          <ProximityTitle text="¡Hablemos!" />
         </h2>
         <TileRain />
         <a
@@ -63,7 +69,7 @@ export function Finale() {
             Argentina
           </address>
 
-          <div className="flex flex-col gap-12 text-[19px] leading-[1.7] text-ink">
+          <div className="flex flex-col gap-8 text-[19px] leading-[1.3] text-ink">
             <ul>
               <li>
                 <a href={CONTACT.whatsapp} target="_blank" rel="noreferrer" className={link}>

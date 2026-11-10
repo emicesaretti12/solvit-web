@@ -34,7 +34,7 @@ export function SectionNav() {
                 href={`#${item.id}`}
                 aria-current={on ? "true" : undefined}
                 tabIndex={shown ? 0 : -1}
-                className={`group flex items-center py-[7px] text-[10.5px] uppercase tracking-[0.24em] transition-colors duration-300 ${on ? "text-ink" : "text-ink-faint hover:text-ink"}`}
+                className={`group flex items-center py-[7px] text-[11px] uppercase tracking-[0.22em] transition-colors duration-300 ${on ? "text-ink" : "text-ink-faint hover:text-ink"}`}
               >
                 <span
                   aria-hidden="true"

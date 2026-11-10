@@ -102,7 +102,7 @@ export function AgentPreview() {
                   {[0, 1, 2].map((d) => (
                     <span
                       key={d}
-                      className="size-1.5 animate-bounce rounded-full bg-blue-300"
+                      className="typing-dot size-1.5 rounded-full bg-blue-300"
                       style={{ animationDelay: `${d * 120}ms` }}
                     />
                   ))}

@@ -10,8 +10,8 @@
   cámara (las marcas StageMark le dicen al escenario qué pose va en cada punto del scroll). En
   celulares la S vive en el hueco #hero-slot y las frases van debajo.
 */
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useEffect, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 import { StageMark, useStageDrag } from "@/components/three/stage";
 import { PROJECTS } from "@/content/projects";
 import { Globe } from "./globe";
@@ -57,9 +57,26 @@ function RotatingWord() {
 
 export function Hero() {
   const drag = useStageDrag();
+  const section = useRef<HTMLElement>(null);
+  const reduce = useReducedMotion();
+  // Escritorio: al bajar, las dos frases se abren hacia los costados y se apagan, dejándole el
+  // centro a la S que se despliega
+  const [wide, setWide] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setWide(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  const { scrollYProgress } = useScroll({ target: section, offset: ["start start", "end start"] });
+  const left = useTransform(scrollYProgress, [0, 0.4], ["0vw", "-9vw"]);
+  const right = useTransform(scrollYProgress, [0, 0.4], ["0vw", "9vw"]);
+  const fade = useTransform(scrollYProgress, [0.05, 0.36], [1, 0]);
+  const part = wide && !reduce;
 
   return (
-    <section id="inicio" aria-labelledby="hero-titulo" className="relative min-h-[118svh] lg:min-h-[128svh]">
+    <section ref={section} id="inicio" aria-labelledby="hero-titulo" className="relative min-h-[118svh] lg:min-h-[128svh]">
       <StageMark pose="hero" slot="hero-slot" className="absolute left-0 top-0" />
       <StageMark pose="unfold" className="absolute left-0 top-[22%] max-lg:hidden" />
       <StageMark pose="plunge" className="absolute left-0 top-[44%] max-lg:hidden" />
@@ -70,7 +87,7 @@ export function Hero() {
       {/* Primera pantalla */}
       <div className="relative mx-auto flex h-[100svh] min-h-[620px] flex-col px-5 md:px-[4.2vw] lg:block">
         {/* Globo */}
-        <div className="hero-fade absolute right-5 top-[11svh] [animation-delay:500ms] md:right-[2.6vw] lg:top-[21%]">
+        <div className="hero-fade absolute right-5 top-[11svh] [--d:500ms] md:right-[2.6vw] lg:top-[21%]">
           <Globe className="w-[52px] cursor-grab active:cursor-grabbing md:w-[92px] lg:w-[132px]" />
         </div>
 
@@ -84,19 +101,23 @@ export function Hero() {
 
         <h1
           id="hero-titulo"
-          className="hero-fade mt-6 max-w-[15ch] text-[2rem] leading-[1.08] tracking-[-0.035em] text-ink [animation-delay:250ms] lg:absolute lg:left-[4.2vw] lg:top-[47.5%] lg:mt-0 lg:max-w-none lg:-translate-y-1/2 lg:text-[clamp(1.3rem,1.72vw,1.9rem)] lg:leading-[1.22]"
+          className="hero-fade mt-6 max-w-[15ch] text-[2rem] leading-[1.08] tracking-[-0.035em] text-ink [--d:250ms] lg:absolute lg:left-[4.2vw] lg:top-[47.5%] lg:mt-0 lg:max-w-none lg:-translate-y-1/2 lg:text-[clamp(1.3rem,1.72vw,1.9rem)] lg:leading-[1.22]"
         >
-          Tecnología que hace <em className="font-normal italic text-blue-500">crecer</em>
-          <br className="max-lg:hidden" /> tu <RotatingWord />
+          <motion.span className="block" style={part ? { x: left, opacity: fade } : undefined}>
+            Tecnología que hace <em className="font-normal italic text-blue-500">crecer</em>
+            <br className="max-lg:hidden" /> tu <RotatingWord />
+          </motion.span>
         </h1>
 
-        <p className="hero-fade mt-4 max-w-[30ch] text-[17px] leading-[1.45] text-ink-muted [animation-delay:400ms] lg:absolute lg:right-[7.5vw] lg:top-[47.5%] lg:mt-0 lg:max-w-none lg:-translate-y-1/2 lg:text-right lg:text-[clamp(1rem,1.18vw,1.25rem)] lg:leading-[1.5]">
-          Ingeniería y software para empresas
-          <br className="max-lg:hidden" /> que <span className="text-ink">quieren vender más.</span>
+        <p className="hero-fade mt-4 max-w-[30ch] text-[17px] leading-[1.45] text-ink-muted [--d:400ms] lg:absolute lg:right-[7.5vw] lg:top-[47.5%] lg:mt-0 lg:max-w-none lg:-translate-y-1/2 lg:text-right lg:text-[clamp(1rem,1.18vw,1.25rem)] lg:leading-[1.5]">
+          <motion.span className="block" style={part ? { x: right, opacity: fade } : undefined}>
+            Ingeniería y software para empresas
+            <br className="max-lg:hidden" /> que <span className="text-ink">quieren vender más.</span>
+          </motion.span>
         </p>
 
         {/* Clientes */}
-        <div className="hero-fade marquee-hold absolute inset-x-0 bottom-[3.2svh] z-[2] flex items-center gap-8 px-5 [animation-delay:700ms] md:px-0 lg:left-1/2 lg:w-[52vw] lg:-translate-x-1/2">
+        <div className="hero-fade marquee-hold absolute inset-x-0 bottom-[3.2svh] z-[2] flex items-center gap-8 px-5 [--d:700ms] md:px-0 lg:left-1/2 lg:w-[52vw] lg:-translate-x-1/2">
           <p className="label-caps shrink-0 max-md:hidden">Confían en SEN</p>
           <div className="relative flex min-w-0 flex-1 overflow-hidden [--duration:34s] [--gap:3.5rem] [mask-image:linear-gradient(to_right,transparent,#000_12%,#000_88%,transparent)]">
             {[0, 1].map((copy) => (

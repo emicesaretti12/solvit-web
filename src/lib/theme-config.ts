@@ -9,8 +9,9 @@ export const DEFAULT_THEME: Theme = "light";
 export const THEME_COLOR: Record<Theme, string> = { light: "#ffffff", dark: "#0b1222" };
 
 // Se ejecuta inline en <head>, antes del primer pintado: marca que hay JavaScript (las
-// entradas animadas del CSS dependen de .js)
-export const JS_FLAG_SCRIPT = `document.documentElement.classList.add("js")`;
+// entradas animadas del CSS dependen de .js) y saltea el telón de entrada si ya se vio en esta
+// sesión (al volver o recargar, la página aparece directo)
+export const JS_FLAG_SCRIPT = `(function(){var d=document.documentElement;d.classList.add("js");try{if(sessionStorage.getItem("sen-intro"))d.classList.add("no-intro");else sessionStorage.setItem("sen-intro","1")}catch(e){}})()`;
 
 // Sin zoom, como una app instalada. iOS Safari ignora user-scalable=no en el viewport: el
 // pellizco se frena con sus eventos gesture* (solo existen con dos dedos, así que el scroll de

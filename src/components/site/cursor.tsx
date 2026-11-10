@@ -94,10 +94,19 @@ export function Cursor() {
   }, []);
 
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-[70] hidden [@media(hover:hover)_and_(pointer:fine)]:block">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed left-0 top-0 z-[70] hidden [@media(hover:hover)_and_(pointer:fine)]:block"
+    >
       <div className="mix-blend-difference">
-        <div ref={ring} className="absolute -left-5 -top-5 size-10 rounded-full border border-white opacity-0 transition-opacity duration-300" />
-        <div ref={dot} className="absolute -left-[3px] -top-[3px] size-1.5 rounded-full bg-white opacity-0 transition-opacity duration-300" />
+        <div
+          ref={ring}
+          className="absolute -left-5 -top-5 size-10 rounded-full border border-white opacity-0 transition-opacity duration-300"
+        />
+        <div
+          ref={dot}
+          className="absolute -left-[3px] -top-[3px] size-1.5 rounded-full bg-white opacity-0 transition-opacity duration-300"
+        />
       </div>
       <div
         ref={bubble}

@@ -70,7 +70,12 @@ export function About() {
         <div className="mt-16 grid gap-12 md:mt-[6vw] lg:grid-cols-[1.4fr_1fr] lg:items-end">
           <ul className="grid gap-6 sm:grid-cols-3">
             {PRINCIPLES.map((p, i) => (
-              <li key={p} data-reveal className="rise border-t border-ink/15 pt-5" style={{ ["--delay" as string]: `${i * 90}ms` }}>
+              <li
+                key={p}
+                data-reveal
+                className="rise border-t border-ink/15 pt-5"
+                style={{ ["--delay" as string]: `${i * 90}ms` }}
+              >
                 <p className="text-[17px] leading-[1.35] text-ink">{p}</p>
               </li>
             ))}
@@ -83,7 +88,10 @@ export function About() {
                 <span className="block text-ink-muted">{BRAND_TAGLINE}</span>
               </p>
             </div>
-            <a href="#contacto" className="pill inline-flex h-12 items-center rounded-full bg-ink px-7 text-[13px] font-semibold uppercase text-white">
+            <a
+              href="#contacto"
+              className="pill inline-flex h-12 items-center rounded-full bg-ink px-7 text-[13px] font-semibold uppercase text-white"
+            >
               <span className="roll">
                 <span>Trabajemos juntos</span>
                 <span aria-hidden="true">Trabajemos juntos</span>

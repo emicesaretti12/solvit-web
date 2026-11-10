@@ -65,7 +65,10 @@ const SKINS = [
 ];
 
 const MAX = 40;
-const TILES = Array.from({ length: MAX }, (_, i) => ({ icon: ICONS[i % ICONS.length], skin: SKINS[(i * 3 + (i >> 2)) % SKINS.length] }));
+const TILES = Array.from({ length: MAX }, (_, i) => ({
+  icon: ICONS[i % ICONS.length],
+  skin: SKINS[(i * 3 + (i >> 2)) % SKINS.length],
+}));
 
 export function TileRain() {
   const root = useRef<HTMLDivElement>(null);

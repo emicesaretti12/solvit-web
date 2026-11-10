@@ -82,7 +82,7 @@ export function Logo({
         <Wordmark className="h-[0.95rem] w-auto self-start text-ink" />
         {/* Bajada del brand board: mayúsculas con tracking amplio, solo en el logo */}
         {withTagline && (
-          <span className="mt-2 text-[0.55rem] uppercase tracking-[0.28em] text-ink-muted">{BRAND_TAGLINE}</span>
+          <span className="mt-2 text-[11px] uppercase tracking-[0.2em] text-ink-muted">{BRAND_TAGLINE}</span>
         )}
       </span>
       <span className="sr-only">{BRAND_NAME}</span>

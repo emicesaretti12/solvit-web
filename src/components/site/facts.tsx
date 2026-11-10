@@ -5,6 +5,7 @@
 */
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { DELIVERED, PROJECTS, SECTORS } from "@/content/projects";
+import { CountUp } from "./count-up";
 import { SplitText } from "./split-text";
 
 type Fact = { who: string; sector: string; text: string; tint: number };
@@ -27,7 +28,17 @@ const initials = (name: string) =>
     .map((w) => w[0]!.toUpperCase())
     .join("");
 
-function Column({ facts, reverse, duration, className = "" }: { facts: Fact[]; reverse?: boolean; duration: number; className?: string }) {
+function Column({
+  facts,
+  reverse,
+  duration,
+  className = "",
+}: {
+  facts: Fact[];
+  reverse?: boolean;
+  duration: number;
+  className?: string;
+}) {
   return (
     <div className={`overflow-hidden [--gap:1.25rem] ${className}`} style={{ ["--duration" as string]: `${duration}s` }}>
       {[0, 1].map((copy) => (
@@ -39,7 +50,9 @@ function Column({ facts, reverse, duration, className = "" }: { facts: Fact[]; r
           {facts.map((fact, i) => (
             <li key={i} className="rounded-3xl border border-line bg-white p-5">
               <div className="flex items-center gap-3">
-                <span className={`grid size-9 shrink-0 place-items-center rounded-full text-[12px] font-bold ${TINTS[fact.tint % TINTS.length]}`}>
+                <span
+                  className={`grid size-9 shrink-0 place-items-center rounded-full text-[12px] font-bold ${TINTS[fact.tint % TINTS.length]}`}
+                >
                   {initials(fact.who)}
                 </span>
                 <span className="min-w-0">
@@ -63,12 +76,15 @@ export function Facts() {
   return (
     <section id="hechos" aria-labelledby="hechos-titulo" className="relative overflow-hidden bg-paper py-20 md:py-[7vw]">
       <div className="mx-auto px-5 text-center md:px-[5.8vw]">
-        <h2 id="hechos-titulo" className="text-[clamp(2.1rem,4.4vw,3.6rem)] font-bold uppercase leading-[1] tracking-[-0.035em] text-ink">
+        <h2
+          id="hechos-titulo"
+          className="text-[clamp(2.1rem,4.4vw,3.6rem)] font-bold uppercase leading-[1] tracking-[-0.035em] text-ink"
+        >
           <SplitText text="Hechos, no promesas" />
         </h2>
         <p data-reveal className="rise mt-4 text-[16px] text-ink-muted [--delay:200ms]">
-          <span className="tabular font-bold text-ink">+{DELIVERED}</span> proyectos entregados ·{" "}
-          <span className="tabular font-bold text-ink">{SECTORS}</span> rubros distintos
+          <CountUp to={DELIVERED} prefix="+" className="font-bold text-ink" /> proyectos entregados ·{" "}
+          <CountUp to={SECTORS} className="font-bold text-ink" /> rubros distintos
         </p>
       </div>
 

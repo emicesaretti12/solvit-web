@@ -18,14 +18,15 @@ import { CONTACT } from "@/content/contact-info";
 import { tap } from "@/lib/haptics";
 import { SplitText } from "./split-text";
 
-type Step = { key: string; title: string; text: string; url: string; Preview: ComponentType };
+type Step = { key: string; title: string; text: string; url: string; shows: string; Preview: ComponentType };
 
 const STEPS: Step[] = [
   {
     key: "atraer",
     title: "Atraer",
-    text: "Contenido y pauta en Meta y Google que traen consultas, medidas hasta la venta.",
+    text: "Tu web, el contenido y la pauta en Meta y Google traen consultas, medidas hasta la venta.",
     url: "campañas",
+    shows: "El embudo de una campaña: cuánta gente vio el anuncio, cuántos consultaron y cuántos compraron.",
     Preview: MarketingPreview,
   },
   {
@@ -33,6 +34,7 @@ const STEPS: Step[] = [
     title: "Atender",
     text: "Un agente de IA responde al instante por WhatsApp, Instagram y tu web, a cualquier hora.",
     url: "agente",
+    shows: "Una conversación real de WhatsApp: el agente responde, califica la consulta y la pasa a un vendedor.",
     Preview: AgentPreview,
   },
   {
@@ -40,6 +42,8 @@ const STEPS: Step[] = [
     title: "Cerrar",
     text: "Un CRM a tu medida ordena cada consulta por vendedor y por etapa, para que ninguna se pierda.",
     url: "crm",
+    shows:
+      "El CRM: cada consulta con su vendedor y su etapa. Cada rol (administrador, supervisor, ventas) ve y hace solo lo suyo.",
     Preview: CrmPreview,
   },
 ];
@@ -77,11 +81,14 @@ export function System() {
             </span>
           </h2>
           <p data-reveal className="rise mt-8 max-w-[46ch] text-[17px] leading-[1.55] text-ink-muted [--delay:150ms]">
-            Unimos el marketing, la atención y la gestión en un mismo circuito: cada consulta entra, se responde al
-            instante y llega al vendedor correcto. Vos ves en un tablero qué campaña trajo cada venta.
+            Unimos el marketing, la atención y la gestión en un mismo circuito: cada consulta entra, se responde al instante y
+            llega al vendedor correcto. Vos ves en un tablero qué campaña trajo cada venta.
           </p>
           <div data-reveal className="rise mt-9 flex flex-wrap gap-3 [--delay:250ms]">
-            <a href="#contacto" className="pill inline-flex h-14 items-center rounded-full bg-ink px-8 text-[16px] font-medium text-white">
+            <a
+              href="#contacto"
+              className="pill inline-flex h-14 items-center rounded-full bg-ink px-8 text-[16px] font-medium text-white"
+            >
               <span className="roll">
                 <span>Pedí tu diagnóstico</span>
                 <span aria-hidden="true">Pedí tu diagnóstico</span>
@@ -147,15 +154,14 @@ export function System() {
           </div>
 
           {/* Etapas: tarjetas que también son pestañas */}
-          <div role="tablist" aria-label="Etapas del sistema" className="mt-4 grid gap-3 md:grid-cols-3">
+          <div role="group" aria-label="Etapas del sistema" className="mt-4 grid gap-3 md:grid-cols-3">
             {STEPS.map((s, i) => {
               const on = i === active;
               return (
                 <button
                   key={s.key}
                   type="button"
-                  role="tab"
-                  aria-selected={on}
+                  aria-pressed={on}
                   onClick={() => {
                     tap();
                     setActive(i);
@@ -182,7 +188,10 @@ export function System() {
               );
             })}
           </div>
-          <p className="mt-4 text-[12.5px] text-ink-faint">Las vistas usan datos de ejemplo.</p>
+          <p aria-live="polite" className="mt-5 max-w-[62ch] text-[15px] leading-[1.5] text-ink">
+            <span className="font-semibold">Qué estás viendo.</span> {step.shows}{" "}
+            <span className="text-ink-faint">Datos de ejemplo.</span>
+          </p>
         </div>
       </div>
     </section>

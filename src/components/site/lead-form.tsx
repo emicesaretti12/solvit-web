@@ -106,7 +106,7 @@ export function LeadForm({ compact = false, origin }: { compact?: boolean; origi
             <button
               type="button"
               onClick={() => setMore(true)}
-              className="text-sm text-ink-muted underline-offset-4 transition-colors duration-150 hover:text-ink hover:underline"
+              className="inline-flex min-h-11 items-center text-sm text-ink-muted underline-offset-4 transition-colors duration-150 hover:text-ink hover:underline"
             >
               + Agregar un mensaje
             </button>

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Manrope } from "next/font/google";
+import { LogoMark, Wordmark } from "@/components/logo";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { Toaster } from "@/components/toaster";
 import { DEFAULT_THEME, JS_FLAG_SCRIPT, THEME_COLOR, ZOOM_GUARD_SCRIPT } from "@/lib/theme-config";
@@ -86,6 +87,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Saltar al contenido
         </a>
+        {/* Telón de entrada (solo CSS, nunca frena un clic): el logo sube y el telón se levanta.
+            Se muestra una vez por sesión (ver JS_FLAG_SCRIPT) */}
+        <div aria-hidden="true" className="intro">
+          <span className="intro-mask">
+            <span className="intro-logo">
+              <LogoMark className="h-12 w-auto" />
+              <Wordmark className="h-7 w-auto text-white" />
+            </span>
+          </span>
+        </div>
         <SmoothScroll />
         {children}
         <Toaster />

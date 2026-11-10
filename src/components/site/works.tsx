@@ -11,6 +11,7 @@ import { motion, useReducedMotion, useScroll, useTransform } from "motion/react"
 import { useRef, useState, type CSSProperties } from "react";
 import { coverOf, DELIVERED, PROJECTS, type Project } from "@/content/projects";
 import { tap } from "@/lib/haptics";
+import { CountUp } from "./count-up";
 import { SplitText } from "./split-text";
 
 const FIRST = 6;
@@ -96,6 +97,19 @@ function BrandColumn({ names, reverse }: { names: string[]; reverse?: boolean })
   );
 }
 
+/* La vitrina llega un poco más chica y termina de crecer al entrar (ligado al scroll) */
+function GrowIn({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "start 0.35"] });
+  const scale = useTransform(scrollYProgress, [0, 1], [0.9, 1]);
+  return (
+    <motion.div ref={ref} style={reduce ? undefined : { scale }} className="mt-20 origin-top md:mt-[6vw]">
+      {children}
+    </motion.div>
+  );
+}
+
 export function Works() {
   const [all, setAll] = useState(false);
   const shown = all ? PROJECTS : PROJECTS.slice(0, FIRST);
@@ -109,7 +123,7 @@ export function Works() {
           <h2 id="trabajos-titulo" className="text-[clamp(3rem,8.4vw,8.6rem)] leading-[0.98] tracking-[-0.04em] text-ink">
             <SplitText text="Últimos trabajos" />
           </h2>
-          <p data-reveal className="rise max-w-[40ch] pb-3 text-[12.5px] uppercase leading-[1.5] text-ink [--delay:250ms]">
+          <p data-reveal className="rise max-w-[38ch] pb-3 text-[16px] leading-[1.5] text-ink-muted [--delay:250ms]">
             Diseñamos y construimos productos digitales que ya son parte de la operación y de las ventas de cada cliente.
           </p>
         </div>
@@ -137,20 +151,24 @@ export function Works() {
         </button>
 
         {/* Vitrina de marcas */}
-        <div data-reveal className="rise marquee-hold mt-20 overflow-hidden rounded-[2rem] bg-night px-6 pt-9 text-white md:mt-[6vw] md:px-8">
-          <div className="flex items-end justify-between gap-8 border-b border-white/15 pb-5">
-            <h3 className="max-w-[20ch] text-balance text-[clamp(1.7rem,3.5vw,3rem)] font-bold uppercase leading-[0.95] tracking-[-0.03em]">
-              Marcas que ya construyen con nosotros.
-            </h3>
-            <p className="tabular shrink-0 text-[clamp(2rem,4vw,3.4rem)] font-bold leading-none tracking-[-0.03em]">+{DELIVERED}</p>
-          </div>
-          <div className="grid h-[340px] [mask-image:linear-gradient(to_bottom,transparent,#000_14%,#000_86%,transparent)] md:grid-cols-2">
-            <BrandColumn names={clients.slice(0, half)} />
-            <div className="max-md:hidden">
-              <BrandColumn names={clients.slice(half)} reverse />
+        <GrowIn>
+          <div data-reveal className="rise marquee-hold overflow-hidden rounded-[2rem] bg-night px-6 pt-9 text-white md:px-8">
+            <div className="flex items-end justify-between gap-8 border-b border-white/15 pb-5">
+              <h3 className="max-w-[20ch] text-balance text-[clamp(1.7rem,3.5vw,3rem)] font-bold uppercase leading-[0.95] tracking-[-0.03em]">
+                Marcas que ya construyen con nosotros.
+              </h3>
+              <p className="shrink-0 text-[clamp(2rem,4vw,3.4rem)] font-bold leading-none tracking-[-0.03em]">
+                <CountUp to={DELIVERED} prefix="+" />
+              </p>
+            </div>
+            <div className="grid h-[340px] [mask-image:linear-gradient(to_bottom,transparent,#000_14%,#000_86%,transparent)] md:grid-cols-2">
+              <BrandColumn names={clients.slice(0, half)} />
+              <div className="max-md:hidden">
+                <BrandColumn names={clients.slice(half)} reverse />
+              </div>
             </div>
           </div>
-        </div>
+        </GrowIn>
       </div>
     </section>
   );

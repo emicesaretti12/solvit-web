@@ -14,6 +14,7 @@ import { CONTACT } from "@/content/contact-info";
 import { NAV } from "@/content/nav";
 import { tap } from "@/lib/haptics";
 import { LeadForm } from "./lead-form";
+import { Magnetic } from "./magnetic";
 import { useActiveSection } from "./use-active-section";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -81,48 +82,52 @@ export function Header() {
             <Logo />
           </a>
 
-          <div className="drop-in pointer-events-auto flex items-center gap-2.5 [animation-delay:120ms]">
-            <a
-              href="#contacto"
-              onClick={() => setOpen(false)}
-              className="pill hidden h-[52px] items-center gap-3 rounded-full bg-ink px-7 text-[15px] font-medium uppercase tracking-[0.01em] text-white md:inline-flex"
-            >
-              <span className="roll">
-                <span>Hablemos</span>
-                <span aria-hidden="true">Hablemos</span>
-              </span>
-              <span aria-hidden="true" className="size-1.5 rounded-full bg-white" />
-            </a>
-            <button
-              ref={toggle}
-              type="button"
-              aria-expanded={open}
-              aria-controls="menu-principal"
-              onClick={() => {
-                tap();
-                setOpen((v) => !v);
-              }}
-              className={`roll-host group flex h-[46px] items-center gap-6 rounded-full text-[14px] uppercase text-ink shadow-[0_1px_0_rgb(255_255_255/0.7)_inset,0_1px_2px_rgb(var(--shade-rgb)/0.08)] transition-[background-color,transform] duration-200 ease-out active:scale-[0.97] max-md:w-[46px] max-md:justify-center md:pl-8 md:pr-5 ${open ? "bg-white" : "bg-pill hover:bg-white"}`}
-            >
-              <span className="relative hidden h-5 overflow-hidden md:block">
-                <span
-                  className="flex flex-col transition-transform duration-300 ease-[var(--ease-expo)]"
-                  style={{ transform: open ? "translateY(-50%)" : "none" }}
-                >
-                  <span className="h-5 leading-5">Menú</span>
-                  <span className="h-5 leading-5">Cerrar</span>
-                </span>
-              </span>
-              <span className="sr-only md:hidden">{open ? "Cerrar menú" : "Abrir menú"}</span>
-              <span
-                aria-hidden="true"
-                className="flex gap-[5px] transition-transform duration-300 ease-[var(--ease-expo)]"
-                style={{ transform: open ? "rotate(90deg)" : "none" }}
+          <div className="drop-in pointer-events-auto flex items-center gap-2.5 [--d:120ms]">
+            <Magnetic className="max-md:hidden">
+              <a
+                href="#contacto"
+                onClick={() => setOpen(false)}
+                className="pill hidden h-[52px] items-center gap-3 rounded-full bg-ink px-7 text-[15px] font-medium uppercase tracking-[0.01em] text-white md:inline-flex"
               >
-                <span className="size-[5px] rounded-full bg-ink" />
-                <span className="size-[5px] rounded-full bg-ink" />
-              </span>
-            </button>
+                <span className="roll">
+                  <span>Hablemos</span>
+                  <span aria-hidden="true">Hablemos</span>
+                </span>
+                <span aria-hidden="true" className="size-1.5 rounded-full bg-white" />
+              </a>
+            </Magnetic>
+            <Magnetic strength={0.2}>
+              <button
+                ref={toggle}
+                type="button"
+                aria-expanded={open}
+                aria-controls="menu-principal"
+                onClick={() => {
+                  tap();
+                  setOpen((v) => !v);
+                }}
+                className={`roll-host group flex h-[46px] items-center gap-6 rounded-full text-[14px] uppercase text-ink shadow-[0_1px_0_rgb(255_255_255/0.7)_inset,0_1px_2px_rgb(var(--shade-rgb)/0.08)] transition-[background-color,transform] duration-200 ease-out active:scale-[0.97] max-md:w-[46px] max-md:justify-center md:pl-8 md:pr-5 ${open ? "bg-white" : "bg-pill hover:bg-white"}`}
+              >
+                <span className="relative hidden h-5 overflow-hidden md:block">
+                  <span
+                    className="flex flex-col transition-transform duration-300 ease-[var(--ease-expo)]"
+                    style={{ transform: open ? "translateY(-50%)" : "none" }}
+                  >
+                    <span className="h-5 leading-5">Menú</span>
+                    <span className="h-5 leading-5">Cerrar</span>
+                  </span>
+                </span>
+                <span className="sr-only md:hidden">{open ? "Cerrar menú" : "Abrir menú"}</span>
+                <span
+                  aria-hidden="true"
+                  className="flex gap-[5px] transition-transform duration-300 ease-[var(--ease-expo)]"
+                  style={{ transform: open ? "rotate(90deg)" : "none" }}
+                >
+                  <span className="size-[5px] rounded-full bg-ink" />
+                  <span className="size-[5px] rounded-full bg-ink" />
+                </span>
+              </button>
+            </Magnetic>
           </div>
 
           <AnimatePresence>
@@ -134,7 +139,10 @@ export function Header() {
                 data-lenis-prevent
                 className="pointer-events-auto absolute right-0 top-[calc(100%+10px)] flex max-h-[calc(100svh-96px)] w-[min(calc(100vw-40px),320px)] origin-top-right flex-col gap-2.5 overflow-y-auto overscroll-contain"
               >
-                <motion.ul {...card(0)} className="origin-top-right rounded-2xl bg-white p-3 shadow-[0_24px_60px_-24px_rgb(var(--shade-rgb)/0.45)]">
+                <motion.ul
+                  {...card(0)}
+                  className="origin-top-right rounded-2xl bg-white p-3 shadow-[0_24px_60px_-24px_rgb(var(--shade-rgb)/0.45)]"
+                >
                   {NAV.map((item) => (
                     <li key={item.id}>
                       <a
@@ -154,7 +162,10 @@ export function Header() {
                     </li>
                   ))}
                 </motion.ul>
-                <motion.div {...card(1)} className="origin-top-right rounded-2xl bg-white p-7 pb-4 shadow-[0_24px_60px_-24px_rgb(var(--shade-rgb)/0.45)]">
+                <motion.div
+                  {...card(1)}
+                  className="origin-top-right rounded-2xl bg-white p-7 pb-4 shadow-[0_24px_60px_-24px_rgb(var(--shade-rgb)/0.45)]"
+                >
                   <p className="mb-6 text-[34px] leading-[1.02] tracking-[-0.03em] text-ink">Dejanos tu correo</p>
                   <LeadForm compact origin="menu" />
                 </motion.div>

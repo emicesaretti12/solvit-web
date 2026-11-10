@@ -39,12 +39,14 @@ npm run lint
   - `header.tsx` (logo, "Hablemos" y el menú en tarjetas), `section-nav.tsx` (puntos de
     sección), `contact-badge.tsx` (botón flotante a WhatsApp), `cursor.tsx` (cursor propio)
   - `hero.tsx`, con `globe.tsx` (globo de puntos) y `hills.tsx` (valle de cintas)
+  - `demos/` (demostraciones paso a paso de web y de CRM, con su kit común), `magnetic.tsx`,
+    `count-up.tsx` y `proximity-title.tsx` (piezas de movimiento)
   - `works.tsx` (últimos trabajos y vitrina de marcas), `services.tsx` (tarjetas que se apilan),
     `system.tsx` (vistas vivas por etapa), `facts.tsx` (hechos en columnas que se mueven),
     `about.tsx` (manifiesto), `finale.tsx` y `tile-rain.tsx` (cierre con física y pie)
   - `lead-form.tsx` (correo y mensaje opcional), `split-text.tsx` y `page-observers.tsx`
     (entradas al entrar en pantalla y pausa de loops fuera de pantalla)
-- `src/components/services-3d.tsx`: los cinco objetos 3D de los servicios
+- `src/components/services-3d.tsx`: los objetos 3D de agentes de IA, proyectos híbridos y marketing
 - `src/components/previews/`: vistas vivas de ejemplo (embudo, agente de IA, CRM)
 - `src/content/`: servicios, proyectos, contacto y navegación
 - `src/app/api/contacto/route.ts`: endpoint del formulario (valida el correo y registra la consulta)

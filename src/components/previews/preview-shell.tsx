@@ -58,7 +58,7 @@ export function PreviewShell({
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {status}
-            <span className="text-[10.5px] text-ink-faint">Ejemplo</span>
+            <span className="text-[11px] text-ink-faint">Ejemplo</span>
           </div>
         </div>
         {onTogglePause && (

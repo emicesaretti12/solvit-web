@@ -44,7 +44,9 @@ Prohibido: negro puro, degradés violeta "de IA", glows, campos grandes de azul 
 - **Etiquetas:** mayúsculas de 11 a 13px; con tracking amplio (0.28em) solo las de sección.
 - **Mono:** Geist Mono para números, índices y la barra de dirección de la ventana del sistema.
 - **Wordmark SEN:** en vectores (Krona One trazada), solo en el logo.
-- Cuerpo de 15 a 19px, interlineado 1.5, máximo ~46 caracteres por línea.
+- Cuerpo de 15 a 19px, interlineado 1.5, máximo ~46 caracteres por línea. Ningún texto de la
+  interfaz baja de 11px; los párrafos nunca van enteros en mayúsculas.
+- Enlaces y botones con al menos 44px de alto táctil.
 
 ## 4. Component Stylings
 
@@ -65,9 +67,12 @@ Prohibido: negro puro, degradés violeta "de IA", glows, campos grandes de azul 
   etiqueta en mayúsculas y nombre enorme. Vitrina navy con las marcas en dos columnas que suben
   y bajan.
 - **Servicios:** cinco tarjetas navy (radio 44px) que se apilan; a la derecha, un panel claro
-  con el objeto 3D del servicio.
-- **Sistema:** titular en mayúsculas, ventana con la vista viva de la etapa y tres tarjetas que
-  son pestañas con barra de tiempo.
+  que muestra qué hace el servicio. Web y software a medida llevan una demostración paso a paso
+  (un cliente busca, entra a la web y consulta; una consulta avanza por las etapas del CRM hasta
+  la venta), con pasos que se pueden tocar. Los otros tres, su objeto 3D. En celulares las
+  demos se reacomodan en vertical para que el texto se lea.
+- **Sistema:** titular en mayúsculas, ventana con la vista viva de la etapa, tres tarjetas que
+  la eligen (con barra de tiempo) y una línea "Qué estás viendo" que explica cada vista.
 - **Hechos:** tres columnas de tarjetas en marquesina vertical. Solo hechos confirmados de cada
   proyecto: nunca reseñas ni números inventados.
 - **Cierre:** pantalla fija color `haze` con "¡Hablemos!" gigante y fichas de herramientas que
@@ -84,6 +89,10 @@ Prohibido: negro puro, degradés violeta "de IA", glows, campos grandes de azul 
 ## 6. Motion & Interaction
 
 - **Scroll suave:** Lenis con mouse y trackpad; en táctil, el scroll nativo.
+- **Telón de entrada:** una vez por sesión, el logo sube sobre navy y el telón se levanta
+  (solo CSS, 1,4 s, nunca bloquea un clic). Las entradas del hero esperan a que se levante.
+- **Puntero:** los botones del encabezado y el de contacto son magnéticos (resorte); las letras
+  de "¡Hablemos!" engordan cerca del mouse (Manrope variable).
 - **Entradas:** `data-reveal` + un solo IntersectionObserver (`page-observers.tsx`). Los
   titulares entran letra por letra desde su máscara; los bloques suben; las portadas se abren de
   abajo hacia arriba con la imagen llegando desde un zoom.
@@ -92,7 +101,8 @@ Prohibido: negro puro, degradés violeta "de IA", glows, campos grandes de azul 
   debajo; las palabras del manifiesto se encienden.
 - **Loops:** marquesinas (clientes, marcas, hechos), el globo, las cintas del valle, la palabra
   que rota, "contacto" girando. Todos se pausan fuera de pantalla; las marquesinas, además, con
-  el mouse encima.
+  el mouse encima, y aceleran con la velocidad del scroll.
+- **Números:** "+10" y los rubros cuentan desde cero al entrar en pantalla.
 - **Física:** las fichas del cierre se pueden agarrar y tirar con el mouse; en táctil, un toque
   las hace saltar.
 - **Curvas:** entradas con cubic-bezier(0.16, 1, 0.3, 1). Solo transform, opacity y clip-path.
