@@ -7,12 +7,13 @@ software a medida, agentes de IA, hardware e IoT y marketing digital.
 
 - Next.js (App Router) + TypeScript
 - Tailwind CSS v4
-- Motion (`motion/react`), GSAP + ScrollTrigger y Lenis (scroll suave)
-- three.js + React Three Fiber para el isotipo en 3D; CSS 3D para los objetos de los servicios
-- Sonner para avisos del formulario
-- Phosphor Icons
-- Estructura shadcn/ui (`components.json`, `src/components/ui`, `cn()` en `src/lib/utils.ts`)
-- Fuentes: Geist, Geist Mono, Archivo (titulares) y Krona One (wordmark)
+- Motion (`motion/react`) para las animaciones ligadas al scroll y las transiciones; Lenis para
+  el scroll suave (GSAP solo como reloj de Lenis y del escenario 3D)
+- three.js + React Three Fiber para el isotipo en 3D; canvas 2D para el globo y el valle de
+  cintas; CSS 3D para los objetos de los servicios
+- matter-js para las fichas que caen en el cierre (se carga recién al llegar)
+- Sonner para avisos del formulario; Phosphor Icons y Simple Icons
+- Fuentes: Manrope (todo) y Geist Mono (datos)
 
 ## Desarrollo
 
@@ -25,35 +26,28 @@ npm run lint
 
 ## Estructura
 
-- `src/app/page.tsx`: composición de la página (hero, servicios, cómo funciona, recorrido,
-  proyectos, nosotros, contacto)
-- `src/app/globals.css`: tokens de marca (navy medianoche + azul eléctrico), temas (claro por
-  defecto) y animaciones ligadas al scroll
-- `src/app/native.css`: capa de app nativa (sin zoom ni rebote, áreas seguras, cambio de tema
-  con View Transition); `manifest.ts`, `apple-icon.tsx` e `icons/`: app instalable
-- `src/app/scenes.css`: escenas 3D en CSS (objetos de los servicios, mazo de celulares y la
-  moneda del recorrido)
-- `src/components/three/`: escenario WebGL con el isotipo y sus partículas (poses por sección en
-  `choreography.ts`; en celulares la S vive solo en el hero)
-- `src/components/ui/hero-01-utils/`: hero, header (menú como hoja inferior) y "Trabajamos con"
-- `src/components/services.tsx` y `services-3d.tsx`: los cinco servicios con sus objetos 3D
-- `src/components/how-it-works*.tsx`: los cuatro pasos de la venta (panel fijo en escritorio,
-  tarjetas en celulares)
-- `src/components/sales-flow*.tsx` y `journey-mobile.tsx`: el recorrido de una consulta
+- `src/app/page.tsx`: composición de la página (hero, trabajos, servicios, sistema, hechos,
+  nosotros, cierre y pie)
+- `src/app/globals.css`: tokens de marca (página blanca, tinta navy, azul eléctrico) y las
+  clases de movimiento (texto letra por letra, entradas, botones pastilla, marquesinas)
+- `src/app/native.css`: capa de app nativa (sin zoom ni rebote, áreas seguras); `manifest.ts`,
+  `apple-icon.tsx` e `icons/`: app instalable
+- `src/app/scenes.css`: objetos 3D en CSS de los servicios
+- `src/components/three/`: escenario WebGL con el isotipo y sus partículas (poses del hero en
+  `choreography.ts`)
+- `src/components/site/`: las secciones y lo fijo de la página
+  - `header.tsx` (logo, "Hablemos" y el menú en tarjetas), `section-nav.tsx` (puntos de
+    sección), `contact-badge.tsx` (botón flotante a WhatsApp), `cursor.tsx` (cursor propio)
+  - `hero.tsx`, con `globe.tsx` (globo de puntos) y `hills.tsx` (valle de cintas)
+  - `works.tsx` (últimos trabajos y vitrina de marcas), `services.tsx` (tarjetas que se apilan),
+    `system.tsx` (vistas vivas por etapa), `facts.tsx` (hechos en columnas que se mueven),
+    `about.tsx` (manifiesto), `finale.tsx` y `tile-rain.tsx` (cierre con física y pie)
+  - `lead-form.tsx` (correo y mensaje opcional), `split-text.tsx` y `page-observers.tsx`
+    (entradas al entrar en pantalla y pausa de loops fuera de pantalla)
+- `src/components/services-3d.tsx`: los cinco objetos 3D de los servicios
 - `src/components/previews/`: vistas vivas de ejemplo (embudo, agente de IA, CRM)
-- `src/components/offscreen-pause.tsx`: pausa los loops de CSS de lo que no está a la vista
-- `src/components/projects.tsx` y `projects/`: proyectos (vitrina con el +10 en 3D, anillo de
-  portadas en celulares, abanico en escritorio y laptops 3D de los casos destacados)
-- `src/components/ui/`: componentes base al estilo shadcn (hero-01, portfolio-gallery,
-  area-chart-1, sheet, navigation-menu, button)
-- `src/content/`: servicios y proyectos
-- `src/app/api/contacto/route.ts`: endpoint del formulario (valida y registra la consulta)
-
-## shadcn/ui
-
-`components.json` sigue el formato del CLI de shadcn, así que `npx shadcn@latest add <componente>`
-instala en `src/components/ui` y usa `cn()` de `src/lib/utils.ts`. La carpeta `ui/` separa los
-componentes base (sin contenido de SEN) de las secciones que arman la página.
+- `src/content/`: servicios, proyectos, contacto y navegación
+- `src/app/api/contacto/route.ts`: endpoint del formulario (valida el correo y registra la consulta)
 
 ## Pendientes
 
@@ -61,4 +55,7 @@ componentes base (sin contenido de SEN) de las secciones que arman la página.
   archivos originales.
 - Reemplazar las portadas ilustradas de los proyectos (`public/projects/*.svg`) por capturas reales.
 - Conectar el formulario de contacto con el destino real (email, CRM o WhatsApp).
-- Las vistas vivas y el tablero usan datos de ejemplo (rotulados en pantalla).
+- Sumar los logos reales de los clientes (hoy sus nombres van como marcas tipográficas en el
+  hero y en la vitrina de marcas).
+- Confirmar la ciudad que muestran el pie y el globo (Córdoba, Argentina).
+- Las vistas vivas usan datos de ejemplo (rotulados en pantalla).
