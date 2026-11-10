@@ -21,7 +21,7 @@ function Cover({ project, index }: { project: Project; index: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], ["-4%", "4%"]);
+  const y = useTransform(scrollYProgress, [0, 1], ["-1.6%", "1.6%"]);
 
   const body = (
     <>
@@ -30,7 +30,7 @@ function Cover({ project, index }: { project: Project; index: number }) {
         style={{ "--delay": `${(index % 2) * 120}ms` } as CSSProperties}
         className="cover relative aspect-[16/10] overflow-hidden rounded-3xl bg-mist"
       >
-        <motion.div style={reduce ? undefined : { y }} className="absolute inset-[-4.5%]">
+        <motion.div style={reduce ? undefined : { y }} className="absolute inset-[-2%]">
           {/* Las portadas son ilustraciones SVG livianas: van como <img>, sin optimizador */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
