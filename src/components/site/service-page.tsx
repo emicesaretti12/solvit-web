@@ -147,7 +147,7 @@ export function ServicePage({ slug }: { slug: string }) {
               {work.map((project) => {
                 const body = (
                   <>
-                    <div className="cover relative aspect-[16/10] overflow-hidden rounded-3xl bg-night">
+                    <div className="cover relative aspect-[16/10] overflow-hidden rounded-3xl bg-mist">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={coverOf(project)}

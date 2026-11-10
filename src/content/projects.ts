@@ -1,7 +1,8 @@
 /*
   Proyectos realizados por SEN. Las descripciones salen de lo que muestra cada sitio publicado
-  (y de lo que contó el cliente, en la cervecería automática). Las portadas son capturas reales
-  de cada sitio (public/projects/*.webp); la cervecería usa una ilustración.
+  (y de lo que contó el cliente, en la cervecería automática). Las portadas muestran cada sitio
+  en una laptop y un celular, armadas con capturas reales (public/projects/*.webp); la
+  cervecería usa una ilustración.
 */
 
 export type Specialty = "Desarrollo web" | "Software a medida" | "Hardware e IoT" | "SEO";

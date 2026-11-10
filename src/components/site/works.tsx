@@ -28,7 +28,7 @@ function Cover({ project, index }: { project: Project; index: number }) {
       <div
         ref={ref}
         style={{ "--delay": `${(index % 2) * 120}ms` } as CSSProperties}
-        className="cover relative aspect-[16/10] overflow-hidden rounded-3xl bg-night"
+        className="cover relative aspect-[16/10] overflow-hidden rounded-3xl bg-mist"
       >
         <motion.div style={reduce ? undefined : { y }} className="absolute inset-[-4.5%]">
           {/* Las portadas son ilustraciones SVG livianas: van como <img>, sin optimizador */}

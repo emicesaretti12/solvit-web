@@ -1,7 +1,7 @@
 # Graph Report - solvit-web  (2026-11-10)
 
 ## Corpus Check
-- 75 files · ~39,013 words
+- 75 files · ~39,020 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 5 file(s) not represented in the graph (top: .css 3, (none) 2)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e44f51da`
+- Built from commit: `d6db7cf2`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -50,14 +50,14 @@
 ## Surprising Connections (you probably didn't know these)
 - `AgentObject()` --calls--> `LogoMark()`  [EXTRACTED]
   src/components/services-3d.tsx → src/components/logo.tsx
-- `RootLayout()` --calls--> `JsonLd()`  [EXTRACTED]
-  src/app/layout.tsx → src/components/json-ld.tsx
-- `RootLayout()` --calls--> `LogoMark()`  [EXTRACTED]
-  src/app/layout.tsx → src/components/logo.tsx
-- `Home()` --calls--> `Finale()`  [EXTRACTED]
-  src/app/page.tsx → src/components/site/finale.tsx
-- `ServicePage()` --calls--> `Finale()`  [EXTRACTED]
-  src/components/site/service-page.tsx → src/components/site/finale.tsx
+- `Page()` --calls--> `ServicePage()`  [EXTRACTED]
+  src/app/servicios/agentes-de-ia/page.tsx → src/components/site/service-page.tsx
+- `Page()` --calls--> `ServicePage()`  [EXTRACTED]
+  src/app/servicios/desarrollo-web/page.tsx → src/components/site/service-page.tsx
+- `Page()` --calls--> `ServicePage()`  [EXTRACTED]
+  src/app/servicios/hardware-iot/page.tsx → src/components/site/service-page.tsx
+- `Page()` --calls--> `ServicePage()`  [EXTRACTED]
+  src/app/servicios/marketing-digital/page.tsx → src/components/site/service-page.tsx
 
 ## Import Cycles
 - None detected.
