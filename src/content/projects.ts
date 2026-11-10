@@ -1,9 +1,7 @@
 /*
-  Proyectos realizados por SEN.
-  Datos tomados de los proyectos publicados en la cuenta de Vercel de SEN (dominios, tipo de
-  proyecto y lo que dicen sus commits) y de lo que contó el cliente (la cervecería automática).
-  CONFIRMAR los textos con cada cliente y reemplazar las portadas (public/projects/*.svg, armadas
-  como ilustraciones) por capturas reales cuando estén.
+  Proyectos realizados por SEN. Las descripciones salen de lo que muestra cada sitio publicado
+  (y de lo que contó el cliente, en la cervecería automática). Las portadas son capturas reales
+  de cada sitio (public/projects/*.webp); la cervecería usa una ilustración.
 */
 
 export type Specialty = "Desarrollo web" | "Software a medida" | "Hardware e IoT" | "SEO";
@@ -23,6 +21,8 @@ export type Project = {
   highlights?: string[];
   url?: string;
   featured?: boolean;
+  /** La portada es una captura real del sitio (.webp); si no, una ilustración (.svg) */
+  shot?: boolean;
 };
 
 export const PROJECTS: Project[] = [
@@ -30,18 +30,19 @@ export const PROJECTS: Project[] = [
     slug: "motobox-cordoba",
     client: "Motobox Córdoba",
     name: "Motobox Córdoba",
-    sector: "Motos",
+    sector: "Concesionaria de motos",
     kind: "Sitio web + CRM",
     specialties: ["Desarrollo web", "Software a medida"],
     summary:
-      "Sitio web con base de datos y un CRM propio con usuarios por rol, desde donde un administrador gestiona las fotos del sitio.",
+      "Sitio de una concesionaria de motos 0km con catálogo y usados, conectado a un CRM propio con usuarios por rol desde donde se administran las fotos.",
     highlights: [
       "Sitio público conectado a su base de datos",
       "CRM propio con alta de usuarios por rol",
       "Fotos del sitio administradas desde el CRM",
     ],
-    url: "https://motoboxcordoba.com",
+    url: "https://www.motoboxcordoba.com",
     featured: true,
+    shot: true,
   },
   {
     slug: "baterias-cordoba",
@@ -59,6 +60,7 @@ export const PROJECTS: Project[] = [
     ],
     url: "https://www.bateriascordoba.com.ar",
     featured: true,
+    shot: true,
   },
   {
     slug: "adami-industrial",
@@ -67,17 +69,32 @@ export const PROJECTS: Project[] = [
     sector: "Industria",
     kind: "Sitio institucional",
     specialties: ["Desarrollo web"],
-    summary: "Sitio institucional con una sección de industrias: ocho sectores ilustrados con pictogramas técnicos animados.",
+    summary:
+      "Sitio institucional de una empresa de soluciones industriales, con una sección de industrias ilustrada con pictogramas técnicos animados.",
     url: "https://www.adami.com.ar",
+    shot: true,
+  },
+  {
+    slug: "rental-cordoba",
+    client: "Rental Córdoba",
+    name: "Rental Córdoba",
+    sector: "Stands y eventos",
+    kind: "Sitio web",
+    specialties: ["Desarrollo web", "SEO"],
+    summary: "Sitio de una empresa de diseño y armado de stands para ferias y eventos: liviano y con SEO trabajado en cada página.",
+    url: "https://www.rentalcordoba.com.ar",
+    shot: true,
   },
   {
     slug: "non-sistemas-reservas",
     client: "NON Sistemas",
-    name: "NON Sistemas · Reservas",
-    sector: "Servicios",
+    name: "Noni · Reservas",
+    sector: "Software",
     kind: "Sistema de reservas",
     specialties: ["Software a medida"],
-    summary: "Sistema de reservas con catálogo público editable e inventario.",
+    summary: "Sistema de reservas online y gestión de agenda para negocios con turnos, con catálogo público editable e inventario.",
+    url: "https://non-sistemas-reservas.vercel.app",
+    shot: true,
   },
   {
     slug: "renacer-hormonal",
@@ -86,47 +103,107 @@ export const PROJECTS: Project[] = [
     sector: "Salud",
     kind: "Sitio web",
     specialties: ["Desarrollo web"],
-    summary: "Sitio web de una clínica.",
+    summary: "Sitio de una clínica de salud hormonal femenina, con sus programas, su equipo y la agenda de consultas.",
     url: "https://renacerhormonal.com.ar",
-  },
-  {
-    slug: "club-de-previas",
-    client: "Club de Previas",
-    name: "Club de Previas",
-    sector: "Gastronomía",
-    kind: "Sitio web",
-    specialties: ["Desarrollo web"],
-    summary: "Sitio con contacto directo por WhatsApp.",
-    url: "https://www.clubdeprevias.com.ar",
-  },
-  {
-    slug: "rental-cordoba",
-    client: "Rental Córdoba",
-    name: "Rental Córdoba",
-    sector: "Alquileres",
-    kind: "Sitio web",
-    specialties: ["Desarrollo web", "SEO"],
-    summary: "Sitio estático liviano, con SEO trabajado en cada página.",
-    url: "https://www.rentalcordoba.com.ar",
+    shot: true,
   },
   {
     slug: "plenomax",
-    client: "Plenomax",
-    name: "Plenomax",
-    sector: "Empresa",
-    kind: "Sitio web",
+    client: "Pleno Max",
+    name: "Pleno Max",
+    sector: "Pinturas",
+    kind: "Sitio + catálogo",
     specialties: ["Desarrollo web"],
-    summary: "Sitio web institucional.",
+    summary: "Sitio y catálogo de una fábrica de pinturas, látex y revestimientos, con pedido de cotización.",
     url: "https://plenomax.com.ar",
+    shot: true,
   },
   {
     slug: "eli-ceramica",
     client: "Eli Cerámica",
     name: "Eli Cerámica",
     sector: "Cerámica",
-    kind: "Catálogo online",
+    kind: "Tienda y catálogo",
     specialties: ["Desarrollo web"],
-    summary: "Catálogo digital de piezas de cerámica.",
+    summary: "Tienda online y catálogo mayorista de cerámica artesanal hecha en las Sierras Chicas.",
+    url: "https://eliceramica-catalogo.vercel.app",
+    shot: true,
+  },
+  {
+    slug: "club-de-previas",
+    client: "Club de Previas",
+    name: "Club de Previas",
+    sector: "Bar",
+    kind: "Página de enlaces",
+    specialties: ["Desarrollo web"],
+    summary: "Página de un bar de tragos con reservas, carta y ubicación, y contacto directo por WhatsApp.",
+    url: "https://www.clubdeprevias.com.ar",
+    shot: true,
+  },
+  {
+    slug: "prode-mundial",
+    name: "Prode Mundial 2026",
+    sector: "Bar",
+    kind: "Aplicación web",
+    specialties: ["Software a medida"],
+    summary: "Prode del Mundial 2026 para los clientes de Club de Previas: cada uno carga sus pronósticos y suma puntos.",
+    url: "https://fixture-wheat.vercel.app",
+    shot: true,
+  },
+  {
+    slug: "boxpoint",
+    client: "BoxPoint",
+    name: "BoxPoint",
+    sector: "Sorteos",
+    kind: "Ruleta de sorteos",
+    specialties: ["Software a medida"],
+    summary: "Ruleta digital de sorteos, pensada para usar en pantalla completa en el local.",
+    url: "https://www.boxpoint.com.ar",
+    shot: true,
+  },
+  {
+    slug: "grifos",
+    client: "Grifo's",
+    name: "Grifo's",
+    sector: "Gastronomía",
+    kind: "Carta digital",
+    specialties: ["Desarrollo web"],
+    summary: "Carta digital de una pizzería y bar, por categorías y con precios, para ver desde el celular.",
+    url: "https://grifos-app.vercel.app",
+    shot: true,
+  },
+  {
+    slug: "crazy-monkey",
+    client: "Crazy Monkey",
+    name: "Crazy Monkey",
+    sector: "Gastronomía",
+    kind: "Carta de delivery",
+    specialties: ["Desarrollo web"],
+    summary: "Carta de delivery con promos y categorías para armar el pedido desde el celular.",
+    url: "https://crazy-monkey-wine.vercel.app",
+    shot: true,
+  },
+  {
+    slug: "edunova",
+    client: "EDUNOVA",
+    name: "EDUNOVA",
+    sector: "Educación",
+    kind: "Sitio web",
+    specialties: ["Desarrollo web"],
+    summary: "Sitio de una consultora pedagógica, con sus servicios, su formación docente y el pedido de diagnóstico.",
+    url: "https://consultora-pedagogica.vercel.app",
+    shot: true,
+  },
+  {
+    slug: "polar",
+    client: "Polar",
+    name: "Polar",
+    sector: "Software",
+    kind: "Landing",
+    specialties: ["Desarrollo web"],
+    summary: "Landing de un sistema de ventas con inteligencia artificial para WhatsApp.",
+    url: "https://polar-nu-eight.vercel.app",
+    shot: true,
   },
   {
     slug: "cerveceria-automatica",
@@ -144,11 +221,10 @@ export const PROJECTS: Project[] = [
   },
 ];
 
-// El cliente indicó que son "muchos más de 10" proyectos entregados: la página dice "Más de 10".
-// CONFIRMAR el número real para mostrarlo.
-export const DELIVERED = 10;
+// Proyectos entregados: la página dice "+15" (acá hay 16 publicados)
+export const DELIVERED = 15;
 
 /** Rubros distintos entre los proyectos publicados */
 export const SECTORS = new Set(PROJECTS.map((p) => p.sector)).size;
 
-export const coverOf = (p: Project) => `/projects/${p.slug}.svg`;
+export const coverOf = (p: Project) => `/projects/${p.slug}.${p.shot ? "webp" : "svg"}`;

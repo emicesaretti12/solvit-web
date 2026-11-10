@@ -67,9 +67,9 @@ export function Finale({ base = "" }: { base?: string }) {
         <div className="mt-14 grid flex-1 gap-14 md:mt-[6vw] lg:grid-cols-[0.5fr_0.5fr_1fr] lg:gap-10">
           <div>
             <address className="text-[19px] not-italic leading-[1.35] text-ink">
-              Córdoba
+              Sierras Chicas
               <br />
-              Argentina
+              Córdoba, Argentina
             </address>
             <nav aria-label="Servicios" className="mt-10">
               <p className="text-[12px] uppercase tracking-[0.2em] text-ink-faint">Servicios</p>

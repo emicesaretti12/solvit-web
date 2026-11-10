@@ -1,7 +1,7 @@
 # Graph Report - solvit-web  (2026-11-10)
 
 ## Corpus Check
-- 75 files · ~38,701 words
+- 75 files · ~39,013 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 5 file(s) not represented in the graph (top: .css 3, (none) 2)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0c8e6e0a`
+- Built from commit: `e44f51da`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -40,8 +40,8 @@
 2. `ServicePage()` - 23 edges
 3. `Home()` - 16 edges
 4. `compilerOptions` - 16 edges
-5. `@phosphor-icons/react` - 14 edges
-6. `motion` - 14 edges
+5. `motion` - 14 edges
+6. `@phosphor-icons/react` - 14 edges
 7. `SplitText()` - 13 edges
 8. `LogoMark()` - 12 edges
 9. `tap()` - 12 edges
@@ -54,10 +54,10 @@
   src/app/layout.tsx → src/components/json-ld.tsx
 - `RootLayout()` --calls--> `LogoMark()`  [EXTRACTED]
   src/app/layout.tsx → src/components/logo.tsx
-- `Home()` --calls--> `About()`  [EXTRACTED]
-  src/app/page.tsx → src/components/site/about.tsx
 - `Home()` --calls--> `Finale()`  [EXTRACTED]
   src/app/page.tsx → src/components/site/finale.tsx
+- `ServicePage()` --calls--> `Finale()`  [EXTRACTED]
+  src/components/site/service-page.tsx → src/components/site/finale.tsx
 
 ## Import Cycles
 - None detected.

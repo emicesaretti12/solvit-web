@@ -34,7 +34,7 @@ export default function OpengraphImage() {
           <div style={{ marginTop: 30, fontSize: 30, lineHeight: 1.35, color: "rgba(255,255,255,0.75)" }}>
             Desarrollo web · Software a medida · Agentes de IA · IoT · Marketing
           </div>
-          <div style={{ marginTop: 26, fontSize: 26, color: "#1fdcff" }}>Córdoba, Argentina · sensoftware.com.ar</div>
+          <div style={{ marginTop: 26, fontSize: 26, color: "#1fdcff" }}>Sierras Chicas, Córdoba · sensoftware.com.ar</div>
         </div>
         <img alt="" width={236} height={360} src={`data:image/svg+xml;utf8,${encodeURIComponent(MARK)}`} />
       </div>

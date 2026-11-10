@@ -1,6 +1,6 @@
 # SEN Software
 
-> Equipo de ingeniería y desarrollo de software de Córdoba, Argentina. Hace desarrollo web, software a medida (CRM, reservas, inventario), agentes de IA para WhatsApp e Instagram, proyectos de hardware e IoT y marketing digital para empresas que quieren vender más.
+> Equipo de ingeniería y desarrollo de software de Sierras Chicas, Córdoba, Argentina. Hace desarrollo web, software a medida (CRM, reservas, inventario), agentes de IA para WhatsApp e Instagram, proyectos de hardware e IoT y marketing digital para empresas que quieren vender más.
 
 Sitio: https://sensoftware.com.ar
 Contacto: inf.solvit@gmail.com · WhatsApp +54 9 351 352-2968
@@ -15,4 +15,4 @@ Contacto: inf.solvit@gmail.com · WhatsApp +54 9 351 352-2968
 
 ## Proyectos entregados
 
-Motobox Córdoba (sitio web y CRM), Baterías Córdoba (sitio y catálogo con 52 páginas de aterrizaje locales), ADAMI Industrial (sitio institucional), NON Sistemas (sistema de reservas), Renacer Hormonal, Club de Previas, Rental Córdoba, Plenomax, Eli Cerámica y una cervecería automática con ESP32.
+Motobox Córdoba (sitio de concesionaria de motos y CRM), Baterías Córdoba (sitio y catálogo con 52 páginas de aterrizaje locales), ADAMI Industrial (sitio institucional), Rental Córdoba (stands y eventos), Noni de NON Sistemas (sistema de reservas), Renacer Hormonal (clínica), Pleno Max (fábrica de pinturas), Eli Cerámica (tienda y catálogo), Club de Previas (bar) y su Prode Mundial 2026, BoxPoint (ruleta de sorteos), Grifo's y Crazy Monkey (cartas digitales), EDUNOVA (consultora pedagógica), Polar (landing) y una cervecería automática con ESP32.

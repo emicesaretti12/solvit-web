@@ -22,6 +22,7 @@ export const organizationSchema = {
   telephone: CONTACT.tel.replace("tel:", ""),
   address: { "@type": "PostalAddress", addressLocality: SITE_LOCALITY, addressRegion: "Córdoba", addressCountry: SITE_COUNTRY },
   areaServed: [
+    { "@type": "Place", name: "Sierras Chicas, Córdoba" },
     { "@type": "City", name: "Córdoba" },
     { "@type": "Country", name: "Argentina" },
   ],

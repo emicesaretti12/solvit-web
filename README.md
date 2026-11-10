@@ -60,9 +60,9 @@ npm run lint
 
 - Reemplazar la recreación SVG del isotipo y del wordmark (`src/components/logo.tsx`) por los
   archivos originales.
-- Reemplazar las portadas ilustradas de los proyectos (`public/projects/*.svg`) por capturas reales.
+- La cervecería automática todavía usa una portada ilustrada (falta una foto real).
 - Conectar el formulario de contacto con el destino real (email, CRM o WhatsApp).
 - Sumar los logos reales de los clientes (hoy sus nombres van como marcas tipográficas en el
   hero y en la vitrina de marcas).
-- Confirmar la ciudad que muestran el pie y el globo (Córdoba, Argentina).
+
 - Las demostraciones y el recorrido del sistema usan datos de ejemplo (rotulados en pantalla).

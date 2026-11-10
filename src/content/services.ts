@@ -40,20 +40,20 @@ export const SERVICES: Service[] = [
       "Diseño y desarrollo de sitios web, tiendas online y landings en Córdoba, Argentina. Rápidos en el celular, con SEO local y medición desde el primer día.",
     heading: "Desarrollo web en Córdoba",
     body: [
-      "Diseñamos y desarrollamos sitios web, tiendas online, catálogos y landings para negocios de Córdoba y de toda Argentina. Cada sitio se piensa para un objetivo: que la persona que te busca te encuentre, entienda qué ofrecés y te consulte.",
+      "Diseñamos y desarrollamos sitios web, tiendas online, catálogos y landings para negocios de Sierras Chicas, Córdoba y toda Argentina. Cada sitio se piensa para un objetivo: que la persona que te busca te encuentre, entienda qué ofrecés y te consulte.",
       "Trabajamos con Next.js y sitios prerenderizados, que cargan rápido en el celular aunque la conexión sea mala. Dejamos el SEO técnico resuelto desde el inicio (títulos, datos estructurados, sitemap, páginas por servicio y por zona) y conectamos la medición para saber de dónde llega cada consulta.",
       "El sitio queda conectado a WhatsApp, a tus formularios y, si lo necesitás, a un CRM o a un catálogo que podés editar vos.",
     ],
     faqs: [
       { q: "¿Qué tipo de sitios web desarrollan?", a: "Sitios institucionales, tiendas y catálogos online, y landings para campañas. También sitios conectados a una base de datos o a un CRM propio." },
       { q: "¿El sitio queda optimizado para Google?", a: "Sí. Entregamos el SEO técnico resuelto: carga rápida en el celular, títulos y descripciones por página, datos estructurados, sitemap y páginas de aterrizaje para búsquedas locales." },
-      { q: "¿Trabajan solo en Córdoba?", a: "Estamos en Córdoba y trabajamos con negocios de toda Argentina. Las reuniones pueden ser presenciales o por videollamada." },
+      { q: "¿Trabajan solo en Córdoba?", a: "Estamos en Sierras Chicas, Córdoba, y trabajamos con negocios de toda Argentina." },
     ],
     title: "Desarrollo web",
     lead: "Webs que se convierten en consultas.",
     text: "Sitios, tiendas y landings rápidos en el celular, con SEO y medición desde el primer día.",
     deliverables: ["Sitios institucionales", "Tiendas y catálogos", "Landings para campañas", "SEO local"],
-    work: ["baterias-cordoba", "adami-industrial", "rental-cordoba"],
+    work: ["baterias-cordoba", "adami-industrial", "rental-cordoba", "renacer-hormonal", "plenomax", "edunova"],
   },
   {
     key: "software",
@@ -76,7 +76,7 @@ export const SERVICES: Service[] = [
     lead: "Sistemas hechos a la forma de tu equipo.",
     text: "CRM, reservas, inventario y paneles de gestión con usuarios por rol, pensados para cómo trabajás.",
     deliverables: ["CRM", "Reservas", "Inventario", "Paneles por rol"],
-    work: ["motobox-cordoba", "non-sistemas-reservas"],
+    work: ["motobox-cordoba", "non-sistemas-reservas", "prode-mundial"],
   },
   {
     key: "ia",
@@ -153,15 +153,15 @@ export const serviceBySlug = (slug: string) => SERVICES.find((s) => s.slug === s
 export const HOME_FAQS: Faq[] = [
   {
     q: "¿Qué hace SEN Software?",
-    a: "Somos un equipo de ingenieros y desarrolladores de Córdoba, Argentina. Hacemos desarrollo web, software a medida (CRM, reservas, inventario), agentes de IA para WhatsApp e Instagram, proyectos de hardware e IoT y marketing digital.",
+    a: "Somos un equipo de ingenieros y desarrolladores de Sierras Chicas, Córdoba, Argentina. Hacemos desarrollo web, software a medida (CRM, reservas, inventario), agentes de IA para WhatsApp e Instagram, proyectos de hardware e IoT y marketing digital.",
   },
   {
     q: "¿Con qué tipo de empresas trabajan?",
-    a: "Con negocios y empresas que quieren vender más y ordenar su operación. Entregamos proyectos para rubros como motos, baterías, industria, salud, gastronomía y alquileres.",
+    a: "Con negocios y empresas que quieren vender más y ordenar su operación. Entregamos proyectos para rubros como motos, baterías, industria, salud, gastronomía, educación y eventos.",
   },
   {
     q: "¿Trabajan solo en Córdoba?",
-    a: "Estamos en Córdoba y trabajamos con clientes de toda Argentina, de forma presencial o remota.",
+    a: "Estamos en Sierras Chicas, Córdoba, y trabajamos con clientes de toda Argentina.",
   },
   {
     q: "¿Cómo empiezo?",
