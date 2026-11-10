@@ -41,7 +41,15 @@ export function PageObservers() {
     };
     scan();
     // Lo que se monta después (por ejemplo, al ver todos los proyectos) también se observa
-    const mo = new MutationObserver(scan);
+    // (agrupado: muchas piezas cambian el DOM seguido y no hace falta mirar en cada cambio)
+    let pending = 0;
+    const mo = new MutationObserver(() => {
+      if (pending) return;
+      pending = window.setTimeout(() => {
+        pending = 0;
+        scan();
+      }, 250);
+    });
     mo.observe(document.body, { childList: true, subtree: true });
 
     // Marquesinas con inercia
@@ -50,6 +58,7 @@ export function PageObservers() {
     let lastT = performance.now();
     let speed = 0;
     let rate = 1;
+    let applied = 1;
     let frame = 0;
     let marquees: Animation[] = [];
     let listedAt = 0;
@@ -63,11 +72,18 @@ export function PageObservers() {
       const target = 1 + Math.min(3.5, speed * 1.4);
       rate += (target - rate) * 0.12;
       list(now);
-      for (const a of marquees) a.playbackRate = rate;
+      // En escalones de un cuarto: cambiar la velocidad reinicia la animación en el compositor,
+      // así que se toca pocas veces por gesto y no en cada cuadro
+      const stepped = Math.round(rate * 4) / 4;
+      if (stepped !== applied) {
+        applied = stepped;
+        for (const a of marquees) a.playbackRate = stepped;
+      }
       if (Math.abs(rate - 1) > 0.01 || speed > 0.01) frame = requestAnimationFrame(tick);
       else {
         for (const a of marquees) a.playbackRate = 1;
         rate = 1;
+        applied = 1;
         frame = 0;
       }
     };
@@ -86,6 +102,7 @@ export function PageObservers() {
       reveal.disconnect();
       pause.disconnect();
       mo.disconnect();
+      window.clearTimeout(pending);
       cancelAnimationFrame(frame);
       window.removeEventListener("scroll", onScroll);
     };

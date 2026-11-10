@@ -20,7 +20,7 @@ const RAD = Math.PI / 180;
 // Córdoba, Argentina
 const HOME = { lat: -31.4 * RAD, lon: -64.2 * RAD };
 
-type Dot = { sinLat: number; cosLat: number; lon: number };
+type Dot = { sinLat: number; cosLat: number; sinLon: number; cosLon: number };
 
 function landDots(): Dot[] {
   const bin = atob(LAND);
@@ -30,7 +30,8 @@ function landDots(): Dot[] {
       const k = j * COLS + i;
       if (!((bin.charCodeAt(k >> 3) >> (k & 7)) & 1)) continue;
       const lat = (90 - (j + 0.5) * 3) * RAD;
-      dots.push({ sinLat: Math.sin(lat), cosLat: Math.cos(lat), lon: (-180 + (i + 0.5) * 3) * RAD });
+      const lon = (-180 + (i + 0.5) * 3) * RAD;
+      dots.push({ sinLat: Math.sin(lat), cosLat: Math.cos(lat), sinLon: Math.sin(lon), cosLon: Math.cos(lon) });
     }
   }
   return dots;
@@ -45,6 +46,7 @@ export function Globe({ className = "" }: { className?: string }) {
     if (!canvas || !ctx) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const dots = landDots();
+    const buckets: number[][] = [[], [], [], []];
     const tilt = -16 * RAD;
     const sinT = Math.sin(tilt);
     const cosT = Math.cos(tilt);
@@ -107,13 +109,30 @@ export function Globe({ className = "" }: { className?: string }) {
       for (let lon = -180; lon < 180; lon += 30) line((t) => [(-90 + t * 180) * RAD, lon * RAD]);
       for (let lat = -60; lat <= 60; lat += 30) line((t) => [lat * RAD, (-180 + t * 360) * RAD]);
 
-      // Tierra: un punto por celda, más tenue hacia el borde
+      // Tierra: un punto por celda, más tenue hacia el borde. Sin trigonometría por punto (el
+      // giro se aplica con el seno y el coseno ya calculados) y en cuatro tandas de opacidad:
+      // un solo relleno por tanda en vez de uno por punto
       const s = Math.max(1.1 * dpr, R * 0.021);
+      const sinR = Math.sin(rot);
+      const cosR = Math.cos(rot);
+      const k = R * 0.985;
+      for (const path of buckets) path.length = 0;
       for (const d of dots) {
-        const p = project(d.sinLat, d.cosLat, d.lon);
-        if (p.z <= 0.02) continue;
-        ctx.fillStyle = `rgb(255 255 255 / ${0.25 + 0.75 * p.z})`;
-        ctx.fillRect(c + p.x * R * 0.985 - s / 2, c - p.y * R * 0.985 - s / 2, s, s);
+        const cosD = d.cosLon * cosR + d.sinLon * sinR;
+        const z = sinT * d.sinLat + cosT * d.cosLat * cosD;
+        if (z <= 0.02) continue;
+        const sinD = d.sinLon * cosR - d.cosLon * sinR;
+        const x = c + d.cosLat * sinD * k - s / 2;
+        const y = c - (cosT * d.sinLat - sinT * d.cosLat * cosD) * k - s / 2;
+        buckets[Math.min(3, (z * 4) | 0)].push(x, y);
+      }
+      for (let b = 0; b < 4; b++) {
+        const path = buckets[b];
+        if (!path.length) continue;
+        ctx.fillStyle = `rgb(255 255 255 / ${0.34 + b * 0.22})`;
+        ctx.beginPath();
+        for (let i = 0; i < path.length; i += 2) ctx.rect(path[i], path[i + 1], s, s);
+        ctx.fill();
       }
 
       // Córdoba
@@ -202,7 +221,6 @@ export function Globe({ className = "" }: { className?: string }) {
       ref={ref}
       role="img"
       aria-label="Globo terráqueo girando, con Córdoba, Argentina, marcada"
-      data-cursor="Girar"
       className={`aspect-square touch-pan-y rounded-full ${className}`}
     />
   );

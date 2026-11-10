@@ -1,12 +1,11 @@
-"use client";
-
 /*
   Detrás de SEN: el manifiesto en grande. Las palabras pasan de apagadas a encendidas a medida
-  que el párrafo cruza la pantalla (ligado al scroll). Debajo, la firma del equipo y los tres
-  principios de trabajo.
+  que el párrafo cruza la pantalla. Es una animación de CSS ligada al scroll (view-timeline,
+  ver .manifesto en globals.css): corre en el compositor, sin JavaScript. Donde el navegador no
+  la soporta, o con reduced motion, el texto se ve entero. Debajo, la firma del equipo y los
+  tres principios de trabajo.
 */
-import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from "motion/react";
-import { useRef } from "react";
+import type { CSSProperties } from "react";
 import { AppIcon, BRAND_TAGLINE } from "@/components/logo";
 
 const MANIFESTO =
@@ -18,26 +17,7 @@ const PRINCIPLES = [
   "Trabajamos por etapas que podés medir.",
 ];
 
-function Word({
-  children,
-  range,
-  progress,
-  still,
-}: {
-  children: string;
-  range: [number, number];
-  progress: MotionValue<number>;
-  /** Con reduced motion: encendida desde el principio */
-  still: boolean;
-}) {
-  const opacity = useTransform(progress, range, still ? [1, 1] : [0.13, 1]);
-  return <motion.span style={{ opacity }}>{children} </motion.span>;
-}
-
 export function About() {
-  const text = useRef<HTMLParagraphElement>(null);
-  const reduce = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: text, offset: ["start 0.86", "end 0.5"] });
   const words = MANIFESTO.split(" ");
 
   return (
@@ -50,20 +30,15 @@ export function About() {
           “
         </span>
         <p
-          ref={text}
           aria-label={MANIFESTO}
-          className="mt-8 max-w-[24ch] text-[clamp(2rem,5vw,4.6rem)] font-medium leading-[1.07] tracking-[-0.04em] text-ink md:max-w-[26ch]"
+          className="manifesto mt-8 max-w-[24ch] text-[clamp(2rem,5vw,4.6rem)] font-medium leading-[1.07] tracking-[-0.04em] text-ink md:max-w-[26ch]"
         >
-          {/* Siempre la misma estructura (el servidor no sabe si hay reduced motion) */}
           {words.map((word, i) => (
-            <Word
-              key={i}
-              progress={scrollYProgress}
-              still={Boolean(reduce)}
-              range={[i / words.length, Math.min(1, (i + 2.5) / words.length)]}
-            >
-              {word}
-            </Word>
+            <span key={i} aria-hidden="true">
+              <span className="manifesto-word" style={{ "--n": i } as CSSProperties}>
+                {word}
+              </span>{" "}
+            </span>
           ))}
         </p>
 
@@ -74,13 +49,13 @@ export function About() {
                 key={p}
                 data-reveal
                 className="rise border-t border-ink/15 pt-5"
-                style={{ ["--delay" as string]: `${i * 90}ms` }}
+                style={{ "--delay": `${i * 90}ms` } as CSSProperties}
               >
                 <p className="text-[17px] leading-[1.35] text-ink">{p}</p>
               </li>
             ))}
           </ul>
-          <div data-reveal className="rise flex flex-col items-start gap-6 lg:items-end [--delay:200ms]">
+          <div data-reveal className="rise flex flex-col items-start gap-6 [--delay:200ms] lg:items-end">
             <div className="flex items-center gap-4">
               <AppIcon className="size-[74px] shadow-[0_16px_36px_-16px_rgb(var(--shade-rgb)/0.7)]" />
               <p className="text-[17px] leading-snug lg:text-right">

@@ -77,7 +77,6 @@ export function LeadForm({ compact = false, origin }: { compact?: boolean; origi
           type="submit"
           disabled={sending}
           aria-label="Enviar correo"
-          data-cursor-hover
           className="group grid size-11 shrink-0 place-items-center rounded-full text-ink transition-[background-color,color,transform] duration-200 ease-out hover:bg-ink hover:text-white active:scale-95 disabled:opacity-60"
         >
           {sending ? (

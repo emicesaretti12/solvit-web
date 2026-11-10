@@ -8,7 +8,7 @@ software a medida, agentes de IA, hardware e IoT y marketing digital.
 - Next.js (App Router) + TypeScript
 - Tailwind CSS v4
 - Motion (`motion/react`) para las animaciones ligadas al scroll y las transiciones; Lenis para
-  el scroll suave (GSAP solo como reloj de Lenis y del escenario 3D)
+  el scroll suave
 - three.js + React Three Fiber para el isotipo en 3D; canvas 2D para el globo y el valle de
   cintas; CSS 3D para los objetos de los servicios
 - matter-js para las fichas que caen en el cierre (se carga recién al llegar)
@@ -37,17 +37,16 @@ npm run lint
   `choreography.ts`)
 - `src/components/site/`: las secciones y lo fijo de la página
   - `header.tsx` (logo, "Hablemos" y el menú en tarjetas), `section-nav.tsx` (puntos de
-    sección), `contact-badge.tsx` (botón flotante a WhatsApp), `cursor.tsx` (cursor propio)
+    sección), `contact-badge.tsx` (botón flotante a WhatsApp)
   - `hero.tsx`, con `globe.tsx` (globo de puntos) y `hills.tsx` (valle de cintas)
   - `demos/` (demostraciones paso a paso de web y de CRM, con su kit común), `magnetic.tsx`,
     `count-up.tsx` y `proximity-title.tsx` (piezas de movimiento)
   - `works.tsx` (últimos trabajos y vitrina de marcas), `services.tsx` (tarjetas que se apilan),
-    `system.tsx` (vistas vivas por etapa), `facts.tsx` (hechos en columnas que se mueven),
+    `system.tsx` (el recorrido de una consulta por el sistema), `facts.tsx` (hechos en columnas que se mueven),
     `about.tsx` (manifiesto), `finale.tsx` y `tile-rain.tsx` (cierre con física y pie)
   - `lead-form.tsx` (correo y mensaje opcional), `split-text.tsx` y `page-observers.tsx`
     (entradas al entrar en pantalla y pausa de loops fuera de pantalla)
 - `src/components/services-3d.tsx`: los objetos 3D de agentes de IA, proyectos híbridos y marketing
-- `src/components/previews/`: vistas vivas de ejemplo (embudo, agente de IA, CRM)
 - `src/content/`: servicios, proyectos, contacto y navegación
 - `src/app/api/contacto/route.ts`: endpoint del formulario (valida el correo y registra la consulta)
 
@@ -60,4 +59,4 @@ npm run lint
 - Sumar los logos reales de los clientes (hoy sus nombres van como marcas tipográficas en el
   hero y en la vitrina de marcas).
 - Confirmar la ciudad que muestran el pie y el globo (Córdoba, Argentina).
-- Las vistas vivas usan datos de ejemplo (rotulados en pantalla).
+- Las demostraciones y el recorrido del sistema usan datos de ejemplo (rotulados en pantalla).

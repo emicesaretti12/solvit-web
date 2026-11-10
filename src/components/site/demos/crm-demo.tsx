@@ -47,7 +47,7 @@ function StaticCard({ card }: { card: Card }) {
 }
 
 export function CrmDemo() {
-  const { ref, step, pick, running, reduce, ms } = useDemoLoop(STEPS.length, 2900);
+  const { ref, step, pick, running, reduce, ms } = useDemoLoop(STEPS.length, 2100);
   // En qué columna está la consulta que se mueve
   const column = [0, 1, 2, 3][step];
   const assigned = step >= 1;

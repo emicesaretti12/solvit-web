@@ -10,7 +10,7 @@
   cámara (las marcas StageMark le dicen al escenario qué pose va en cada punto del scroll). En
   celulares la S vive en el hueco #hero-slot y las frases van debajo.
 */
-import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { StageMark, useStageDrag } from "@/components/three/stage";
 import { PROJECTS } from "@/content/projects";
@@ -32,13 +32,16 @@ const CLIENTS = PROJECTS.flatMap((p) => (p.client ? [p.client] : []));
 function RotatingWord() {
   const [i, setI] = useState(0);
   const reduce = useReducedMotion();
+  // Solo rota mientras se ve: fuera de pantalla no hay nada que animar
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref);
   useEffect(() => {
-    if (reduce) return;
+    if (reduce || !inView) return;
     const id = window.setInterval(() => setI((v) => (v + 1) % WORDS.length), 2400);
     return () => window.clearInterval(id);
-  }, [reduce]);
+  }, [reduce, inView]);
   return (
-    <span className="-my-[0.2em] inline-grid overflow-hidden py-[0.2em] align-bottom">
+    <span ref={ref} className="-my-[0.2em] inline-grid overflow-hidden py-[0.2em] align-bottom">
       <AnimatePresence initial={false}>
         <motion.span
           key={WORDS[i]}
@@ -95,7 +98,6 @@ export function Hero() {
         <div
           id="hero-slot"
           {...drag}
-          data-cursor="Girá la S"
           className="mx-auto mt-[15svh] h-[40svh] w-[min(72vw,360px)] shrink-0 touch-pan-y lg:absolute lg:left-1/2 lg:top-1/2 lg:mt-0 lg:h-[56svh] lg:w-[30vw] lg:-translate-x-1/2 lg:-translate-y-[48%] lg:cursor-grab lg:active:cursor-grabbing"
         />
 

@@ -3,7 +3,7 @@ import { Geist_Mono, Manrope } from "next/font/google";
 import { LogoMark, Wordmark } from "@/components/logo";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { Toaster } from "@/components/toaster";
-import { DEFAULT_THEME, JS_FLAG_SCRIPT, THEME_COLOR, ZOOM_GUARD_SCRIPT } from "@/lib/theme-config";
+import { DEFAULT_THEME, INTRO_SCRIPT, JS_FLAG_SCRIPT, THEME_COLOR, ZOOM_GUARD_SCRIPT } from "@/lib/theme-config";
 import "./globals.css";
 import "./scenes.css";
 import "./native.css";
@@ -87,16 +87,30 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Saltar al contenido
         </a>
-        {/* Telón de entrada (solo CSS, nunca frena un clic): el logo sube y el telón se levanta.
-            Se muestra una vez por sesión (ver JS_FLAG_SCRIPT) */}
-        <div aria-hidden="true" className="intro">
-          <span className="intro-mask">
-            <span className="intro-logo">
-              <LogoMark className="h-12 w-auto" />
-              <Wordmark className="h-7 w-auto text-white" />
+        {/* Carga: contador de 000 a 100 sobre navy y telón que se levanta (ver INTRO_SCRIPT y
+            globals.css). El script lo mueve antes de que React hidrate: por eso el contador y el
+            telón no avisan diferencias de hidratación */}
+        <div id="intro" aria-hidden="true" className="intro" suppressHydrationWarning>
+          <div className="intro-top flex items-center justify-between">
+            <span className="flex items-center gap-2.5">
+              <LogoMark className="h-7 w-auto" />
+              <Wordmark className="h-[0.95rem] w-auto text-white" />
             </span>
-          </span>
+            <span className="text-[12px] uppercase tracking-[0.22em] text-white/55">Ingeniería y software</span>
+          </div>
+          <div className="intro-bottom">
+            <p className="intro-count">
+              <span data-n suppressHydrationWarning>
+                000
+              </span>
+              <small>%</small>
+            </p>
+            <div className="intro-bar">
+              <span data-bar suppressHydrationWarning />
+            </div>
+          </div>
         </div>
+        <script dangerouslySetInnerHTML={{ __html: INTRO_SCRIPT }} />
         <SmoothScroll />
         {children}
         <Toaster />

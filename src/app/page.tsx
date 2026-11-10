@@ -1,7 +1,6 @@
 import { Stage } from "@/components/three/stage";
 import { About } from "@/components/site/about";
 import { ContactBadge } from "@/components/site/contact-badge";
-import { Cursor } from "@/components/site/cursor";
 import { Facts } from "@/components/site/facts";
 import { Finale } from "@/components/site/finale";
 import { Header } from "@/components/site/header";
@@ -17,8 +16,7 @@ import { Works } from "@/components/site/works";
   hero (la S en 3D, el globo y el valle de cintas) → últimos trabajos y marcas → servicios en
   tarjetas que se apilan → el sistema SEN con sus vistas vivas → hechos de cada proyecto →
   detrás de SEN → "¡Hablemos!" con las fichas que caen, y el pie que sube y lo tapa.
-  Fijos sobre la página: el encabezado con su menú, los puntos de sección, el botón de contacto
-  y el cursor propio. Detrás de todo, el escenario WebGL con el isotipo (Stage).
+  Fijos sobre la página: el encabezado con su menú, los puntos de sección y el botón de contacto. Detrás de todo, el escenario WebGL con el isotipo (Stage).
 */
 export default function Home() {
   return (
@@ -37,7 +35,6 @@ export default function Home() {
         <Finale />
       </main>
       <PageObservers />
-      <Cursor />
     </>
   );
 }

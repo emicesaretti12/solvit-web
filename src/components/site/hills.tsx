@@ -9,7 +9,9 @@
 */
 import { useEffect, useRef } from "react";
 
-const LINES = 44;
+// Cintas: menos en pantallas angostas (cada una es un trazo por cuadro)
+const LINES_WIDE = 44;
+const LINES_NARROW = 30;
 
 export function Hills({ className = "" }: { className?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -49,6 +51,7 @@ export function Hills({ className = "" }: { className?: string }) {
       pointerPull += (pullTarget - pointerPull) * 0.08;
       const top = h * 0.04;
       const depth = h * 0.5;
+      const LINES = w < 700 ? LINES_NARROW : LINES_WIDE;
       const gap = (h * 0.62) / LINES;
       const amp = Math.min(10, h * 0.018);
       const step = Math.max(6, w / 160);

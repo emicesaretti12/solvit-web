@@ -7,6 +7,7 @@
   otra pestaña. Cierra con la vitrina oscura de marcas: dos columnas de nombres que suben y
   bajan sin parar.
 */
+import { ArrowUpRight } from "@phosphor-icons/react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { useRef, useState, type CSSProperties } from "react";
 import { coverOf, DELIVERED, PROJECTS, type Project } from "@/content/projects";
@@ -40,6 +41,14 @@ function Cover({ project, index }: { project: Project; index: number }) {
             className="cover-img size-full object-cover transition-transform duration-[1.4s] ease-[var(--ease-expo)] group-hover:scale-[1.045]"
           />
         </motion.div>
+        {project.url && (
+          <span
+            aria-hidden="true"
+            className="absolute right-4 top-4 grid size-12 scale-75 place-items-center rounded-full bg-white text-ink opacity-0 shadow-[0_10px_24px_-12px_rgb(4_8_20/0.6)] transition-[transform,opacity] duration-300 ease-[var(--ease-expo)] group-hover:scale-100 group-hover:opacity-100 [@media(hover:none)]:scale-100 [@media(hover:none)]:opacity-100"
+          >
+            <ArrowUpRight size={20} weight="bold" />
+          </span>
+        )}
       </div>
       <p className="mt-6 flex flex-wrap items-center gap-x-2 text-[12.5px] uppercase tracking-[0.01em] text-ink">
         {project.kind}
@@ -58,7 +67,7 @@ function Cover({ project, index }: { project: Project; index: number }) {
   return (
     <li className="rise rise-flat" data-reveal style={{ "--delay": `${(index % 2) * 120}ms` } as CSSProperties}>
       {project.url ? (
-        <a href={project.url} target="_blank" rel="noreferrer" data-cursor="Ver sitio" className="group block">
+        <a href={project.url} target="_blank" rel="noreferrer" className="group block">
           {body}
           <span className="sr-only"> (se abre en otra pestaña)</span>
         </a>
@@ -97,6 +106,19 @@ function BrandColumn({ names, reverse }: { names: string[]; reverse?: boolean })
   );
 }
 
+/* El título gigante se desliza hacia la izquierda mientras cruza la pantalla (ligado al scroll) */
+function Drift({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const x = useTransform(scrollYProgress, [0, 1], ["5vw", "-5vw"]);
+  return (
+    <motion.span ref={ref} style={reduce ? undefined : { x }} className="block">
+      {children}
+    </motion.span>
+  );
+}
+
 /* La vitrina llega un poco más chica y termina de crecer al entrar (ligado al scroll) */
 function GrowIn({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -121,7 +143,9 @@ export function Works() {
       <div className="mx-auto px-5 md:px-[5vw]">
         <div className="flex flex-wrap items-end justify-between gap-x-12 gap-y-6">
           <h2 id="trabajos-titulo" className="text-[clamp(3rem,8.4vw,8.6rem)] leading-[0.98] tracking-[-0.04em] text-ink">
-            <SplitText text="Últimos trabajos" />
+            <Drift>
+              <SplitText text="Últimos trabajos" />
+            </Drift>
           </h2>
           <p data-reveal className="rise max-w-[38ch] pb-3 text-[16px] leading-[1.5] text-ink-muted [--delay:250ms]">
             Diseñamos y construimos productos digitales que ya son parte de la operación y de las ventas de cada cliente.

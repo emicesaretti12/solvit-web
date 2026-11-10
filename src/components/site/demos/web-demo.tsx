@@ -25,7 +25,7 @@ function Typed({ text, run }: { text: string; run: boolean }) {
       i += 1;
       setN(i);
       if (i >= text.length) window.clearInterval(id);
-    }, 55);
+    }, 30);
     return () => window.clearInterval(id);
   }, [run, text]);
   return (
@@ -106,7 +106,7 @@ function Results({ run }: { run: boolean }) {
       <motion.div
         initial={run ? { opacity: 0, y: "0.8em" } : false}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: EASE, delay: run ? 1.25 : 0 }}
+        transition={{ duration: 0.5, ease: EASE, delay: run ? 0.7 : 0 }}
         className="relative rounded-[0.9em] bg-blue-500/8 p-[0.9em] shadow-[0_0_0_0.12em_var(--blue-500)]"
       >
         <span className="absolute -right-[0.5em] -top-[0.7em] rounded-full bg-blue-500 px-[0.7em] py-[0.25em] text-[0.7em] font-bold text-white">
@@ -121,7 +121,7 @@ function Results({ run }: { run: boolean }) {
           key={i}
           initial={run ? { opacity: 0 } : false}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.4, delay: run ? 1.4 + i * 0.1 : 0 }}
+          transition={{ duration: 0.4, delay: run ? 0.85 + i * 0.08 : 0 }}
           className="px-[0.9em]"
         >
           <span className={`${bar} h-[0.35em] w-[26%]`} />
@@ -134,16 +134,16 @@ function Results({ run }: { run: boolean }) {
 }
 
 export function WebDemo() {
-  const { ref, step, pick, running, reduce, ms } = useDemoLoop(STEPS.length, 4600);
+  const { ref, step, pick, running, reduce, ms } = useDemoLoop(STEPS.length, 3000);
   // En el paso 3 el botón se aprieta y después llega la consulta
   const [pressed, setPressed] = useState(false);
   const [arrived, setArrived] = useState(false);
   useEffect(() => {
     if (step !== 2) return;
     const still = reduce;
-    const t1 = window.setTimeout(() => setPressed(true), still ? 0 : 900);
-    const t2 = window.setTimeout(() => setPressed(false), still ? 0 : 1150);
-    const t3 = window.setTimeout(() => setArrived(true), still ? 0 : 1350);
+    const t1 = window.setTimeout(() => setPressed(true), still ? 0 : 550);
+    const t2 = window.setTimeout(() => setPressed(false), still ? 0 : 800);
+    const t3 = window.setTimeout(() => setArrived(true), still ? 0 : 950);
     return () => {
       window.clearTimeout(t1);
       window.clearTimeout(t2);
@@ -193,7 +193,7 @@ export function WebDemo() {
                   className="absolute size-[1.8em] drop-shadow-[0_0.2em_0.3em_rgb(0_0_0/0.25)]"
                   initial={{ left: "70%", top: "20%", opacity: 0 }}
                   animate={{ left: "22%", top: "62%", opacity: 1 }}
-                  transition={{ duration: 0.85, ease: [0.77, 0, 0.175, 1] }}
+                  transition={{ duration: 0.5, ease: [0.77, 0, 0.175, 1] }}
                 >
                   <path d="M5 3l14 8-6 1.5L10 19z" fill="#0b1222" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round" />
                 </motion.svg>

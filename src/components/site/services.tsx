@@ -44,10 +44,13 @@ function Card({ service, index, progress }: { service: Service; index: number; p
   const Glyph = ICONS[service.key];
 
   return (
-    <li className="lg:sticky lg:top-0 lg:flex lg:h-[100svh] lg:items-center" style={{ paddingTop: `calc(${index} * 0.9rem)` }}>
+    <li
+      className="lg:sticky lg:top-[6svh] lg:flex lg:h-[88svh] lg:items-center"
+      style={{ paddingTop: `calc(${index} * 0.9rem)` }}
+    >
       <motion.article
         style={reduce ? undefined : { scale }}
-        className="stack-card relative grid w-full overflow-hidden rounded-[2rem] bg-night text-white shadow-[0_-18px_50px_-30px_rgb(4_8_20/0.7)] lg:h-[min(80svh,660px)] lg:grid-cols-[1fr_1.02fr] lg:rounded-[2.75rem]"
+        className="stack-card relative grid w-full overflow-hidden rounded-[2rem] bg-night text-white shadow-[0_-18px_50px_-30px_rgb(4_8_20/0.7)] lg:h-[min(74svh,640px)] lg:grid-cols-[1fr_1.02fr] lg:rounded-[2.75rem]"
       >
         <div className="flex flex-col p-7 pb-6 md:p-12 lg:p-[clamp(2.4rem,4.2vw,4rem)]">
           <p

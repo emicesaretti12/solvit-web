@@ -2,8 +2,9 @@
 
 /*
   Puntos de sección (escritorio): una pastilla translúcida al costado derecho, con un punto por
-  sección (el de la activa, lleno). Cerrada ocupa solo el margen de la página; al pasar el mouse
-  o al recorrerla con el teclado se abre y muestra los nombres. Aparece al dejar el hero.
+  sección (el de la activa, lleno). Ocupa solo el margen de la página; al pasar el mouse o al
+  recorrerla con el teclado, los nombres aparecen al lado de cada punto (solo opacidad y
+  transform: la pastilla no cambia de tamaño). Aparece al dejar el hero.
 */
 import { useEffect, useState } from "react";
 import { NAV } from "@/content/nav";
@@ -34,16 +35,14 @@ export function SectionNav() {
                 href={`#${item.id}`}
                 aria-current={on ? "true" : undefined}
                 tabIndex={shown ? 0 : -1}
-                className={`group flex items-center py-[7px] text-[11px] uppercase tracking-[0.22em] transition-colors duration-300 ${on ? "text-ink" : "text-ink-faint hover:text-ink"}`}
+                className={`group relative flex items-center py-[7px] text-[11px] uppercase tracking-[0.22em] transition-colors duration-300 ${on ? "text-ink" : "text-ink-faint hover:text-ink"}`}
               >
                 <span
                   aria-hidden="true"
                   className={`size-[11px] rounded-full transition-[background-color,transform] duration-300 ease-out ${on ? "scale-100 bg-ink" : "scale-[0.82] bg-ink/25 group-hover:bg-ink/60"}`}
                 />
-                <span className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-500 ease-[var(--ease-expo)] group-hover/nav:grid-cols-[1fr] group-focus-within/nav:grid-cols-[1fr]">
-                  <span className="overflow-hidden whitespace-nowrap pl-0 opacity-0 transition-[opacity,padding] duration-300 group-hover/nav:pl-2.5 group-hover/nav:pr-1.5 group-hover/nav:opacity-100 group-focus-within/nav:pl-2.5 group-focus-within/nav:pr-1.5 group-focus-within/nav:opacity-100">
-                    {item.label}
-                  </span>
+                <span className="pointer-events-none absolute right-full top-1/2 mr-3 -translate-y-1/2 translate-x-2 whitespace-nowrap rounded-full bg-white px-3 py-1.5 text-ink opacity-0 shadow-[0_8px_20px_-12px_rgb(var(--shade-rgb)/0.6)] transition-[opacity,transform] duration-200 ease-out group-hover/nav:translate-x-0 group-hover/nav:opacity-100 group-focus-within/nav:translate-x-0 group-focus-within/nav:opacity-100">
+                  {item.label}
                 </span>
               </a>
             </li>

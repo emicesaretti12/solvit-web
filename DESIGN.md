@@ -10,8 +10,7 @@ ritmo del scroll o del puntero.
 
 Un solo tema, claro. La página es blanca; lo oscuro (botones, tarjetas de servicios, vitrina de
 marcas, globo) es el navy de la marca, nunca negro puro. El azul eléctrico es señal: la palabra
-en cursiva del hero, el punto de la sección activa, el foco, la burbuja del cursor, alguna
-ficha. El degradé azul a cian vive en el isotipo (3D en el hero) y en las cintas del valle.
+en cursiva del hero, el punto de la sección activa, el foco, alguna ficha. El degradé azul a cian vive en el isotipo (3D en el hero) y en las cintas del valle.
 
 - **Density:** 3 (pocas cosas por pantalla, cada una grande)
 - **Variance:** 7 (titulares gigantes a la izquierda, piezas redondeadas a todo el ancho)
@@ -55,10 +54,8 @@ Prohibido: negro puro, degradés violeta "de IA", glows, campos grandes de azul 
   "Dejanos tu correo" y WhatsApp. En celulares, solo el botón redondo.
 - **Botones:** pastilla. Al pasar el mouse el relleno sube desde abajo y el texto rueda (sale
   por arriba y entra su copia). Feedback táctil scale(0.97).
-- **Cursor:** punto más aro con inercia (mix-blend-difference). Crece sobre enlaces; sobre
-  `data-cursor="texto"` es una burbuja azul con ese texto ("Ver sitio", "Girá la S").
-- **Puntos de sección:** pastilla translúcida a la derecha; cerrada son solo puntos, con el
-  mouse muestra los nombres.
+- **Puntos de sección:** pastilla translúcida a la derecha, solo puntos; con el mouse, el
+  nombre de cada sección aparece al lado de su punto.
 - **Botón flotante:** el isotipo en un círculo blanco con "contacto" girando; va a WhatsApp.
 - **Hero:** la S en 3D al centro (se gira con mouse o dedo), promesa a la izquierda con la
   palabra que rota, a quién le hablamos a la derecha, globo de puntos con Córdoba marcada,
@@ -71,8 +68,11 @@ Prohibido: negro puro, degradés violeta "de IA", glows, campos grandes de azul 
   (un cliente busca, entra a la web y consulta; una consulta avanza por las etapas del CRM hasta
   la venta), con pasos que se pueden tocar. Los otros tres, su objeto 3D. En celulares las
   demos se reacomodan en vertical para que el texto se lea.
-- **Sistema:** titular en mayúsculas, ventana con la vista viva de la etapa, tres tarjetas que
-  la eligen (con barra de tiempo) y una línea "Qué estás viendo" que explica cada vista.
+- **Sistema:** un panel navy que cuenta el recorrido de una sola consulta por tres estaciones en
+  fila (el anuncio, el chat con el agente de IA y el CRM), unidas por una línea que se llena.
+  Una pastilla "Consulta" viaja de estación en estación; la activa está al frente y corre su
+  secuencia, las anteriores quedan resueltas y las siguientes, en espera. Arriba, una frase dice
+  qué está pasando; abajo, tres pasos dejan elegir. En celulares se ve una estación por vez.
 - **Hechos:** tres columnas de tarjetas en marquesina vertical. Solo hechos confirmados de cada
   proyecto: nunca reseñas ni números inventados.
 - **Cierre:** pantalla fija color `haze` con "¡Hablemos!" gigante y fichas de herramientas que
@@ -82,15 +82,16 @@ Prohibido: negro puro, degradés violeta "de IA", glows, campos grandes de azul 
 ## 5. Layout Principles
 
 - A todo el ancho, con márgenes en vw (5 a 6vw en escritorio, 20px en celulares).
-- Página: hero → trabajos y marcas → servicios → sistema → hechos → nosotros → cierre y pie.
+- Página: carga → hero → trabajos y marcas → servicios → sistema → hechos → nosotros → cierre y pie.
 - Menos de 768px: una sola columna; las tarjetas de servicios van en fila, sin pila.
 - Alturas completas con `svh`. Sin scroll horizontal en ningún ancho.
 
 ## 6. Motion & Interaction
 
 - **Scroll suave:** Lenis con mouse y trackpad; en táctil, el scroll nativo.
-- **Telón de entrada:** una vez por sesión, el logo sube sobre navy y el telón se levanta
-  (solo CSS, 1,4 s, nunca bloquea un clic). Las entradas del hero esperan a que se levante.
+- **Carga:** sobre navy, un contador grande sube de 000 a 100 con una barra azul a cian; llega a
+  100 cuando la página terminó de cargar (mínimo 1,5 s) y el telón se levanta. Recién ahí entran
+  el encabezado y el hero. Sin JavaScript o con reduced motion no hay telón.
 - **Puntero:** los botones del encabezado y el de contacto son magnéticos (resorte); las letras
   de "¡Hablemos!" engordan cerca del mouse (Manrope variable).
 - **Entradas:** `data-reveal` + un solo IntersectionObserver (`page-observers.tsx`). Los
@@ -109,6 +110,27 @@ Prohibido: negro puro, degradés violeta "de IA", glows, campos grandes de azul 
 - **Reduced motion:** sin scroll suave, sin cursor propio, sin loops; todo visible desde el
   primer cuadro; las fichas aparecen ya apiladas y el globo y el valle quedan quietos.
 - **CSS:** las clases propias van en `@layer components` para que las utilidades puedan pisarlas.
+- **Cursor:** el del sistema. No hay cursor propio.
+
+### Presupuesto de cuadros
+
+Reglas que salieron de medir la página (traza y perfil de CPU con el procesador frenado 4×):
+
+- Solo `transform`, `opacity` y `clip-path`. Única excepción: el peso de las diez letras de
+  "¡Hablemos!", solo con mouse y con `contain: layout`.
+- Nada se mide durante el scroll: las posiciones de las secciones y las marcas del isotipo se
+  miden al cargar y cuando cambia el tamaño; en el scroll solo se compara un número.
+- Sin GSAP ni ScrollTrigger: Lenis corre con su propio `requestAnimationFrame`.
+- Sin `will-change` permanente: cientos de letras promovidas a capas costaban más que el
+  beneficio. El navegador promueve solo mientras algo se anima.
+- Un loop que no se ve, no corre: canvas, WebGL, palabra que rota, marquesinas y demos se
+  detienen fuera de pantalla. Las fichas del cierre se duermen cuando la pila queda quieta.
+- Girar un SVG con texto sobre un trazo recalcula su layout en cada cuadro: se gira el
+  contenedor HTML.
+- Las marquesinas cambian de velocidad en escalones, no en cada cuadro (cada cambio reinicia la
+  animación en el compositor).
+- Las animaciones ligadas al scroll van en CSS (`animation-timeline`) cuando se puede: el
+  manifiesto no usa JavaScript.
 
 ## 7. Anti-Patterns (Banned)
 
