@@ -32,16 +32,27 @@ export const PROJECTS: Project[] = [
     client: "Motobox Córdoba",
     name: "Motobox Córdoba",
     sector: "Concesionaria de motos",
-    kind: "Sitio web + CRM",
-    specialties: ["Desarrollo web", "Software a medida"],
-    summary:
-      "Sitio de una concesionaria de motos 0km con catálogo y usados, conectado a un CRM propio con usuarios por rol desde donde se administran las fotos.",
-    highlights: [
-      "Sitio público conectado a su base de datos",
-      "CRM propio con alta de usuarios por rol",
-      "Fotos del sitio administradas desde el CRM",
-    ],
+    kind: "Sitio web",
+    specialties: ["Desarrollo web"],
+    summary: "Sitio de una concesionaria de motos 0km con catálogo, usados y sorteo, conectado a su base de datos y con consulta directa por WhatsApp.",
+    highlights: ["Sitio público conectado a su base de datos", "Fotos del sitio administradas desde el CRM"],
     url: "https://www.motoboxcordoba.com",
+    featured: true,
+    shot: true,
+  },
+  {
+    slug: "motobox-crm",
+    name: "CRM de Motobox",
+    sector: "Concesionaria de motos",
+    kind: "CRM a medida",
+    specialties: ["Software a medida"],
+    summary:
+      "CRM propio de la concesionaria: cada consulta con su prioridad, su vendedor y su estado, en tabla o en tablero, con agenda, inventario y métricas.",
+    highlights: [
+      "Consultas con prioridad, vendedor y estado, en tabla o tablero",
+      "Agenda de citas, inventario y ventas en el mismo sistema",
+      "Usuarios por rol y tablero con las consultas por día",
+    ],
     featured: true,
     shot: true,
   },
@@ -152,10 +163,35 @@ export const PROJECTS: Project[] = [
     shot: true,
   },
   {
-    slug: "boxpoint",
+    slug: "boxpoint-web",
     client: "BoxPoint",
-    name: "BoxPoint",
-    sector: "Sorteos",
+    name: "BoxPoint Moto & Resort",
+    sector: "Hotel y bar",
+    kind: "Sitio web",
+    specialties: ["Desarrollo web"],
+    summary: "Sitio de un hotel y bar para motociclistas: habitaciones, bar, próximos eventos, tarjeta de socios y un juego.",
+    url: "https://boxpoint-web.vercel.app",
+    shot: true,
+  },
+  {
+    slug: "boxpoint-crm",
+    name: "CRM de BoxPoint",
+    sector: "Hotel y bar",
+    kind: "Sistema de gestión",
+    specialties: ["Software a medida"],
+    summary:
+      "Sistema de gestión del hotel y el bar: reservas y check-in, mensajes, tareas, carta y stock, eventos, clientes y socios.",
+    highlights: [
+      "Reservas, llegadas y salidas del día con check-in",
+      "Carta y stock, eventos y mensajes en un mismo panel",
+      "Clientes, socios y beneficios",
+    ],
+    shot: true,
+  },
+  {
+    slug: "boxpoint",
+    name: "Ruleta BoxPoint",
+    sector: "Hotel y bar",
     kind: "Ruleta de sorteos",
     specialties: ["Software a medida"],
     summary: "Ruleta digital de sorteos, pensada para usar en pantalla completa en el local.",
@@ -207,6 +243,16 @@ export const PROJECTS: Project[] = [
     shot: true,
   },
   {
+    slug: "leco",
+    client: "Le&Co",
+    name: "Le&Co",
+    sector: "Agroindustria",
+    kind: "Control de acceso",
+    specialties: ["Software a medida"],
+    summary: "Terminal de control de acceso de una empresa de legumbres: el personal se identifica y registra su entrada y su salida.",
+    shot: true,
+  },
+  {
     slug: "cerveceria-automatica",
     name: "Cervecería automática",
     sector: "Gastronomía",
@@ -222,7 +268,7 @@ export const PROJECTS: Project[] = [
   },
 ];
 
-// Proyectos entregados: la página dice "+15" (acá hay 16 publicados)
+// Proyectos entregados: la página dice "+15" (acá hay 20 publicados)
 export const DELIVERED = 15;
 
 /** Rubros distintos entre los proyectos publicados */

@@ -53,7 +53,7 @@ export const SERVICES: Service[] = [
     lead: "Webs que se convierten en consultas.",
     text: "Sitios, tiendas y landings rápidos en el celular, con SEO y medición desde el primer día.",
     deliverables: ["Sitios institucionales", "Tiendas y catálogos", "Landings para campañas", "SEO local"],
-    work: ["baterias-cordoba", "adami-industrial", "rental-cordoba", "renacer-hormonal", "plenomax", "edunova"],
+    work: ["motobox-cordoba", "baterias-cordoba", "adami-industrial", "rental-cordoba", "boxpoint-web", "renacer-hormonal"],
   },
   {
     key: "software",
@@ -76,7 +76,7 @@ export const SERVICES: Service[] = [
     lead: "Sistemas hechos a la forma de tu equipo.",
     text: "CRM, reservas, inventario y paneles de gestión con usuarios por rol, pensados para cómo trabajás.",
     deliverables: ["CRM", "Reservas", "Inventario", "Paneles por rol"],
-    work: ["motobox-cordoba", "non-sistemas-reservas", "prode-mundial"],
+    work: ["motobox-crm", "boxpoint-crm", "non-sistemas-reservas", "leco", "prode-mundial", "boxpoint"],
   },
   {
     key: "ia",
