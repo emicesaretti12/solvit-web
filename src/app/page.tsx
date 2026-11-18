@@ -1,35 +1,46 @@
-import AgencyHeroSection from "@/components/ui/hero-01";
-import { Services } from "@/components/services";
-import { HowItWorks } from "@/components/how-it-works";
-import { SalesFlow } from "@/components/sales-flow";
-import { Projects } from "@/components/projects";
-import { About } from "@/components/about";
-import { Contact } from "@/components/contact";
-import { SiteFooter } from "@/components/site-footer";
-import { OffscreenPause } from "@/components/offscreen-pause";
+import { Stage } from "@/components/three/stage";
+import { About } from "@/components/site/about";
+import { ContactBadge } from "@/components/site/contact-badge";
+import { Facts } from "@/components/site/facts";
+import { Faqs } from "@/components/site/faqs";
+import { JsonLd } from "@/components/json-ld";
+import { faqSchema } from "@/content/schema";
+import { HOME_FAQS } from "@/content/services";
+import { Finale } from "@/components/site/finale";
+import { Header } from "@/components/site/header";
+import { Hero } from "@/components/site/hero";
+import { PageObservers } from "@/components/site/page-observers";
+import { SectionNav } from "@/components/site/section-nav";
+import { Services } from "@/components/site/services";
+import { System } from "@/components/site/system";
+import { Works } from "@/components/site/works";
 
 /*
-  Una sola historia: el hero presenta la promesa con el isotipo en 3D, "Servicios" muestra lo que
-  hace el equipo (desarrollo web, software a medida, agentes de IA, hardware e IoT y marketing),
-  cada uno con su objeto en 3D, "Cómo funciona" recorre la venta en cuatro pasos (atraer, atender,
-  cerrar, crecer) con las cintas de la S, "El camino de cada consulta" muestra el circuito
-  completo (canales → agente de IA → CRM por área → venta → crecimiento), después vienen las
-  pruebas (proyectos y clientes), quiénes somos y el contacto.
-  El hero arma el <main> y el resto de las secciones van adentro, a continuación del slider.
+  Una sola página, de arriba hacia abajo:
+  hero (la S en 3D, el globo y el valle de cintas) → últimos trabajos y marcas → servicios en
+  tarjetas que se apilan → el sistema SEN con sus vistas vivas → hechos de cada proyecto →
+  detrás de SEN → "¡Hablemos!" con las fichas que caen, y el pie que sube y lo tapa.
+  Fijos sobre la página: el encabezado con su menú, los puntos de sección y el botón de contacto. Detrás de todo, el escenario WebGL con el isotipo (Stage).
 */
 export default function Home() {
   return (
     <>
-      <AgencyHeroSection>
+      <Stage />
+      <Header />
+      <SectionNav />
+      <ContactBadge />
+      <main id="main" className="relative z-10 w-full max-w-full flex-1">
+        <Hero />
+        <Works />
         <Services />
-        <HowItWorks />
-        <SalesFlow />
-        <Projects />
+        <System />
+        <Facts />
         <About />
-        <Contact />
-      </AgencyHeroSection>
-      <SiteFooter />
-      <OffscreenPause />
+        <Faqs faqs={HOME_FAQS} />
+        <Finale />
+      </main>
+      <JsonLd data={faqSchema(HOME_FAQS)} />
+      <PageObservers />
     </>
   );
 }

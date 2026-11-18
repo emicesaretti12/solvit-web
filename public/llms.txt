@@ -1,0 +1,18 @@
+# SEN Software
+
+> Equipo de ingeniería y desarrollo de software de Sierras Chicas, Córdoba, Argentina. Hace desarrollo web, software a medida (CRM, reservas, inventario), agentes de IA para WhatsApp e Instagram, proyectos de hardware e IoT y marketing digital para empresas que quieren vender más.
+
+Sitio: https://sensoftware.com.ar
+Contacto: inf.solvit@gmail.com · WhatsApp +54 9 351 352-2968
+
+## Servicios
+
+- [Desarrollo web](https://sensoftware.com.ar/servicios/desarrollo-web): sitios institucionales, tiendas, catálogos y landings rápidos en el celular, con SEO local y medición.
+- [Software a medida](https://sensoftware.com.ar/servicios/software-a-medida): CRM, sistemas de reservas, inventario y paneles de gestión con usuarios por rol.
+- [Agentes de IA](https://sensoftware.com.ar/servicios/agentes-de-ia): atención automática por WhatsApp, Instagram y chat web, con calificación de consultas y derivación a ventas.
+- [Hardware e IoT](https://sensoftware.com.ar/servicios/hardware-iot): placas ESP32, sensores y pantallas conectados a un sistema, con telemetría y control a distancia.
+- [Marketing digital](https://sensoftware.com.ar/servicios/marketing-digital): contenido, manejo de redes y pauta en Meta y Google conectada al CRM.
+
+## Proyectos entregados
+
+Motobox Córdoba (sitio de concesionaria de motos y CRM a medida), BoxPoint Moto & Resort (sitio, sistema de gestión y ruleta de sorteos), Le&Co (control de acceso), Baterías Córdoba (sitio y catálogo con 52 páginas de aterrizaje locales), ADAMI Industrial (sitio institucional), Rental Córdoba (stands y eventos), Noni de NON Sistemas (sistema de reservas), Renacer Hormonal (clínica), Pleno Max (fábrica de pinturas), Eli Cerámica (tienda y catálogo), Club de Previas (bar) y su Prode Mundial 2026, Grifo's y Crazy Monkey (cartas digitales), EDUNOVA (consultora pedagógica), Polar (landing) y una cervecería automática con ESP32.

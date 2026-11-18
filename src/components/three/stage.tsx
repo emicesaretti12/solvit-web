@@ -20,15 +20,11 @@
 import dynamic from "next/dynamic";
 import { useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LogoMark } from "@/components/logo";
 import { tap as haptic } from "@/lib/haptics";
 import { SafeBoundary } from "@/components/safe-boundary";
 import { isotypeHeightPx, restPose, stageSignal, type DragState, type IsoPose } from "./pose";
 import { POSES, type PoseDef, type PoseKey, type StagePose } from "./choreography";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const Scene = dynamic(() => import("./isotype-scene"), { ssr: false });
 
@@ -251,20 +247,34 @@ export function Stage() {
       if (reduce && visible) stageSignal.invalidate();
     };
 
-    const trigger = ScrollTrigger.create({
-      start: 0,
-      end: "max",
-      onUpdate: (self) => update(self.scroll()),
-    });
-    ScrollTrigger.addEventListener("refresh", measure);
+    // El scroll llega por su evento (pasivo) y la pose se calcula una vez por cuadro. Las marcas
+    // se vuelven a medir cuando cambia el alto del documento (fuentes, imágenes, "ver todos")
+    // o el ancho de la ventana: nunca se mide dentro del scroll
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        update(window.scrollY);
+      });
+    };
+    let remeasure = 0;
+    const schedule = () => {
+      window.clearTimeout(remeasure);
+      remeasure = window.setTimeout(measure, 120);
+    };
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(schedule) : null;
+    ro?.observe(document.body);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", schedule);
     desktop.addEventListener("change", measure);
     measure();
-    // Las fuentes y las imágenes cambian alturas después de montar
-    const late = window.setTimeout(measure, 600);
     return () => {
-      window.clearTimeout(late);
-      trigger.kill();
-      ScrollTrigger.removeEventListener("refresh", measure);
+      cancelAnimationFrame(frame);
+      window.clearTimeout(remeasure);
+      ro?.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", schedule);
       desktop.removeEventListener("change", measure);
     };
   }, [reduce]);
@@ -288,7 +298,7 @@ export function Stage() {
       <div
         className={`absolute inset-0 flex items-center justify-center transition-opacity ease-[var(--ease-out)] ${ready ? "opacity-0 duration-300 motion-reduce:duration-700" : "opacity-100 duration-700"}`}
       >
-        <div ref={poster} className="h-[62svh] max-h-[680px] will-change-transform max-lg:max-h-none">
+        <div ref={poster} className="h-[62svh] max-h-[680px] max-lg:max-h-none">
           <LogoMark className="h-full w-auto" />
         </div>
       </div>

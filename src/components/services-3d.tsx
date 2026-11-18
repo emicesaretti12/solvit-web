@@ -101,186 +101,6 @@ function Shadow({ x, y, w, d }: { x: number; y: number; w: number; d: number }) 
   return <span className="scn-face scn-shadow" style={{ left: x, top: y, width: w, height: d }} />;
 }
 
-/* ---------- Desarrollo web: el navegador desarmado en capas ---------- */
-
-function WebObject() {
-  return (
-    <div className="scn-iso" style={{ top: 34 }}>
-      <div className="scn-obj" style={{ width: 180, height: 128, marginLeft: -90, marginTop: -64 }}>
-        <Shadow x={-8} y={-6} w={180} d={128} />
-        <Part x={0} y={0} w={180} d={128} from={-30}>
-          <Slab t={6} top="web-window">
-            <svg viewBox="0 0 180 128" aria-hidden="true">
-              <rect width="180" height="16" className="fill-[var(--scn-bar)]" />
-              <circle cx="9" cy="8" r="2.2" className="fill-[var(--scn-faint)]" />
-              <circle cx="16.5" cy="8" r="2.2" className="fill-[var(--scn-faint)]" />
-              <circle cx="24" cy="8" r="2.2" className="fill-[var(--scn-faint)]" />
-              <rect x="40" y="4.5" width="100" height="7" rx="3.5" className="fill-[var(--scn-faint)]" />
-              {/* Huecos de donde salen las capas */}
-              <rect x="14" y="24" width="152" height="34" rx="3" className="fill-[var(--scn-ghost)]" />
-              <rect x="14" y="66" width="44" height="30" rx="3" className="fill-[var(--scn-ghost)]" />
-              <rect x="68" y="66" width="44" height="30" rx="3" className="fill-[var(--scn-ghost)]" />
-              <rect x="122" y="66" width="44" height="30" rx="3" className="fill-[var(--scn-ghost)]" />
-              <rect x="58" y="102" width="64" height="16" rx="8" className="fill-[var(--scn-ghost)]" />
-            </svg>
-          </Slab>
-        </Part>
-        <Part x={14} y={24} w={152} d={34} z={34} from={6} delay={0.14} loop="scn-bob">
-          <Slab t={4} top="web-hero" tone="scn-slab-blue" sheen>
-            <svg viewBox="0 0 152 34" aria-hidden="true">
-              <rect x="10" y="8" width="74" height="5" rx="2.5" fill="#ffffff" />
-              <rect x="10" y="17" width="50" height="4" rx="2" fill="#ffffff" fillOpacity="0.7" />
-              <rect x="10" y="25" width="22" height="4" rx="2" fill="#ffffff" fillOpacity="0.9" />
-            </svg>
-          </Slab>
-        </Part>
-        {[14, 68, 122].map((x, i) => (
-          <Part key={x} x={x} y={66} w={44} d={30} z={62} from={6} delay={0.26 + i * 0.07} loop="scn-bob" phase={-0.8 - i * 0.5}>
-            <Slab t={4} top="web-card">
-              <svg viewBox="0 0 44 30" aria-hidden="true">
-                <rect x="4" y="4" width="36" height="12" rx="2" className="fill-blue-400/35" />
-                <rect x="4" y="19" width="28" height="3" rx="1.5" className="fill-[var(--scn-line)]" />
-                <rect x="4" y="24" width="18" height="3" rx="1.5" className="fill-[var(--scn-faint)]" />
-              </svg>
-            </Slab>
-          </Part>
-        ))}
-        <Part x={58} y={102} w={64} d={16} z={90} from={6} delay={0.5} loop="web-press">
-          <Slab t={4} top="web-cta" tone="scn-slab-blue" sheen>
-            <span className="web-ripple scn-anim" />
-            <svg viewBox="0 0 64 16" aria-hidden="true">
-              <rect x="14" y="6.5" width="36" height="3" rx="1.5" fill="#ffffff" />
-            </svg>
-          </Slab>
-        </Part>
-        {/* El cursor llega al botón, hace clic (el botón se hunde en el mismo cuadro) y se va */}
-        <div className="web-cursor scn-anim">
-          <span className="scn-face scn-bill web-cursor-face">
-            <svg viewBox="0 0 16 22" className="web-click scn-anim" aria-hidden="true">
-              <path
-                d="M1.2 1.2v16.6l4.3-4.1 2.9 6.8 2.9-1.2-2.8-6.6h6.1z"
-                fill="#0b1222"
-                stroke="#ffffff"
-                strokeWidth="1.3"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
-        </div>
-        {/* Y del clic nace una consulta */}
-        <span className="scn-face scn-bill web-lead" style={{ left: 90, top: 106, "--bz": "112px", "--by": "-100%" } as Vars}>
-          <span className="web-lead-chip scn-anim">
-            <CheckCircle size={12} weight="fill" aria-hidden="true" />
-            Nueva consulta
-          </span>
-        </span>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Software a medida: módulos que caen y encajan ---------- */
-
-const MODULES = [
-  { key: "data", z: 0, label: "Datos", led: 0 },
-  { key: "logic", z: 32, label: "Reglas", led: -0.22 },
-  { key: "ui", z: 64, label: "Pantallas", led: -0.46 },
-] as const;
-
-// Cables por delante de los módulos: por el de la izquierda suben los datos y por el de la
-// derecha bajan las acciones de las pantallas
-const RAILS = [
-  { x: 16, down: false },
-  { x: 134, down: true },
-] as const;
-
-function ModuleTop({ kind }: { kind: (typeof MODULES)[number]["key"] }) {
-  if (kind === "data") {
-    return (
-      <svg viewBox="0 0 150 104" aria-hidden="true">
-        {[0, 1, 2, 3].map((r) => (
-          <g key={r}>
-            <rect x="16" y={20 + r * 18} width="8" height="8" rx="2" className="fill-blue-400/50" />
-            <rect x="32" y={21.5 + r * 18} width={64 - r * 6} height="5" rx="2.5" className="fill-[var(--scn-line)]" />
-            <rect x="104" y={21.5 + r * 18} width="30" height="5" rx="2.5" className="fill-[var(--scn-faint)]" />
-          </g>
-        ))}
-      </svg>
-    );
-  }
-  if (kind === "logic") {
-    return (
-      <svg viewBox="0 0 150 104" aria-hidden="true">
-        <path d="M34 52 H66 M84 52 H116 M75 43 V24 H116" className="fill-none stroke-blue-400/70" strokeWidth="2" strokeLinecap="round" />
-        <circle cx="26" cy="52" r="9" className="fill-none stroke-[var(--scn-line)]" strokeWidth="2" />
-        <rect x="66" y="43" width="18" height="18" rx="3" transform="rotate(45 75 52)" className="fill-blue-500" />
-        <circle cx="124" cy="52" r="9" className="fill-none stroke-[var(--scn-line)]" strokeWidth="2" />
-        <circle cx="124" cy="24" r="6" className="fill-blue-400/45" />
-      </svg>
-    );
-  }
-  return (
-    <svg viewBox="0 0 150 104" aria-hidden="true">
-      <rect x="10" y="10" width="130" height="9" rx="3" className="fill-[var(--scn-bar)]" />
-      {[0, 1, 2].map((c) => (
-        <g key={c}>
-          <rect x={12 + c * 44} y="26" width="38" height="68" rx="4" className="fill-[var(--scn-ghost)]" />
-          <rect x={16 + c * 44} y={c === 1 ? 52 : 32} width="30" height="14" rx="3" className="fill-[var(--scn-faint)]" />
-          {c !== 2 && <rect x={16 + c * 44} y="70" width="30" height="14" rx="3" className="fill-[var(--scn-faint)]" />}
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-/* Canto de adelante de cada módulo, como un equipo en un rack: dos luces fijas y una que
-   titila cuando pasa el dato por su altura */
-function ModuleFront({ phase }: { phase: number }) {
-  return (
-    <>
-      <span className="sw-led sw-led-on" style={{ right: 26 }} />
-      <span className="sw-led" style={{ right: 18 }} />
-      <span className="sw-led sw-led-on sw-blink scn-anim" style={{ right: 10, animationDelay: `${phase}s` }} />
-    </>
-  );
-}
-
-function SoftwareObject() {
-  return (
-    <div className="scn-iso" style={{ top: 30, left: -26 }}>
-      <div className="scn-obj" style={{ width: 150, height: 104, marginLeft: -75, marginTop: -52 }}>
-        <Shadow x={-8} y={-6} w={150} d={104} />
-        {MODULES.map((m, i) => (
-          <Part key={m.key} x={0} y={0} w={150} d={104} z={m.z} from={m.z + 130} delay={0.1 + i * 0.16}>
-            <Slab t={14} top={`sw-top sw-${m.key}`} front={<ModuleFront phase={m.led} />}>
-              <ModuleTop kind={m.key} />
-              {/* La tarjeta que avanza de columna en el tablero */}
-              {m.key === "ui" && <span className="sw-ticket scn-anim" />}
-            </Slab>
-            <span className="scn-face scn-tag sw-label">{m.label}</span>
-          </Part>
-        ))}
-        {RAILS.map((r) => (
-          <div key={r.x}>
-            {/* El cable se para sobre la mesa y entra a cada módulo por una ficha */}
-            <span className="scn-face sw-rail" style={{ left: r.x - 1 }} />
-            {MODULES.map((m) => (
-              <span key={m.key} className="scn-face sw-port" style={{ left: r.x - 3, "--pz": `${m.z + 7}px` } as Vars} />
-            ))}
-            {[0, -1.2].map((delay) => (
-              <span
-                key={delay}
-                className={`sw-dot scn-anim ${r.down ? "sw-dot-down" : ""}`}
-                style={{ left: r.x - 3, animationDelay: `${delay + (r.down ? -0.6 : 0)}s` }}
-              />
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /* ---------- Agentes de IA: el ícono con espesor y los mensajes en órbita ---------- */
 
 const BUBBLES: { angle: number; icon: Icon; text: string; agent?: boolean }[] = [
@@ -564,9 +384,8 @@ function FunnelLabels() {
 
 /* ---------- Escena ---------- */
 
-const OBJECTS: Record<ServiceKey, () => ReactNode> = {
-  web: WebObject,
-  software: SoftwareObject,
+// Web y software a medida no tienen objeto: muestran una demostración (site/demos)
+const OBJECTS: Partial<Record<ServiceKey, () => ReactNode>> = {
   ia: AgentObject,
   hardware: HardwareObject,
   marketing: MarketingObject,
@@ -576,6 +395,7 @@ const OBJECTS: Record<ServiceKey, () => ReactNode> = {
    dentro de la perspectiva de la escena, que se suma a la inclinación de la tarjeta */
 export function ServiceScene({ kind, look }: { kind: ServiceKey; look?: MotionValue<string> }) {
   const Object3D = OBJECTS[kind];
+  if (!Object3D) return null;
   return (
     <div className={`scn scn-${kind}`} aria-hidden="true">
       {/* Los objetos isométricos llevan su sombra en el plano; los que flotan, una en el piso */}

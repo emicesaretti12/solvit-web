@@ -2,10 +2,6 @@
 
 import { useEffect } from "react";
 import Lenis from "lenis";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 let instance: Lenis | null = null;
 
@@ -14,15 +10,15 @@ export const getLenis = () => instance;
 
 /*
   Scroll con inercia para la rueda del mouse y el trackpad. Lenis mueve el scroll nativo de la
-  ventana, así que position: sticky, el portal y los useScroll de Motion siguen funcionando.
+  ventana, así que position: sticky y las animaciones ligadas al scroll siguen funcionando.
 
   - Solo con puntero fino y hover (mouse o trackpad). En pantallas táctiles el scroll queda
-    100% nativo, con la inercia del teléfono: Lenis igual dejaba pasar el dedo, pero sus
-    escuchas táctiles no pasivas hacían que cada toque esperara al hilo principal antes de
-    scrollear. Ahí las anclas se deslizan con scroll-behavior (native.css).
+    100% nativo, con la inercia del teléfono. Ahí las anclas se deslizan con scroll-behavior
+    (native.css).
   - Con reduced motion no se monta: el scroll es el nativo y las anclas saltan.
-  - Zoom: Lenis ignora la rueda con Ctrl (el pellizco del trackpad), así que no la convierte
-    en scroll; el bloqueo del zoom lo hace el script del layout (ZOOM_GUARD_SCRIPT).
+  - Corre con su propio requestAnimationFrame, que se detiene mientras la pestaña está oculta.
+  - Zoom: Lenis ignora la rueda con Ctrl (el pellizco del trackpad); el bloqueo del zoom lo hace
+    el script del layout (ZOOM_GUARD_SCRIPT).
 */
 export function SmoothScroll() {
   useEffect(() => {
@@ -39,13 +35,13 @@ export function SmoothScroll() {
     });
     instance = lenis;
 
-    lenis.on("scroll", ScrollTrigger.update);
-    const tick = (time: number) => lenis.raf(time * 1000);
-    gsap.ticker.add(tick);
-    gsap.ticker.lagSmoothing(0);
+    let frame = requestAnimationFrame(function tick(time) {
+      lenis.raf(time);
+      frame = requestAnimationFrame(tick);
+    });
 
     return () => {
-      gsap.ticker.remove(tick);
+      cancelAnimationFrame(frame);
       lenis.destroy();
       instance = null;
     };

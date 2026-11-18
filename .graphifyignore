@@ -1,0 +1,8 @@
+# Solo el código del sitio: las skills instaladas y lo generado quedan afuera del grafo
+.agents/
+.claude/
+node_modules/
+.next/
+public/
+package-lock.json
+skills-lock.json
